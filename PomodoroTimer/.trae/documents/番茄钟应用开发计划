@@ -1,0 +1,197 @@
+# 番茄钟应用开发计划
+
+## 项目概述
+开发一个基于番茄工作法的倒计时应用，支持定时器控制、浏览器通知、提示音和统计功能。
+
+## 技术栈
+- **前端框架**: React + TypeScript
+- **构建工具**: Vite
+- **样式方案**: Tailwind CSS
+- **通知系统**: Browser Notification API
+- **数据存储**: LocalStorage
+- **音频播放**: HTML5 Audio API
+
+## 项目结构
+
+```
+PomodoroTimer/
+├── src/
+│   ├── components/
+│   │   ├── Timer/
+│   │   │   ├── TimerDisplay.tsx      # 倒计时显示组件
+│   │   │   ├── TimerControls.tsx     # 控制按钮(开始/暂停/重置)
+│   │   │   └── TimerSettings.tsx     # 时长设置组件
+│   │   ├── Stats/
+│   │   │   └── StatsPanel.tsx        # 统计面板组件
+│   │   └── Notification/
+│   │       └── NotificationManager.ts # 通知管理器
+│   ├── hooks/
+│   │   ├── useTimer.ts               # 定时器核心逻辑 Hook
+│   │   ├── useLocalStorage.ts        # LocalStorage 操作 Hook
+│   │   └── useNotification.ts        # 通知管理 Hook
+│   ├── utils/
+│   │   ├── audio.ts                  # 提示音播放工具
+│   │   └── time.ts                   # 时间格式化工具
+│   ├── types/
+│   │   └── index.ts                  # TypeScript 类型定义
+│   ├── App.tsx                       # 主应用组件
+│   ├── main.tsx                      # 入口文件
+│   └── index.css                     # 全局样式(Tailwind)
+├── public/
+│   └── sounds/
+│       └── notification.mp3          # 提示音文件
+├── index.html                        # HTML 模板
+├── vite.config.ts                    # Vite 配置
+├── tailwind.config.js                # Tailwind 配置
+├── tsconfig.json                     # TypeScript 配置
+└── package.json                      # 项目依赖
+```
+
+## 实现步骤
+
+### 第一阶段: 项目初始化
+
+1. **创建 Vite 项目**
+   ```bash
+   npm create vite@latest . -- --template react-ts
+   ```
+
+2. **安装依赖**
+   ```bash
+   npm install
+   npm install -D tailwindcss postcss autoprefixer
+   npx tailwindcss init -p
+   ```
+
+3. **配置 Tailwind CSS**
+   - 配置 `tailwind.config.js` 的 content 路径
+   - 在 `index.css` 中添加 Tailwind 指令
+   - 配置自定义主题颜色(番茄红、休息绿等)
+
+4. **配置 TypeScript**
+   - 设置 `tsconfig.json` 严格模式
+   - 配置路径别名 `@/*` 指向 `src/*`
+
+### 第二阶段: 核心功能实现
+
+5. **定义类型系统** (`src/types/index.ts`)
+   ```typescript
+   type TimerMode = 'work' | 'break'
+   type TimerStatus = 'idle' | 'running' | 'paused'
+   
+   interface TimerSettings {
+     workDuration: number  // 工作时长(分钟)
+     breakDuration: number // 休息时长(分钟)
+   }
+   
+   interface Stats {
+     completedPomodoros: number    // 完成番茄数
+     totalWorkMinutes: number      // 总工作分钟数
+     sessions: SessionRecord[]     // 会话记录
+   }
+   ```
+
+6. **创建自定义 Hook**
+   - `useLocalStorage.ts`: 封装 LocalStorage 读写操作
+   - `useTimer.ts`: 实现定时器核心逻辑
+     - 倒计时计算
+     - 开始/暂停/重置控制
+     - 自动切换工作/休息模式
+     - 时间到达回调
+   - `useNotification.ts`: 管理浏览器通知权限和发送
+
+7. **实现工具函数**
+   - `utils/time.ts`: 时间格式化 (秒 → MM:SS)
+   - `utils/audio.ts`: 提示音播放/停止控制
+
+### 第三阶段: 组件开发
+
+8. **TimerDisplay 组件**
+   - 大号数字显示倒计时
+   - 显示当前模式(工作/休息)
+   - 进度环/进度条可视化
+   - 响应式布局
+
+9. **TimerControls 组件**
+   - 开始/暂停/重置按钮
+   - 按钮状态根据定时器状态变化
+   - 添加微交互动画
+
+10. **TimerSettings 组件**
+    - 输入框自定义工作/休息时长
+    - 实时验证输入范围(1-60分钟)
+    - 保存设置到 LocalStorage
+
+11. **StatsPanel 组件**
+    - 显示今日/本周/总计完成番茄数
+    - 统计图表(简单柱状图)
+    - 数据持久化到 LocalStorage
+
+12. **NotificationManager**
+    - 请求通知权限
+    - 时间到达时发送桌面通知
+    - 同时播放提示音
+
+### 第四阶段: 应用集成
+
+13. **App.tsx 主组件**
+    - 整合所有子组件
+    - 管理全局状态
+    - 处理模式切换逻辑
+    - 添加页面标题动态更新
+
+14. **样式优化**
+    - 使用 Tailwind 实现响应式设计
+    - 添加过渡动画和悬停效果
+    - 优化移动端体验
+    - 添加深色/浅色主题
+
+### 第五阶段: 测试与优化
+
+15. **功能测试**
+    - 测试倒计时准确性
+    - 测试开始/暂停/重置
+    - 测试模式自动切换
+    - 测试通知功能
+    - 测试数据持久化
+
+16. **性能优化**
+    - 使用 React.memo 优化渲染
+    - 使用 useCallback/useMemo 优化性能
+    - 优化定时器精度(使用 Date.now 校准)
+
+17. **边界情况处理**
+    - 页面不可见时定时器继续运行
+    - 刷新页面后状态恢复
+    - 通知权限被拒绝的降级处理
+
+## 关键实现细节
+
+### 定时器精度方案
+- 使用 `setInterval` 每秒更新
+- 使用 `Date.now()` 校准时间偏差
+- 后台标签页使用 Page Visibility API 处理
+
+### 通知方案
+- 应用启动时请求 Notification 权限
+- 时间到达时发送桌面通知
+- 同时播放提示音作为备用提醒
+
+### 数据存储方案
+- LocalStorage 存储设置和统计数据
+- 使用日期作为键区分不同天的数据
+- 定期清理过期数据
+
+## 验收标准
+
+- [ ] 倒计时功能正常工作
+- [ ] 开始、暂停、重置按钮功能正确
+- [ ] 可自定义工作和休息时长
+- [ ] 时间到达时发送桌面通知
+- [ ] 时间到达时播放提示音
+- [ ] 自动切换工作和休息模式
+- [ ] 统计功能记录完成番茄数
+- [ ] 数据刷新后不丢失
+- [ ] 响应式设计适配移动端
+- [ ] 无 TypeScript 类型错误
+- [ ] 代码符合规范无警告
