@@ -1,1 +1,0 @@
-# Weather Query Tool tests package

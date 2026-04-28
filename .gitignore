@@ -1,0 +1,14 @@
+# 忽略 node_modules
+node_modules/
+
+# 忽略 Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# 忽略日志文件
+*.log
+debug.log
+
+# 忽略个人作品集（它有独立的 Git 仓库）
+Personal Portfolio/
