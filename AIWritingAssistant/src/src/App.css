@@ -1,0 +1,46 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.app-header {
+  padding: 16px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #e8e8e8;
+  text-align: center;
+}
+
+.app-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.app-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.app-sidebar {
+  width: 220px;
+  background: #f5f5f5;
+  border-right: 1px solid #e8e8e8;
+  padding: 12px;
+  overflow-y: auto;
+}
+
+.app-main {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #e8e8e8;
+}
+
+.app-output {
+  width: 45%;
+  padding: 16px;
+  overflow-y: auto;
+}

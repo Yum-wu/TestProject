@@ -1,0 +1,117 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+.modeBar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.modeBtn {
+  padding: 6px 14px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  background: #fafafa;
+  color: #666;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.modeBtn:hover {
+  border-color: #4a90d9;
+  color: #4a90d9;
+}
+
+.modeBtn.active {
+  background: #4a90d9;
+  color: #fff;
+  border-color: #4a90d9;
+}
+
+.textarea {
+  width: 100%;
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.textarea:focus {
+  border-color: #4a90d9;
+  box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.1);
+}
+
+.params {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.paramItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #666;
+}
+
+.paramItem input[type="range"] {
+  width: 100px;
+}
+
+.select {
+  padding: 4px 8px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 13px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btnPrimary {
+  background: #5cb85c;
+  color: #fff;
+  flex: 1;
+}
+
+.btnPrimary:hover:not(:disabled) {
+  background: #4cae4c;
+}
+
+.btnSecondary {
+  background: #f0ad4e;
+  color: #fff;
+}
+
+.btnSecondary:hover:not(:disabled) {
+  background: #ec971f;
+}

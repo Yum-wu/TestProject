@@ -1,0 +1,17 @@
+# 依赖
+node_modules/
+dist/
+
+# 环境变量（含 API 密钥）
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 头脑风暴临时文件
+.superpowers/

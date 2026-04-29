@@ -1,0 +1,113 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.header h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.count {
+  font-size: 12px;
+  color: #999;
+}
+
+.list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.empty {
+  text-align: center;
+  color: #ccc;
+  font-size: 13px;
+  margin-top: 40px;
+}
+
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 8px;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+.item:hover {
+  background: #e8e8e8;
+}
+
+.itemContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.itemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  color: #fff;
+}
+
+.badge-continuation { background: #4a90d9; }
+.badge-rewrite { background: #5cb85c; }
+.badge-expand { background: #f0ad4e; }
+.badge-summarize { background: #d9534f; }
+.badge-email { background: #6f42c1; }
+.badge-copywriting { background: #e83e8c; }
+
+.time {
+  font-size: 11px;
+  color: #999;
+}
+
+.itemText {
+  font-size: 12px;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.deleteBtn {
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  color: #ccc;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.deleteBtn:hover {
+  background: #d9534f;
+  color: #fff;
+}

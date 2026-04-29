@@ -1,0 +1,102 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.header h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.copyBtn {
+  padding: 4px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copyBtn:hover {
+  border-color: #4a90d9;
+  color: #4a90d9;
+}
+
+.copyBtn.copied {
+  background: #5cb85c;
+  color: #fff;
+  border-color: #5cb85c;
+}
+
+.content {
+  flex: 1;
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #999;
+  font-size: 14px;
+}
+
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 16px;
+  background: #4a90d9;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.markdown {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #333;
+}
+
+.markdown p {
+  margin-bottom: 12px;
+}
+
+.markdown ul, .markdown ol {
+  padding-left: 20px;
+  margin-bottom: 12px;
+}
+
+.error {
+  color: #d9534f;
+  font-size: 14px;
+}
+
+.partial {
+  color: #999;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.placeholder {
+  color: #ccc;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 40px;
+}
