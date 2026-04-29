@@ -217,7 +217,7 @@
       const formData = new FormData();
       formData.append("file", audioBlob, "recording.wav");
 
-      const response = await fetch("/api/transcribe?stream=true", {
+      const response = await fetch("/api/transcribe", {
         method: "POST",
         body: formData,
       });
@@ -227,35 +227,12 @@
         throw new Error(data.error || `请求失败 (${response.status})`);
       }
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let fullText = "";
+      const data = await response.json();
+      const text = data.text || "";
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n");
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const dataStr = line.slice(6);
-            if (dataStr === "[DONE]") continue;
-
-            try {
-              const data = JSON.parse(dataStr);
-              if (data.text) {
-                fullText += data.text;
-                resultText.textContent = fullText;
-              }
-            } catch (e) {}
-          }
-        }
-      }
-
-      if (fullText.trim()) {
-        saveToHistory(fullText);
+      if (text.trim()) {
+        resultText.textContent = text;
+        saveToHistory(text);
         statusText.textContent = "识别完成";
       } else {
         showError("未能识别出语音内容，请重新录音尝试。");
