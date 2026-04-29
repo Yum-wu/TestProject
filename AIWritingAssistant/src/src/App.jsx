@@ -22,12 +22,7 @@ function App() {
   }, [addRecord]);
 
   useEffect(() => {
-    if (
-      !isLoading &&
-      content &&
-      lastGenerateParamsRef.current &&
-      addRecordRef.current
-    ) {
+    if (!isLoading && content && lastGenerateParamsRef.current) {
       addRecordRef.current({
         ...lastGenerateParamsRef.current,
         output: content,
