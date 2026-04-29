@@ -28,6 +28,15 @@ app.post("/api/transcribe", upload.single("file"), async (req, res) => {
     return res.status(400).json({ error: "未收到音频文件" });
   }
 
+  const streamMode = req.query.stream === "true";
+
+  if (streamMode) {
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.flushHeaders();
+  }
+
   try {
     const formData = new FormData();
     formData.append("model", "glm-asr-2512");
@@ -36,6 +45,7 @@ app.post("/api/transcribe", upload.single("file"), async (req, res) => {
       new Blob([req.file.buffer], { type: req.file.mimetype || "audio/wav" }),
       req.file.originalname || "audio.wav",
     );
+    formData.append("stream", streamMode);
 
     const response = await fetch(ZHIPU_API_URL, {
       method: "POST",
@@ -48,17 +58,42 @@ app.post("/api/transcribe", upload.single("file"), async (req, res) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("智谱API错误:", response.status, errorText);
-      return res.status(response.status).json({
-        error: `语音识别服务错误 (${response.status})`,
-        detail: errorText,
-      });
+      if (streamMode) {
+        res.write(`data: ${JSON.stringify({ error: errorText })}\n\n`);
+        res.end();
+      } else {
+        return res.status(response.status).json({
+          error: `语音识别服务错误 (${response.status})`,
+          detail: errorText,
+        });
+      }
+      return;
     }
 
-    const result = await response.json();
-    res.json(result);
+    if (streamMode) {
+      for await (const chunk of response.body) {
+        const text = chunk.toString();
+        const lines = text.split("\n");
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            res.write(line + "\n");
+          }
+        }
+      }
+      res.write("data: [DONE]\n\n");
+      res.end();
+    } else {
+      const result = await response.json();
+      res.json(result);
+    }
   } catch (error) {
     console.error("识别请求失败:", error);
-    res.status(500).json({ error: "语音识别请求失败", detail: error.message });
+    if (streamMode) {
+      res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
+      res.end();
+    } else {
+      res.status(500).json({ error: "语音识别请求失败", detail: error.message });
+    }
   }
 });
 

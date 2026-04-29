@@ -217,7 +217,7 @@ main {
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   padding: 16px;
-  padding-right: 50px;
+  padding-bottom: 50px;
   min-height: 80px;
 }
 
@@ -234,10 +234,15 @@ main {
   color: #666;
 }
 
-.copy-btn {
+.result-actions {
   position: absolute;
-  top: 12px;
+  bottom: 12px;
   right: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
   background: rgba(255, 255, 255, 0.1);
   border: none;
   border-radius: 8px;
@@ -247,12 +252,8 @@ main {
   transition: all 0.2s;
 }
 
-.copy-btn:hover {
+.action-btn:hover {
   background: rgba(255, 255, 255, 0.2);
-}
-
-.copy-btn.copied {
-  background: rgba(46, 204, 113, 0.3);
 }
 
 .error-section {

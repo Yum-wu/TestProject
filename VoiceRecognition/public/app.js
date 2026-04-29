@@ -23,6 +23,7 @@
   const resultSection = document.getElementById("resultSection");
   const resultText = document.getElementById("resultText");
   const copyBtn = document.getElementById("copyBtn");
+  const exportCsvBtn = document.getElementById("exportCsvBtn");
   const errorSection = document.getElementById("errorSection");
   const errorText = document.getElementById("errorText");
   const historyList = document.getElementById("historyList");
@@ -33,6 +34,7 @@
     recordBtn.addEventListener("click", toggleRecording);
     recognizeBtn.addEventListener("click", recognizeAudio);
     copyBtn.addEventListener("click", copyResult);
+    exportCsvBtn.addEventListener("click", exportToCsv);
     clearHistoryBtn.addEventListener("click", clearHistory);
     renderHistory();
   }
@@ -76,6 +78,9 @@
       isRecording = true;
       updateRecordingUI(true);
       startTimer();
+
+      resultSection.style.display = "none";
+      errorSection.style.display = "none";
     } catch (err) {
       console.error("麦克风访问失败:", err);
       showError("需要麦克风权限才能录音，请在浏览器设置中允许访问麦克风。");
@@ -205,27 +210,52 @@
     recognizeBtnText.textContent = "识别中...";
     loadingSpinner.style.display = "inline-block";
     errorSection.style.display = "none";
+    resultSection.style.display = "block";
+    resultText.textContent = "";
 
     try {
       const formData = new FormData();
       formData.append("file", audioBlob, "recording.wav");
 
-      const response = await fetch("/api/transcribe", {
+      const response = await fetch("/api/transcribe?stream=true", {
         method: "POST",
         body: formData,
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
+        const data = await response.json();
         throw new Error(data.error || `请求失败 (${response.status})`);
       }
 
-      const text = data.text || "";
-      if (text.trim()) {
-        resultText.textContent = text;
-        resultSection.style.display = "block";
-        saveToHistory(text);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n");
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const dataStr = line.slice(6);
+            if (dataStr === "[DONE]") continue;
+
+            try {
+              const data = JSON.parse(dataStr);
+              if (data.text) {
+                fullText += data.text;
+                resultText.textContent = fullText;
+              }
+            } catch (e) {}
+          }
+        }
+      }
+
+      if (fullText.trim()) {
+        saveToHistory(fullText);
         statusText.textContent = "识别完成";
       } else {
         showError("未能识别出语音内容，请重新录音尝试。");
@@ -252,10 +282,8 @@
     try {
       await navigator.clipboard.writeText(text);
       copyBtn.textContent = "✅";
-      copyBtn.classList.add("copied");
       setTimeout(() => {
         copyBtn.textContent = "📋";
-        copyBtn.classList.remove("copied");
       }, 1500);
     } catch (err) {
       const range = document.createRange();
@@ -266,6 +294,38 @@
       document.execCommand("copy");
       selection.removeAllRanges();
     }
+  }
+
+  function exportToCsv() {
+    const history = getHistory();
+    if (history.length === 0) {
+      showError("没有历史记录可导出");
+      return;
+    }
+
+    const BOM = "\uFEFF";
+    let csv = BOM + "序号,识别内容,识别时间\n";
+
+    history.forEach((item, index) => {
+      const text = item.text.replace(/"/g, '""');
+      const time = item.time.replace(/"/g, '""');
+      csv += `${index + 1},"${text}","${time}"\n`;
+    });
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `语音识别记录_${new Date().toLocaleDateString("zh-CN").replace(/\//g, "-")}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    exportCsvBtn.textContent = "✅";
+    setTimeout(() => {
+      exportCsvBtn.textContent = "📥";
+    }, 1500);
   }
 
   function getHistory() {
