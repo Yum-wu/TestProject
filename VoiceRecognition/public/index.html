@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI 语音识别</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🎙️ AI 语音识别</h1>
+        <p class="subtitle">点击录音按钮开始，再次点击停止</p>
+      </header>
+
+      <main>
+        <div class="recorder-section">
+          <div class="recorder-wrapper">
+            <button id="recordBtn" class="record-btn" title="点击开始录音">
+              <svg
+                class="mic-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
+                />
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                <line x1="12" y1="19" x2="12" y2="23" />
+                <line x1="8" y1="23" x2="16" y2="23" />
+              </svg>
+            </button>
+            <div class="pulse-ring"></div>
+          </div>
+          <div id="timer" class="timer" style="display: none">60</div>
+          <p id="statusText" class="status-text">点击开始录音</p>
+        </div>
+
+        <div
+          id="recognizeSection"
+          class="recognize-section"
+          style="display: none"
+        >
+          <button id="recognizeBtn" class="recognize-btn">
+            <span id="recognizeBtnText">开始识别</span>
+            <span
+              id="loadingSpinner"
+              class="loading-spinner"
+              style="display: none"
+            ></span>
+          </button>
+        </div>
+
+        <div id="resultSection" class="result-section" style="display: none">
+          <h2>识别结果</h2>
+          <div class="result-box">
+            <div
+              id="resultText"
+              contenteditable="true"
+              class="result-text"
+            ></div>
+            <button id="copyBtn" class="copy-btn" title="复制结果">📋</button>
+          </div>
+        </div>
+
+        <div id="errorSection" class="error-section" style="display: none">
+          <p id="errorText" class="error-text"></p>
+        </div>
+      </main>
+
+      <section class="history-section">
+        <div class="history-header">
+          <h2>📜 识别历史</h2>
+          <button id="clearHistoryBtn" class="clear-btn" style="display: none">
+            清空历史
+          </button>
+        </div>
+        <div id="historyList" class="history-list">
+          <p class="empty-hint">暂无识别记录</p>
+        </div>
+      </section>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

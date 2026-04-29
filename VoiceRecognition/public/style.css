@@ -1,0 +1,391 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  color: #e0e0e0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+}
+
+.container {
+  max-width: 600px;
+  width: 100%;
+  padding: 30px 20px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+header h1 {
+  font-size: 2rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: #888;
+  font-size: 0.95rem;
+}
+
+main {
+  text-align: center;
+}
+
+.recorder-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.recorder-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.record-btn {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+  position: relative;
+  z-index: 2;
+}
+
+.record-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 30px rgba(102, 126, 234, 0.6);
+}
+
+.record-btn:active {
+  transform: scale(0.98);
+}
+
+.record-btn.recording {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  box-shadow: 0 4px 20px rgba(231, 76, 60, 0.5);
+  animation: pulse-btn 1.5s ease-in-out infinite;
+}
+
+.record-btn.recording:hover {
+  box-shadow: 0 6px 30px rgba(231, 76, 60, 0.7);
+}
+
+.mic-icon {
+  width: 48px;
+  height: 48px;
+}
+
+.stop-icon {
+  width: 32px;
+  height: 32px;
+  fill: white;
+}
+
+.pulse-ring {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 3px solid rgba(231, 76, 60, 0.6);
+  animation: none;
+  z-index: 1;
+}
+
+.pulse-ring.active {
+  animation: pulse-ring-anim 1.5s ease-out infinite;
+}
+
+@keyframes pulse-ring-anim {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse-btn {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.timer {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #e74c3c;
+  font-variant-numeric: tabular-nums;
+}
+
+.status-text {
+  color: #aaa;
+  font-size: 0.95rem;
+}
+
+.recognize-section {
+  margin-bottom: 30px;
+}
+
+.recognize-btn {
+  padding: 14px 40px;
+  border: none;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.recognize-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.recognize-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.result-section {
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.result-section h2 {
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+  color: #ccc;
+}
+
+.result-box {
+  position: relative;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 16px;
+  padding-right: 50px;
+  min-height: 80px;
+}
+
+.result-text {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #f0f0f0;
+  outline: none;
+  word-break: break-word;
+}
+
+.result-text:empty::before {
+  content: "识别结果将显示在这里...";
+  color: #666;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: all 0.2s;
+}
+
+.copy-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.copy-btn.copied {
+  background: rgba(46, 204, 113, 0.3);
+}
+
+.error-section {
+  margin-bottom: 30px;
+}
+
+.error-text {
+  background: rgba(231, 76, 60, 0.15);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  border-radius: 10px;
+  padding: 14px;
+  color: #e74c3c;
+  font-size: 0.95rem;
+}
+
+.history-section {
+  margin-top: 40px;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.history-header h2 {
+  font-size: 1.2rem;
+  color: #ccc;
+}
+
+.clear-btn {
+  background: rgba(231, 76, 60, 0.2);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  color: #e74c3c;
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.clear-btn:hover {
+  background: rgba(231, 76, 60, 0.3);
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.empty-hint {
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+  padding: 20px;
+}
+
+.history-item {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  transition: all 0.2s;
+}
+
+.history-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.history-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.history-text {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #ddd;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.history-time {
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 6px;
+}
+
+.history-delete {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 4px;
+  transition: color 0.2s;
+  flex-shrink: 0;
+}
+
+.history-delete:hover {
+  color: #e74c3c;
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 20px 16px;
+  }
+
+  header h1 {
+    font-size: 1.6rem;
+  }
+
+  .record-btn {
+    width: 100px;
+    height: 100px;
+  }
+
+  .pulse-ring {
+    width: 100px;
+    height: 100px;
+  }
+
+  .mic-icon {
+    width: 40px;
+    height: 40px;
+  }
+}
