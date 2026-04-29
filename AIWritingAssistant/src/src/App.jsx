@@ -11,24 +11,28 @@ function App() {
   const [optimizedText, setOptimizedText] = useState(null);
   const [selectedOutput, setSelectedOutput] = useState("");
   const lastGenerateParamsRef = useRef(null);
+  const addRecordRef = useRef(null);
   const { content, isLoading, error, sendRequest, stopGeneration } =
     useStreaming();
-  const { records, deleteRecord } = useHistory();
+  const { records, addRecord, deleteRecord } = useHistory();
+
+  // 使用 ref 存储 addRecord，避免 useEffect 依赖循环
+  useEffect(() => {
+    addRecordRef.current = addRecord;
+  }, [addRecord]);
 
   useEffect(() => {
-    if (!isLoading && content && lastGenerateParamsRef.current) {
-      const params = lastGenerateParamsRef.current;
-      lastGenerateParamsRef.current = null;
-      // 保存记录
-      const newRecord = {
-        ...params,
+    if (
+      !isLoading &&
+      content &&
+      lastGenerateParamsRef.current &&
+      addRecordRef.current
+    ) {
+      addRecordRef.current({
+        ...lastGenerateParamsRef.current,
         output: content,
-      };
-      // 直接调用 addRecord 的底层逻辑，避免依赖引用变化
-      const STORAGE_KEY = "ai-writing-history";
-      const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-      existing.unshift(newRecord);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
+      });
+      lastGenerateParamsRef.current = null;
     }
   }, [isLoading, content]);
 
