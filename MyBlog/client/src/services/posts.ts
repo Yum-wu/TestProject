@@ -21,6 +21,15 @@ export async function getPosts(
 }
 
 /**
+ * 根据 ID 获取文章详情（编辑用）
+ * GET /api/posts/detail/:id
+ */
+export async function getPostById(id: number): Promise<ApiResponse<Post>> {
+  const res = await api.get<ApiResponse<Post>>(`/posts/detail/${id}`);
+  return res.data;
+}
+
+/**
  * 根据 slug 获取文章详情
  * GET /api/posts/:slug
  */

@@ -5,6 +5,37 @@ const { execute } = require("../config/database");
  */
 const PostModel = {
   /**
+   * 批量查询多篇文章的标签
+   * @param {Array<number>} postIds - 文章 ID 数组
+   * @returns {Map<number, Array>} postId -> tags 映射
+   */
+  async findTagsByPostIds(postIds) {
+    if (!postIds || postIds.length === 0) return new Map();
+
+    const placeholders = postIds.map(() => "?").join(", ");
+    const rows = await execute(
+      `SELECT t.id, t.name, t.slug, pt.post_id
+      FROM tags t
+      INNER JOIN post_tags pt ON t.id = pt.tag_id
+      WHERE pt.post_id IN (${placeholders})`,
+      postIds,
+    );
+
+    const tagMap = new Map();
+    for (const row of rows) {
+      if (!tagMap.has(row.post_id)) {
+        tagMap.set(row.post_id, []);
+      }
+      tagMap.get(row.post_id).push({
+        id: row.id,
+        name: row.name,
+        slug: row.slug,
+      });
+    }
+    return tagMap;
+  },
+
+  /**
    * 创建文章
    * @param {object} data - 文章数据
    * @returns {object} 新文章信息
@@ -225,9 +256,12 @@ const PostModel = {
       [...params, pageSize, offset],
     );
 
-    // 为每篇文章查询标签
+    // 为每篇文章查询标签（批量查询，避免 N+1 问题）
+    const postIds = items.map((item) => item.id);
+    const tagMap = await this.findTagsByPostIds(postIds);
+
     for (const item of items) {
-      item.tags = await this.findTagsByPostId(item.id);
+      item.tags = tagMap.get(item.id) || [];
       item.category = item.category_name
         ? {
             id: item.category_id,

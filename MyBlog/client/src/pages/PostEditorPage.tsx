@@ -38,11 +38,16 @@ export default function PostEditorPage() {
   useEffect(() => {
     if (!isEdit || !id) return;
     setLoading(true);
+    const numericId = parseInt(id, 10);
+    if (isNaN(numericId)) {
+      toast.error("无效的文章ID");
+      navigate("/", { replace: true });
+      return;
+    }
     postService
-      .getPostBySlug(id)
+      .getPostById(numericId)
       .then((res) => {
         const post = res.data;
-        /* 检查是否是作者 */
         if (authState.user && post.author_id !== authState.user.id) {
           toast.error("无权编辑此文章");
           navigate("/", { replace: true });
@@ -97,8 +102,7 @@ export default function PostEditorPage() {
       const excerpt = data.content.slice(0, 200).replace(/[#*`\n]/g, "") + "...";
 
       if (isEdit && existingPost) {
-        /* 更新文章 */
-        await postService.updatePost(existingPost.id, {
+        const res = await postService.updatePost(existingPost.id, {
           title: data.title,
           content: data.content,
           excerpt,
@@ -107,7 +111,7 @@ export default function PostEditorPage() {
           tag_ids: selectedTagIds,
         });
         toast.success("文章更新成功");
-        navigate(`/posts/${existingPost.slug}`, { replace: true });
+        navigate(`/posts/${res.data.slug}`, { replace: true });
       } else {
         /* 创建文章 */
         const res = await postService.createPost({

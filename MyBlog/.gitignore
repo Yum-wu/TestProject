@@ -9,6 +9,7 @@ build/
 .env
 .env.local
 .env.*.local
+.env.production
 
 # 上传文件
 server/uploads/

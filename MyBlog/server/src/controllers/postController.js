@@ -205,6 +205,25 @@ const postController = {
   },
 
   /**
+   * 根据 ID 获取文章详情（编辑用，不增加浏览量）
+   * GET /api/posts/detail/:id
+   */
+  async getPostById(req, res, next) {
+    try {
+      const postId = parseInt(req.params.id, 10);
+      const post = await PostModel.findById(postId);
+
+      if (!post) {
+        return error(res, "文章不存在", 404);
+      }
+
+      return success(res, post, "获取成功");
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /**
    * 根据 slug 获取文章详情
    * GET /api/posts/:slug
    * 添加缓存控制头，文章详情缓存 5 分钟

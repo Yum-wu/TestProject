@@ -10,6 +10,7 @@ const router = Router();
 
 // 公开路由 - 文章列表和详情
 router.get("/", optionalAuth, postController.getPosts);
+router.get("/detail/:id", optionalAuth, postController.getPostById);
 router.get("/:slug", optionalAuth, postController.getPostBySlug);
 
 // 需要认证的路由
