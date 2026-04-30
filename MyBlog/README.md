@@ -248,6 +248,70 @@ cd client && npm test
 
 ---
 
+## 🚀 部署指南
+
+### 方式一：手动部署
+
+```bash
+# 1. 初始化服务器
+bash scripts/setup-server.sh
+
+# 2. 配置环境变量
+cd server
+cp .env.example .env
+nano .env  # 填写数据库密码、JWT密钥等
+
+# 3. 部署
+bash scripts/deploy.sh
+```
+
+### 方式二：CD 自动部署（推荐）
+
+#### 1. 在服务器上配置 SSH 密钥
+
+```bash
+# 在服务器上生成 SSH 密钥（如果还没有）
+ssh-keygen -t ed25519 -C "deploy@myblog"
+
+# 将公钥添加到 authorized_keys
+cat ~/.ssh/id_ed25519.pub >> ~/.ssh/authorized_keys
+```
+
+#### 2. 在 GitHub 仓库设置 Secrets
+
+进入 `Settings → Secrets and variables → Actions`，添加以下 secrets：
+
+| Secret 名称 | 说明 | 示例 |
+|-------------|------|------|
+| `DEPLOY_HOST` | 服务器 IP 地址 | `192.168.1.100` |
+| `DEPLOY_USER` | SSH 用户名 | `root` |
+| `DEPLOY_KEY` | 私钥（id_ed25519 内容） | `-----BEGIN OPENSSH...` |
+| `DEPLOY_PORT` | SSH 端口（可选） | `22` |
+
+同时在 `Settings → Variables` 中添加：
+
+| Variable 名称 | 说明 | 示例 |
+|--------------|------|------|
+| `DEPLOY_PATH` | 服务器部署路径 | `/var/www/myblog` |
+| `API_BASE_URL` | API 基础 URL | `https://api.yourdomain.com` |
+
+#### 3. 触发部署
+
+推送代码到 main 分支，或在 GitHub Actions 页面手动触发 `CD` workflow。
+
+### 方式三：Docker 一键部署
+
+```bash
+# 复制生产环境配置
+cp server/.env.production server/.env
+nano server/.env  # 修改密码和域名
+
+# 启动所有服务
+docker-compose up -d
+```
+
+---
+
 ## 📄 License
 
 MIT License

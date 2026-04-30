@@ -1,0 +1,94 @@
+name: CD
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: '部署环境'
+        required: true
+        default: 'production'
+
+jobs:
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      # ===== 前端构建 =====
+      - name: Install frontend dependencies
+        run: cd client && npm ci
+
+      - name: Build frontend
+        run: cd client && npm run build
+        env:
+          VITE_API_BASE_URL: ${{ vars.API_BASE_URL || 'http://localhost:3001' }}
+
+      # ===== 后端依赖 =====
+      - name: Install backend dependencies
+        run: cd server && npm ci --only=production
+
+      # ===== 部署到服务器 =====
+      - name: Deploy to server
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          script_stop: true
+          command: |
+            echo "部署开始..."
+            cd ${{ vars.DEPLOY_PATH || '/var/www/myblog' }}
+
+            # 停止旧服务
+            if pm2 list | grep -q myblog-api; then
+              pm2 stop myblog-api || true
+            fi
+
+            # 备份（保留最近3个版本）
+            if [ -d "client" ]; then
+              mkdir -p backups
+              tar -czf backups/backup-$(date +%Y%m%d-%H%M%S).tar.gz client server uploads 2>/dev/null || true
+              find backups -name "backup-*.tar.gz" -mtime +3 -delete
+            fi
+
+            # 复制新代码
+            rsync -az --exclude='node_modules' --exclude='.git' --exclude='uploads' --exclude='logs' --exclude='backups' ${{ github.workspace }}/server/ ./server/
+            rsync -az --exclude='node_modules' --exclude='.git' ${{ github.workspace }}/client/dist/ ./client/dist/
+
+            # 安装依赖
+            cd server && npm install --production
+
+            # 重启服务
+            pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js
+
+            # 等待服务启动
+            sleep 5
+
+            # 检查健康状态
+            if curl -sf http://localhost:3001/health > /dev/null; then
+              echo "部署成功！服务运行正常"
+            else
+              echo "警告：服务可能未正常启动，请检查"
+              pm2 logs myblog-api --lines 20
+            fi
+
+      - name: Deploy Status Notification
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ 部署完成"
+          else
+            echo "❌ 部署失败，请检查日志"
+          fi

@@ -11,6 +11,9 @@ build/
 .env.*.local
 .env.production
 
+# 服务器备份
+backups/
+
 # 上传文件
 server/uploads/
 
