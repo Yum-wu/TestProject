@@ -199,21 +199,52 @@ cd client && npm test
 
 ## 📝 API 接口
 
+### 认证接口
+
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
 | POST | /api/auth/register | 用户注册 | ❌ |
 | POST | /api/auth/login | 用户登录 | ❌ |
-| GET | /api/auth/profile | 获取用户信息 | ✅ |
+| GET | /api/auth/profile | 获取当前用户信息 | ✅ |
 | PUT | /api/auth/profile | 更新用户信息 | ✅ |
-| GET | /api/posts | 文章列表 | ❌ |
-| GET | /api/posts/:slug | 文章详情 | ❌ |
+
+### 文章接口
+
+| 方法 | 路径 | 说明 | 认证 |
+|------|------|------|------|
+| GET | /api/posts | 文章列表（分页/搜索/筛选） | ❌ |
+| GET | /api/posts/detail/:id | 根据ID获取文章详情 | ❌ |
+| GET | /api/posts/:slug | 根据Slug获取文章详情 | ❌ |
 | POST | /api/posts | 创建文章 | ✅ |
 | PUT | /api/posts/:id | 更新文章 | ✅ |
 | DELETE | /api/posts/:id | 删除文章 | ✅ |
+| POST | /api/posts/upload-cover | 上传封面图 | ✅ |
+
+### 分类接口
+
+| 方法 | 路径 | 说明 | 认证 |
+|------|------|------|------|
 | GET | /api/categories | 分类列表 | ❌ |
+| POST | /api/categories | 创建分类 | ✅ |
+| PUT | /api/categories/:id | 更新分类 | ✅ |
+| DELETE | /api/categories/:id | 删除分类 | ✅ |
+
+### 标签接口
+
+| 方法 | 路径 | 说明 | 认证 |
+|------|------|------|------|
 | GET | /api/tags | 标签列表 | ❌ |
-| GET | /api/posts/:id/comments | 获取评论 | ❌ |
+| POST | /api/tags | 创建标签 | ✅ |
+| DELETE | /api/tags/:id | 删除标签 | ✅ |
+
+### 评论接口
+
+| 方法 | 路径 | 说明 | 认证 |
+|------|------|------|------|
+| GET | /api/posts/:postId/comments | 获取文章评论 | ❌ |
 | POST | /api/comments | 发表评论 | ✅ |
+| POST | /api/comments/:id/reply | 回复评论 | ✅ |
+| DELETE | /api/comments/:id | 删除评论 | ✅ |
 
 ---
 
