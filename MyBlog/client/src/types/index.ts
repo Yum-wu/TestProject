@@ -83,8 +83,6 @@ export interface Post {
   cover_image?: string;
   status: "draft" | "published";
   view_count: number;
-  like_count: number;
-  comment_count: number;
   author_id: number;
   category_id?: number;
   created_at: string;
@@ -97,6 +95,7 @@ export interface Post {
 /** 文章列表项（用于 PostCard 组件适配） */
 export interface PostListItem {
   id: string;
+  slug: string;
   title: string;
   excerpt: string;
   coverUrl?: string;
@@ -108,8 +107,6 @@ export interface PostListItem {
   };
   createdAt: string;
   viewCount: number;
-  likeCount: number;
-  commentCount: number;
   readingTime: number;
 }
 
@@ -118,16 +115,17 @@ export interface CreatePostRequest {
   title: string;
   content: string;
   excerpt?: string;
+  cover_image?: string;
   category_id?: number;
   status?: "draft" | "published";
   tag_ids?: number[];
 }
 
-/** 更新文章请求 */
 export interface UpdatePostRequest {
   title?: string;
   content?: string;
   excerpt?: string;
+  cover_image?: string;
   category_id?: number;
   status?: "draft" | "published";
   tag_ids?: number[];
@@ -147,7 +145,6 @@ export interface Category {
   slug: string;
   description?: string;
   created_at: string;
-  updated_at: string;
   post_count?: number;
 }
 

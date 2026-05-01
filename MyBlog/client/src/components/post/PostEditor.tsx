@@ -13,15 +13,14 @@ interface ToolbarAction {
 
 /* ===== PostEditor 组件属性 ===== */
 interface PostEditorProps {
-  /** 初始标题 */
   initialTitle?: string;
-  /** 初始内容 */
   initialContent?: string;
-  /** 保存回调 */
-  onSave: (data: { title: string; content: string }) => void;
-  /** 是否保存中 */
+  onSave: (data: {
+    title: string;
+    content: string;
+    status: "draft" | "published";
+  }) => void;
   saving?: boolean;
-  /** 是否为编辑模式 */
   isEdit?: boolean;
 }
 
@@ -356,14 +355,18 @@ export default function PostEditor({
 
         {/* 操作按钮 */}
         <div className="flex items-center gap-3">
-          <Button variant="secondary" size="sm">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => onSave({ title, content, status: "draft" })}
+          >
             存草稿
           </Button>
           <Button
             variant="primary"
             size="sm"
             loading={saving}
-            onClick={() => onSave({ title, content })}
+            onClick={() => onSave({ title, content, status: "published" })}
             disabled={!title.trim() || !content.trim()}
           >
             {isEdit ? "更新文章" : "发布文章"}

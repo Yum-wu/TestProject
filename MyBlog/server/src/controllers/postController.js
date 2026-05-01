@@ -21,8 +21,15 @@ const postController = {
         return error(res, "输入验证失败", 422, errors.array());
       }
 
-      const { title, content, excerpt, category_id, status, tag_ids } =
-        req.body;
+      const {
+        title,
+        content,
+        excerpt,
+        cover_image,
+        category_id,
+        status,
+        tag_ids,
+      } = req.body;
       const author_id = req.user.id;
 
       // 生成唯一 slug
@@ -44,7 +51,7 @@ const postController = {
         slug,
         content,
         excerpt: excerpt || null,
-        cover_image: null,
+        cover_image: cover_image || null,
         category_id: category_id || null,
         author_id,
         status: status || "draft",
@@ -75,8 +82,15 @@ const postController = {
       }
 
       const postId = parseInt(req.params.id, 10);
-      const { title, content, excerpt, category_id, status, tag_ids } =
-        req.body;
+      const {
+        title,
+        content,
+        excerpt,
+        cover_image,
+        category_id,
+        status,
+        tag_ids,
+      } = req.body;
 
       // 检查文章是否存在
       const existingPost = await PostModel.findById(postId);
@@ -111,6 +125,7 @@ const postController = {
         slug,
         content,
         excerpt,
+        cover_image,
         category_id,
         status,
       });

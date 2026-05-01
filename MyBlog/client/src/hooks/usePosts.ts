@@ -9,6 +9,7 @@ import { DEFAULT_PAGE_SIZE, READING_SPEED, EXCERPT_MAX_LENGTH } from "../utils/c
 function mapPostToListItem(post: Post): PostListItem {
   return {
     id: String(post.id),
+    slug: post.slug,
     title: post.title,
     excerpt: post.excerpt || post.content.slice(0, EXCERPT_MAX_LENGTH) + "...",
     coverUrl: post.cover_image || undefined,
@@ -20,8 +21,6 @@ function mapPostToListItem(post: Post): PostListItem {
     },
     createdAt: post.created_at,
     viewCount: post.view_count,
-    likeCount: post.like_count,
-    commentCount: post.comment_count,
     readingTime: Math.max(1, Math.ceil(post.content.length / READING_SPEED)),
   };
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { usePosts } from "../hooks/usePosts";
@@ -17,7 +17,7 @@ export default function ProfilePage() {
   const { state: authState, updateProfile, isLoggedIn } = useAuth();
   const { posts, loading: postsLoading } = usePosts({
     authorId: authState.user?.id,
-    status: undefined, /* 显示所有状态的文章 */
+    status: undefined /* 显示所有状态的文章 */,
   });
 
   const [editing, setEditing] = useState(false);
@@ -25,11 +25,13 @@ export default function ProfilePage() {
   const [username, setUsername] = useState(authState.user?.username || "");
   const [bio, setBio] = useState(authState.user?.bio || "");
 
-  /* 未登录时跳转 */
-  if (!isLoggedIn) {
-    navigate("/login", { replace: true });
-    return null;
-  }
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate("/login", { replace: true });
+    }
+  }, [isLoggedIn, navigate]);
+
+  if (!isLoggedIn) return null;
 
   const user = authState.user!;
 

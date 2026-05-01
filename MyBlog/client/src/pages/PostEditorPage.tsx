@@ -28,7 +28,9 @@ export default function PostEditorPage() {
   const [existingPost, setExistingPost] = useState<Post | null>(null);
 
   /* 编辑器状态 */
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | undefined>();
+  const [selectedCategoryId, setSelectedCategoryId] = useState<
+    number | undefined
+  >();
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
   const [coverUrl, setCoverUrl] = useState<string | undefined>();
   const [uploading, setUploading] = useState(false);
@@ -85,12 +87,16 @@ export default function PostEditorPage() {
     setSelectedTagIds((prev) =>
       prev.includes(tagId)
         ? prev.filter((id) => id !== tagId)
-        : [...prev, tagId]
+        : [...prev, tagId],
     );
   };
 
   /* 保存文章 */
-  const handleSave = async (data: { title: string; content: string }) => {
+  const handleSave = async (data: {
+    title: string;
+    content: string;
+    status: "draft" | "published";
+  }) => {
     if (!data.title.trim() || !data.content.trim()) {
       toast.error("标题和内容不能为空");
       return;
@@ -98,31 +104,32 @@ export default function PostEditorPage() {
 
     setSaving(true);
     try {
-      /* 生成摘要 */
-      const excerpt = data.content.slice(0, 200).replace(/[#*`\n]/g, "") + "...";
+      const excerpt =
+        data.content.slice(0, 200).replace(/[#*`\n]/g, "") + "...";
 
       if (isEdit && existingPost) {
         const res = await postService.updatePost(existingPost.id, {
           title: data.title,
           content: data.content,
           excerpt,
+          cover_image: coverUrl,
           category_id: selectedCategoryId,
-          status,
+          status: data.status,
           tag_ids: selectedTagIds,
         });
         toast.success("文章更新成功");
         navigate(`/posts/${res.data.slug}`, { replace: true });
       } else {
-        /* 创建文章 */
         const res = await postService.createPost({
           title: data.title,
           content: data.content,
           excerpt,
+          cover_image: coverUrl,
           category_id: selectedCategoryId,
-          status,
+          status: data.status,
           tag_ids: selectedTagIds,
         });
-        toast.success("文章发布成功");
+        toast.success(data.status === "draft" ? "草稿已保存" : "文章发布成功");
         navigate(`/posts/${res.data.slug}`, { replace: true });
       }
     } catch {
@@ -177,7 +184,7 @@ export default function PostEditorPage() {
                   setSelectedCategoryId(
                     selectedCategoryId === category.id
                       ? undefined
-                      : category.id
+                      : category.id,
                   )
                 }
               />

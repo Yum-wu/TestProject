@@ -74,14 +74,14 @@ app.use(
 
 // 请求限流 - 防止恶意请求和 DDoS 攻击
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 分钟时间窗口
-  max: 100, // 每个 IP 在时间窗口内最多 100 次请求
+  windowMs: 15 * 60 * 1000,
+  max: 300,
   message: {
     status: "error",
     message: "请求过于频繁，请稍后再试",
   },
-  standardHeaders: true, // 返回 RateLimit-* 头信息
-  legacyHeaders: false, // 禁用 X-RateLimit-* 头信息
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 // 对 API 路由应用限流

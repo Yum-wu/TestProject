@@ -10,7 +10,8 @@ const dbConfig = {
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  timezone: "+08:00", // 东八区
+  charset: "utf8mb4",
+  timezone: "+08:00",
 };
 
 // 创建连接池
