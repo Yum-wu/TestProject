@@ -55,9 +55,10 @@ npm run build
 
 # ===== 重启服务 =====
 echo -e "${YELLOW}[5/5] 重启服务...${NC}"
-cd $APP_DIR/server
-pm2 stop $APP_NAME || true
+pm2 delete $APP_NAME 2>/dev/null || true
+cd $APP_DIR
 pm2 start ecosystem.config.js --env production
+pm2 save
 
 # ===== 检查状态 =====
 sleep 3

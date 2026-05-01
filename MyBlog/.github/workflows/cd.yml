@@ -4,11 +4,6 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
-    inputs:
-      environment:
-        description: '部署环境'
-        required: true
-        default: 'production'
 
 jobs:
   deploy:
@@ -31,64 +26,106 @@ jobs:
 
       - name: Build frontend
         run: cd client && npm run build
-        env:
-          VITE_API_BASE_URL: ${{ vars.API_BASE_URL || 'http://localhost:3001' }}
 
-      # ===== 后端依赖 =====
-      - name: Install backend dependencies
-        run: cd server && npm ci --only=production
-
-      # ===== 部署到服务器 =====
-      - name: Deploy to server
-        uses: appleboy/scp-action@v0.1.4
+      # ===== 上传前端构建产物 =====
+      - name: Upload client dist
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           port: ${{ secrets.DEPLOY_PORT || 22 }}
-          script_stop: true
-          command: |
-            echo "部署开始..."
-            cd ${{ vars.DEPLOY_PATH || '/var/www/myblog' }}
+          source: "client/dist/*"
+          target: "${{ vars.DEPLOY_PATH || '/var/www/myblog' }}/client/dist/"
+          strip_components: 2
+          overwrite: true
 
-            # 停止旧服务
-            if pm2 list | grep -q myblog-api; then
-              pm2 stop myblog-api || true
+      # ===== 上传后端代码 =====
+      - name: Upload server code
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          source: "server/src,server/package.json,server/package-lock.json,server/.env.example"
+          target: "${{ vars.DEPLOY_PATH || '/var/www/myblog' }}/server/"
+          strip_components: 1
+          overwrite: true
+
+      # ===== 上传 PM2 配置 =====
+      - name: Upload PM2 config
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          source: "ecosystem.config.js"
+          target: "${{ vars.DEPLOY_PATH || '/var/www/myblog' }}/"
+          overwrite: true
+
+      # ===== 远程执行部署命令 =====
+      - name: Execute deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          script: |
+            DEPLOY_PATH="${{ vars.DEPLOY_PATH || '/var/www/myblog' }}"
+            cd $DEPLOY_PATH || { echo "部署路径不存在"; exit 1; }
+
+            echo "========================================"
+            echo "  开始部署..."
+            echo "========================================"
+
+            # 备份当前版本
+            TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+            mkdir -p backups
+            if [ -d "server/src" ]; then
+              tar -czf backups/backup-$TIMESTAMP.tar.gz server/src server/package.json 2>/dev/null || true
+              find backups -name "backup-*.tar.gz" -mtime +3 -delete 2>/dev/null || true
+              echo "备份已创建: backup-$TIMESTAMP.tar.gz"
             fi
 
-            # 备份（保留最近3个版本）
-            if [ -d "client" ]; then
-              mkdir -p backups
-              tar -czf backups/backup-$(date +%Y%m%d-%H%M%S).tar.gz client server uploads 2>/dev/null || true
-              find backups -name "backup-*.tar.gz" -mtime +3 -delete
-            fi
+            # 安装后端依赖
+            cd $DEPLOY_PATH/server
+            npm install --production --no-audit --no-fund
+            echo "依赖安装完成"
 
-            # 复制新代码
-            rsync -az --exclude='node_modules' --exclude='.git' --exclude='uploads' --exclude='logs' --exclude='backups' ${{ github.workspace }}/server/ ./server/
-            rsync -az --exclude='node_modules' --exclude='.git' ${{ github.workspace }}/client/dist/ ./client/dist/
+            # 创建必要目录
+            mkdir -p $DEPLOY_PATH/uploads/covers $DEPLOY_PATH/logs
 
-            # 安装依赖
-            cd server && npm install --production
+            # 停止旧实例
+            pm2 delete myblog-api 2>/dev/null || true
 
-            # 重启服务
-            pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js
+            # 启动新实例
+            cd $DEPLOY_PATH
+            pm2 start ecosystem.config.js --env production
+            pm2 save
 
-            # 等待服务启动
+            # 等待启动
             sleep 5
 
-            # 检查健康状态
-            if curl -sf http://localhost:3001/health > /dev/null; then
-              echo "部署成功！服务运行正常"
+            # 健康检查
+            echo ""
+            echo "========================================"
+            if curl -sf http://localhost:3001/health > /dev/null 2>&1; then
+              echo "  ✅ 部署成功！服务运行正常"
             else
-              echo "警告：服务可能未正常启动，请检查"
-              pm2 logs myblog-api --lines 20
+              echo "  ⚠️ 服务可能未正常启动，检查日志："
+              pm2 logs myblog-api --lines 20 --nostream
             fi
+            echo "========================================"
 
-      - name: Deploy Status Notification
+      - name: Deployment status
         if: always()
         run: |
           if [ "${{ job.status }}" == "success" ]; then
-            echo "✅ 部署完成"
+            echo "✅ CD 部署流程完成"
           else
-            echo "❌ 部署失败，请检查日志"
+            echo "❌ 部署流程失败"
+            echo "请检查 GitHub Actions 日志获取详细错误信息"
           fi
