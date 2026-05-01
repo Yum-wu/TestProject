@@ -7,7 +7,8 @@ import Button from "../common/Button";
 interface ToolbarAction {
   label: string;
   icon: string;
-  action: () => void;
+  before: string;
+  after: string;
   active?: boolean;
 }
 
@@ -40,7 +41,6 @@ export default function PostEditor({
   const [mode, setMode] = useState<"edit" | "preview">("edit");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  /* 在光标位置插入文本 */
   const insertAtCursor = (before: string, after: string = "") => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -58,7 +58,6 @@ export default function PostEditor({
 
     setContent(newContent);
 
-    /* 恢复光标位置 */
     requestAnimationFrame(() => {
       textarea.focus();
       const newCursorPos =
@@ -67,68 +66,24 @@ export default function PostEditor({
     });
   };
 
-  /* 工具栏操作 */
   const toolbarActions: ToolbarAction[] = [
-    {
-      label: "加粗",
-      icon: "bold",
-      action: () => insertAtCursor("**", "**"),
-    },
-    {
-      label: "斜体",
-      icon: "italic",
-      action: () => insertAtCursor("*", "*"),
-    },
-    {
-      label: "删除线",
-      icon: "strikethrough",
-      action: () => insertAtCursor("~~", "~~"),
-    },
-    {
-      label: "标题",
-      icon: "heading",
-      action: () => insertAtCursor("## "),
-    },
-    {
-      label: "链接",
-      icon: "link",
-      action: () => insertAtCursor("[", "](url)"),
-    },
-    {
-      label: "图片",
-      icon: "image",
-      action: () => insertAtCursor("![alt](", ")"),
-    },
-    {
-      label: "代码",
-      icon: "code",
-      action: () => insertAtCursor("`", "`"),
-    },
+    { label: "加粗", icon: "bold", before: "**", after: "**" },
+    { label: "斜体", icon: "italic", before: "*", after: "*" },
+    { label: "删除线", icon: "strikethrough", before: "~~", after: "~~" },
+    { label: "标题", icon: "heading", before: "## ", after: "" },
+    { label: "链接", icon: "link", before: "[", after: "](url)" },
+    { label: "图片", icon: "image", before: "![alt](", after: ")" },
+    { label: "代码", icon: "code", before: "`", after: "`" },
     {
       label: "代码块",
       icon: "codeblock",
-      action: () => insertAtCursor("\n```javascript\n", "\n```\n"),
+      before: "\n```javascript\n",
+      after: "\n```\n",
     },
-    {
-      label: "引用",
-      icon: "quote",
-      action: () => insertAtCursor("> "),
-    },
-    {
-      label: "列表",
-      icon: "list",
-      action: () => insertAtCursor("- "),
-    },
-    {
-      label: "有序列表",
-      icon: "ordered-list",
-      action: () => insertAtCursor("1. "),
-    },
-    {
-      label: "分割线",
-      icon: "divider",
-      action: () => insertAtCursor("\n---\n"),
-    },
+    { label: "引用", icon: "quote", before: "> ", after: "" },
+    { label: "列表", icon: "list", before: "- ", after: "" },
+    { label: "有序列表", icon: "ordered-list", before: "1. ", after: "" },
+    { label: "分割线", icon: "divider", before: "\n---\n", after: "" },
   ];
 
   /* 渲染工具栏图标 */
@@ -284,7 +239,7 @@ export default function PostEditor({
             <button
               key={action.label}
               type="button"
-              onClick={action.action}
+              onClick={() => insertAtCursor(action.before, action.after)}
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-700 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
               title={action.label}
             >

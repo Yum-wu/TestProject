@@ -39,7 +39,6 @@ export default function PostEditorPage() {
   /* 编辑模式：加载已有文章 */
   useEffect(() => {
     if (!isEdit || !id) return;
-    setLoading(true);
     const numericId = parseInt(id, 10);
     if (isNaN(numericId)) {
       toast.error("无效的文章ID");
