@@ -8,7 +8,7 @@
  */
 
 import { Router } from 'express';
-import { validate, addToCartSchema, updateCartSchema } from '../middleware/validator';
+import { validate, addToCartSchema, updateCartSchema, idParamsSchema } from '../middleware/validator';
 import { authMiddleware } from '../middleware/auth';
 import * as cartController from '../controllers/cart.controller';
 
@@ -19,7 +19,7 @@ router.use(authMiddleware);
 
 router.post('/', validate({ body: addToCartSchema }), cartController.add);
 router.get('/', cartController.list);
-router.patch('/:id', validate({ body: updateCartSchema }), cartController.update);
-router.delete('/:id', cartController.remove);
+router.patch('/:id', validate({ body: updateCartSchema, params: idParamsSchema }), cartController.update);
+router.delete('/:id', validate({ params: idParamsSchema }), cartController.remove);
 
 export default router;

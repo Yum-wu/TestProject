@@ -13,6 +13,8 @@
 
 import express, { Request, Response } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import { env } from './config/env';
 import { requestLogger } from './middleware/requestLogger';
 import { errorHandler } from './middleware/errorHandler';
@@ -22,7 +24,21 @@ const app = express();
 
 // ---- 全局中间件 ----
 
-// 1. CORS 跨域
+// 1. 安全头
+app.use(helmet());
+
+// 2. 限流：每 IP 每分钟最多 100 次请求
+app.use(
+  rateLimit({
+    windowMs: 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { code: 4000, message: '请求过于频繁，请稍后重试', data: null },
+  })
+);
+
+// 3. CORS 跨域
 app.use(
   cors({
     origin: env.cors.origin,
@@ -30,13 +46,13 @@ app.use(
   })
 );
 
-// 2. 请求体 JSON 解析
+// 4. 请求体 JSON 解析
 app.use(express.json({ limit: '1mb' }));
 
-// 3. URL-encoded 解析
+// 5. URL-encoded 解析
 app.use(express.urlencoded({ extended: true }));
 
-// 4. 请求日志
+// 6. 请求日志
 app.use(requestLogger);
 
 // ---- 路由挂载 ----

@@ -10,6 +10,15 @@ const config: Config.InitialOptions = {
   roots: ['<rootDir>/tests'],
   testMatch: ['**/*.test.ts'],
   moduleFileExtensions: ['ts', 'js', 'json'],
+  moduleNameMapper: {
+    '^../src/(.*)$': '<rootDir>/src/$1',
+  },
+  transform: {
+    '^.+\\.ts$': ['ts-jest', {
+      tsconfig: 'tsconfig.test.json',
+      diagnostics: false,
+    }],
+  },
   collectCoverageFrom: [
     'src/services/**/*.ts',
     'src/models/**/*.ts',

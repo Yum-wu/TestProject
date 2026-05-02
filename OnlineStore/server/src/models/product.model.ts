@@ -125,14 +125,21 @@ export async function updateStockWithVersion(
 }
 
 /**
- * 恢复库存（取消订单专用，不使用乐观锁）
+ * 恢复库存（取消订单专用）
+ * 使用乐观锁版本校验防止并发覆盖
  */
-export async function restoreStock(id: number, quantity: number): Promise<void> {
+export async function restoreStock(
+  id: number,
+  quantity: number,
+  version: number,
+): Promise<number> {
   const sql = `
     UPDATE products
     SET stock = stock + ?,
         version = version + 1
     WHERE id = ?
+      AND version = ?
   `;
-  await pool.query(sql, [quantity, id]);
+  const [result] = await pool.query<ResultSetHeader>(sql, [quantity, id, version]);
+  return result.affectedRows;
 }

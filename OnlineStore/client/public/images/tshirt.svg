@@ -1,0 +1,5 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'>
+  <rect width='400' height='400' fill='#FF6584' rx='8'/>
+  <text x='200' y='180' text-anchor='middle' font-size='80'>👕</text>
+  <text x='200' y='260' text-anchor='middle' font-size='18' fill='#333' font-family='sans-serif' font-weight='bold'>T-shirt</text>
+</svg>

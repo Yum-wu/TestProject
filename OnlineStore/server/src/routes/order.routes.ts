@@ -8,7 +8,7 @@
  */
 
 import { Router } from 'express';
-import { validate, createOrderSchema } from '../middleware/validator';
+import { validate, createOrderSchema, idParamsSchema } from '../middleware/validator';
 import { authMiddleware } from '../middleware/auth';
 import * as orderController from '../controllers/order.controller';
 
@@ -19,7 +19,7 @@ router.use(authMiddleware);
 
 router.post('/', validate({ body: createOrderSchema }), orderController.create);
 router.get('/', orderController.list);
-router.get('/:id', orderController.detail);
+router.get('/:id', validate({ params: idParamsSchema }), orderController.detail);
 router.patch('/:id/cancel', orderController.cancel);
 
 export default router;

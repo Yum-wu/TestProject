@@ -8,7 +8,7 @@
  */
 
 import { Router } from 'express';
-import { validate, createAddressSchema, updateAddressSchema } from '../middleware/validator';
+import { validate, createAddressSchema, updateAddressSchema, idParamsSchema } from '../middleware/validator';
 import { authMiddleware } from '../middleware/auth';
 import * as addressController from '../controllers/address.controller';
 
@@ -19,7 +19,7 @@ router.use(authMiddleware);
 
 router.post('/', validate({ body: createAddressSchema }), addressController.create);
 router.get('/', addressController.list);
-router.put('/:id', validate({ body: updateAddressSchema }), addressController.update);
-router.delete('/:id', addressController.remove);
+router.put('/:id', validate({ body: updateAddressSchema, params: idParamsSchema }), addressController.update);
+router.delete('/:id', validate({ params: idParamsSchema }), addressController.remove);
 
 export default router;

@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useRef } from "react";
 import { formatPrice } from "../../utils/format";
 import type { CartItem as CartItemType } from "../../types/cart";
 
@@ -78,17 +78,11 @@ const CartItemComponent = memo(function CartItemComponent({
         >
           &minus;
         </button>
-        <input
-          type="number"
+        <DebouncedInput
           value={item.quantity}
           min={1}
           max={maxQty}
-          onChange={(e) => {
-            const v = parseInt(e.target.value, 10);
-            if (!isNaN(v) && v >= 1 && v <= maxQty) {
-              onChangeQuantity(item.id, v);
-            }
-          }}
+          onChange={(v) => onChangeQuantity(item.id, v)}
         />
         <button
           disabled={item.quantity >= maxQty}
@@ -117,5 +111,35 @@ const CartItemComponent = memo(function CartItemComponent({
     </div>
   );
 });
+
+/**
+ * 防抖输入组件：用户停止输入 500ms 后再触发 onChange
+ */
+function DebouncedInput({
+  value, min, max, onChange,
+}: {
+  value: number; min: number; max: number;
+  onChange: (v: number) => void;
+}) {
+  const timer = useRef<ReturnType<typeof setTimeout>>();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = parseInt(e.target.value, 10);
+    if (isNaN(v) || v < min || v > max) return;
+    if (timer.current) clearTimeout(timer.current);
+    const captured = v;
+    timer.current = setTimeout(() => onChange(captured), 500);
+  };
+
+  return (
+    <input
+      type="number"
+      value={value}
+      min={min}
+      max={max}
+      onChange={handleChange}
+    />
+  );
+}
 
 export default CartItemComponent;

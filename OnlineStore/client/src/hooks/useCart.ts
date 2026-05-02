@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import {
   addToCart as addToCartApi,
   getCart,
@@ -11,21 +11,25 @@ import type { CartData } from '../types/cart';
 /**
  * 购物车 Hook
  * 管理购物车完整数据与操作方法
+ * 使用请求计数器解决竞态条件：旧请求返回时丢弃结果
  */
 export function useCart() {
   const [loading, setLoading] = useState(false);
   const [cartData, setCartData] = useState<CartData | null>(null);
   const { refreshCart } = useCartContext();
+  const requestIdRef = useRef(0);
 
   /**
    * 刷新购物车数据
    */
   const refresh = useCallback(async () => {
+    const id = ++requestIdRef.current;
     setLoading(true);
     try {
       const data = await getCart();
+      if (id !== requestIdRef.current) return; // 丢弃过期请求
       setCartData(data);
-      await refreshCart(); // 同时更新 Context 中的角标数量
+      await refreshCart();
     } catch {
       // 静默失败
     } finally {

@@ -368,19 +368,34 @@ export async function cancelOrder(
       throw new BusinessError(2202, "仅待支付状态的订单可以取消");
     }
 
-    // 3. 查询 order_items → 遍历恢复库存
+    // 3. 查询 order_items → 遍历恢复库存（带乐观锁版本校验）
     const [itemRows] = await connection.query<RowDataPacket[]>(
-      "SELECT * FROM order_items WHERE order_id = ?",
+      "SELECT oi.* FROM order_items oi WHERE oi.order_id = ?",
       [orderId],
     );
 
     for (const item of itemRows) {
-      await connection.query(
+      // 读取当前商品版本号
+      const [prodRows] = await connection.query<RowDataPacket[]>(
+        "SELECT version FROM products WHERE id = ?",
+        [item.product_id],
+      );
+      if (prodRows.length === 0) continue;
+      const currentVersion = prodRows[0].version as number;
+
+      const [updateResult] = await connection.query<RowDataPacket[]>(
         `UPDATE products
          SET stock = stock + ?, version = version + 1
-         WHERE id = ?`,
-        [item.quantity, item.product_id],
+         WHERE id = ? AND version = ?`,
+        [item.quantity, item.product_id, currentVersion],
       );
+
+      const affectedRows = (updateResult as unknown as { affectedRows: number })
+        .affectedRows;
+      if (affectedRows === 0) {
+        await connection.rollback();
+        throw new BusinessError(2203, "取消订单失败，商品库存已变化，请重试");
+      }
     }
 
     // 4. 更新订单状态

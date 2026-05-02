@@ -110,6 +110,7 @@ export default function AddressPage() {
                   setShowForm(false);
                   setEditingAddress(null);
                 }}
+                submitting={loading}
               />
             </div>
           </div>

@@ -173,3 +173,12 @@ export const createOrderSchema = Joi.object({
       'any.required': '购物车项 ID 列表是必填项',
     }),
 });
+
+/** 路径参数 ID 校验（复用） */
+export const idParamsSchema = Joi.object({
+  id: Joi.number().integer().positive().required().messages({
+    'number.base': 'ID 必须是数字',
+    'number.positive': 'ID 必须是正整数',
+    'any.required': 'ID 是必填项',
+  }),
+});
