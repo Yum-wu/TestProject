@@ -12,8 +12,6 @@
 import pool from "../config/db";
 import * as orderModel from "../models/order.model";
 import * as orderItemModel from "../models/orderItem.model";
-import * as productModel from "../models/product.model";
-import * as cartModel from "../models/cart.model";
 import * as addressModel from "../models/address.model";
 import {
   Order,
@@ -22,10 +20,9 @@ import {
   PaginatedData,
   OrderStatus,
 } from "../types";
-import { CreateOrderInput, OrderItemSnapshot } from "../types/order";
-import { AddressSnapshot } from "../types/order";
+import { CreateOrderInput, OrderItemSnapshot, AddressSnapshot } from "../types/order";
 import { generateOrderNo } from "../utils/orderNo";
-import { BusinessError, SystemError } from "../utils/errors";
+import { BusinessError } from "../utils/errors";
 import { RowDataPacket } from "mysql2";
 
 /**
@@ -221,7 +218,7 @@ export async function createOrder(
         typeof order.address_snapshot === "string"
           ? JSON.parse(order.address_snapshot as string)
           : order.address_snapshot,
-      items: itemRows.map((row) => ({
+      items: itemRows.map((row: RowDataPacket) => ({
         ...row,
         subtotal: (row.price as number) * (row.quantity as number),
       })) as OrderItemView[],

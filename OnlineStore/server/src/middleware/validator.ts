@@ -40,7 +40,7 @@ export function validate(schemas: ValidationSchemas) {
           stripUnknown: true,      // 去除未定义字段
         });
         if (error) {
-          const msg = error.details.map((d) => d.message).join('; ');
+          const msg = error.details.map((d: Joi.ValidationErrorItem) => d.message).join('; ');
           throw new ValidationError(1001, `参数校验失败: ${msg}`);
         }
         req.body = value;
@@ -53,7 +53,7 @@ export function validate(schemas: ValidationSchemas) {
           stripUnknown: true,
         });
         if (error) {
-          const msg = error.details.map((d) => d.message).join('; ');
+          const msg = error.details.map((d: Joi.ValidationErrorItem) => d.message).join('; ');
           throw new ValidationError(1002, `查询参数校验失败: ${msg}`);
         }
         req.query = value;
@@ -66,7 +66,7 @@ export function validate(schemas: ValidationSchemas) {
           stripUnknown: true,
         });
         if (error) {
-          const msg = error.details.map((d) => d.message).join('; ');
+          const msg = error.details.map((d: Joi.ValidationErrorItem) => d.message).join('; ');
           throw new ValidationError(1002, `路径参数校验失败: ${msg}`);
         }
         req.params = value;

@@ -2,10 +2,11 @@
   "name": "mini-online-store",
   "private": true,
   "version": "1.0.0",
+  "description": "Mini在线商城前端 - React + TypeScript + Vite",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "tsc && vite build",
     "preview": "vite preview"
   },
   "dependencies": {

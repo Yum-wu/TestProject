@@ -55,6 +55,11 @@ export interface PaginatedData<T> {
 /** 订单状态枚举 */
 export type OrderStatus = 'pending' | 'cancelled';
 
+export { Order, OrderDetail, OrderItemView, OrderItem, OrderListItem, AddressSnapshot, CreateOrderInput, OrderItemSnapshot } from './order';
+export { Product, ProductListItem, ProductFilter } from './product';
+export { CartItem, CartItemView, CartOverview } from './cart';
+export { Address, CreateAddressInput, UpdateAddressInput } from './address';
+
 // ============================================
 // Express 扩展类型声明
 // ============================================

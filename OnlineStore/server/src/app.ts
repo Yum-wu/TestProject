@@ -11,7 +11,7 @@
  * 6. 全局错误处理
  */
 
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { env } from './config/env';
 import { requestLogger } from './middleware/requestLogger';
@@ -42,7 +42,7 @@ app.use(requestLogger);
 // ---- 路由挂载 ----
 
 // 健康检查端点
-app.get('/health', (_req, res) => {
+app.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
@@ -50,7 +50,7 @@ app.get('/health', (_req, res) => {
 app.use('/api', routes);
 
 // ---- 404 兜底 ----
-app.use((_req, res) => {
+app.use((_req: Request, res: Response) => {
   res.status(404).json({
     code: 3003,
     message: '请求的资源不存在',

@@ -25,7 +25,7 @@
 
 ### 2. 数据库初始化
 
-执行 `database.md` 中的 SQL 建表脚本。
+执行 `server/db-init.sql` 中的 SQL 建表脚本。
 
 ### 3. 后端启动
 
