@@ -6,15 +6,22 @@ import { Request, Response, NextFunction } from 'express';
 import { success, paginated } from '../utils/response';
 import { parsePagination } from '../utils/pagination';
 import { env } from '../config/env';
+import { AuthError } from '../utils/errors';
 import * as orderService from '../services/order.service';
 import { OrderStatus } from '../types';
+
+function getUserId(req: Request): number {
+  const userId = req.currentUserId;
+  if (!userId) throw new AuthError(4001, '未登录，请先进行认证');
+  return userId;
+}
 
 /**
  * POST /api/orders — 创建订单
  */
 export async function create(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const userId = req.currentUserId!;
+    const userId = getUserId(req);
     const { address_id, cart_item_ids } = req.body;
     const order = await orderService.createOrder(userId, { address_id, cart_item_ids });
     success(res, order, 'success', 201);
@@ -28,7 +35,7 @@ export async function create(req: Request, res: Response, next: NextFunction): P
  */
 export async function list(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const userId = req.currentUserId!;
+    const userId = getUserId(req);
     const { page, pageSize } = parsePagination(req.query, env.pagination.maxPageSize);
     const status = req.query.status as OrderStatus | undefined;
 
@@ -44,7 +51,7 @@ export async function list(req: Request, res: Response, next: NextFunction): Pro
  */
 export async function detail(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const userId = req.currentUserId!;
+    const userId = getUserId(req);
     const orderId = Number(req.params.id);
     const order = await orderService.getOrderById(userId, orderId);
     success(res, order);
@@ -58,7 +65,7 @@ export async function detail(req: Request, res: Response, next: NextFunction): P
  */
 export async function cancel(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const userId = req.currentUserId!;
+    const userId = getUserId(req);
     const orderId = Number(req.params.id);
     const result = await orderService.cancelOrder(userId, orderId);
     success(res, result);

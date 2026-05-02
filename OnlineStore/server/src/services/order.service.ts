@@ -12,7 +12,6 @@
 import pool from "../config/db";
 import * as orderModel from "../models/order.model";
 import * as orderItemModel from "../models/orderItem.model";
-import * as addressModel from "../models/address.model";
 import {
   Order,
   OrderDetail,
@@ -67,10 +66,24 @@ export async function createOrder(
   try {
     await connection.beginTransaction();
 
-    // ---- 第1步：校验收货地址 ----
-    const address = await addressModel.findById(input.address_id);
+    // ---- 第1步：校验收货地址（事务内查询） ----
+    const [addressRows] = await connection.query<RowDataPacket[]>(
+      "SELECT * FROM addresses WHERE id = ?",
+      [input.address_id],
+    );
+    const address = addressRows[0] as unknown as {
+      id: number;
+      user_id: number;
+      receiver_name: string;
+      phone: string;
+      province: string;
+      city: string;
+      district: string;
+      detail: string;
+      is_default: number;
+    } | undefined;
 
-    if (!address) {
+    if (!addressRows.length || !address) {
       throw new BusinessError(2301, "收货地址不存在");
     }
     if (address.user_id !== userId) {

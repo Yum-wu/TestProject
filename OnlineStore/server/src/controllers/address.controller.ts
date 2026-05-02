@@ -4,14 +4,21 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { success } from '../utils/response';
+import { AuthError } from '../utils/errors';
 import * as addressService from '../services/address.service';
+
+function getUserId(req: Request): number {
+  const userId = req.currentUserId;
+  if (!userId) throw new AuthError(4001, '未登录，请先进行认证');
+  return userId;
+}
 
 /**
  * POST /api/addresses — 新增地址
  */
 export async function create(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const userId = req.currentUserId!;
+    const userId = getUserId(req);
     const data = req.body;
     const address = await addressService.createAddress(userId, data);
     success(res, address, 'success', 201);
@@ -25,7 +32,7 @@ export async function create(req: Request, res: Response, next: NextFunction): P
  */
 export async function list(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const userId = req.currentUserId!;
+    const userId = getUserId(req);
     const addresses = await addressService.getAddresses(userId);
     success(res, addresses);
   } catch (err) {
@@ -38,7 +45,7 @@ export async function list(req: Request, res: Response, next: NextFunction): Pro
  */
 export async function update(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const userId = req.currentUserId!;
+    const userId = getUserId(req);
     const addressId = Number(req.params.id);
     const data = req.body;
     const address = await addressService.updateAddress(userId, addressId, data);
@@ -53,7 +60,7 @@ export async function update(req: Request, res: Response, next: NextFunction): P
  */
 export async function remove(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const userId = req.currentUserId!;
+    const userId = getUserId(req);
     const addressId = Number(req.params.id);
     await addressService.deleteAddress(userId, addressId);
     success(res, null);

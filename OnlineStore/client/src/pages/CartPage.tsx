@@ -40,7 +40,7 @@ export default function CartPage() {
   // 提交订单
   const handleSubmitOrder = async () => {
     if (!selectedAddressId) {
-      alert('请选择收货地址');
+      showToast('请选择收货地址');
       return;
     }
     if (!cartData || cartData.items.length === 0) return;
@@ -55,7 +55,7 @@ export default function CartPage() {
       showToast('下单成功！');
       navigate('/orders');
     } catch (e) {
-      alert(e instanceof Error ? e.message : '下单失败，请重试');
+      showToast(e instanceof Error ? e.message : '下单失败，请重试');
     } finally {
       setSubmitting(false);
     }

@@ -6,7 +6,7 @@
  */
 
 // 必需的环境变量列表
-const requiredEnvVars = ['DB_HOST', 'DB_USER', 'DB_NAME'] as const;
+const requiredEnvVars = ['DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_NAME'] as const;
 
 /**
  * 启动时校验必需环境变量

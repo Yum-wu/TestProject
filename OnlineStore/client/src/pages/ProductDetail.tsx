@@ -46,14 +46,14 @@ export default function ProductDetail() {
     if (!product) return;
     const validation = validateQuantity(quantity, product.stock);
     if (!validation.valid) {
-      alert(validation.message);
+      showToast(validation.message);
       return;
     }
     try {
       await addToCart(product.id, quantity);
       showToast("已加入购物车");
     } catch {
-      alert("加入购物车失败，请重试");
+      showToast("加入购物车失败，请重试");
     }
   };
 

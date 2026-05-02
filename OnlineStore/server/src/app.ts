@@ -50,7 +50,7 @@ app.use(
 app.use(express.json({ limit: '1mb' }));
 
 // 5. URL-encoded 解析
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 // 6. 请求日志
 app.use(requestLogger);

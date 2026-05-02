@@ -6,14 +6,21 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { success } from '../utils/response';
+import { AuthError } from '../utils/errors';
 import * as cartService from '../services/cart.service';
+
+function getUserId(req: Request): number {
+  const userId = req.currentUserId;
+  if (!userId) throw new AuthError(4001, '未登录，请先进行认证');
+  return userId;
+}
 
 /**
  * POST /api/cart — 添加商品到购物车
  */
 export async function add(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const userId = req.currentUserId!;
+    const userId = getUserId(req);
     const { product_id, quantity } = req.body;
     const item = await cartService.addToCart(userId, product_id, quantity);
     success(res, item, 'success', 201);
@@ -27,7 +34,7 @@ export async function add(req: Request, res: Response, next: NextFunction): Prom
  */
 export async function list(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const userId = req.currentUserId!;
+    const userId = getUserId(req);
     const overview = await cartService.getCart(userId);
     success(res, overview);
   } catch (err) {
@@ -40,7 +47,7 @@ export async function list(req: Request, res: Response, next: NextFunction): Pro
  */
 export async function update(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const userId = req.currentUserId!;
+    const userId = getUserId(req);
     const cartItemId = Number(req.params.id);
     const { quantity } = req.body;
     const item = await cartService.updateCartItem(userId, cartItemId, quantity);
@@ -55,7 +62,7 @@ export async function update(req: Request, res: Response, next: NextFunction): P
  */
 export async function remove(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const userId = req.currentUserId!;
+    const userId = getUserId(req);
     const cartItemId = Number(req.params.id);
     await cartService.removeCartItem(userId, cartItemId);
     success(res, null);

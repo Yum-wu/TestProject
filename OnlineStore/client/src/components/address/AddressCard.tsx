@@ -30,7 +30,7 @@ const AddressCard = memo(function AddressCard({
 }: AddressCardProps) {
   return (
     <div
-      className={`card card-body ${selected ? "" : ""}`}
+      className={`card card-body ${selected ? "card-selected" : ""}`}
       style={{
         borderColor: selected ? "var(--color-primary)" : undefined,
         borderWidth: selected ? 2 : 1,

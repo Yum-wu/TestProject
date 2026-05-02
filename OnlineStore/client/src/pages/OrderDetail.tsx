@@ -51,7 +51,6 @@ export default function OrderDetail() {
     } catch (e) {
       alert(e instanceof Error ? e.message : "取消订单失败");
     }
-    setShowCancelDialog(false);
   };
 
   if (loading) return <Loading />;

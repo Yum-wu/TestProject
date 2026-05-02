@@ -20,6 +20,6 @@ router.use(authMiddleware);
 router.post('/', validate({ body: createOrderSchema }), orderController.create);
 router.get('/', orderController.list);
 router.get('/:id', validate({ params: idParamsSchema }), orderController.detail);
-router.patch('/:id/cancel', orderController.cancel);
+router.patch('/:id/cancel', validate({ params: idParamsSchema }), orderController.cancel);
 
 export default router;

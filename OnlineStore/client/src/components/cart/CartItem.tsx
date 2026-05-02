@@ -1,4 +1,4 @@
-import { memo, useRef } from "react";
+import { memo, useRef, useEffect } from "react";
 import { formatPrice } from "../../utils/format";
 import type { CartItem as CartItemType } from "../../types/cart";
 
@@ -122,6 +122,12 @@ function DebouncedInput({
   onChange: (v: number) => void;
 }) {
   const timer = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    return () => {
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = parseInt(e.target.value, 10);
