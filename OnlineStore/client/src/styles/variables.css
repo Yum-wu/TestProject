@@ -1,0 +1,136 @@
+/*=============================================
+ * Mini在线商城 - CSS 设计 Token
+ * 极简风格电商系统的核心样式变量
+ *=============================================*/
+
+:root {
+  /*---------------------------------------------
+   * 1. 主色调 - 蓝色系 (Blue Palette)
+   *    传递信任、专业与科技感
+   *---------------------------------------------*/
+  --color-primary:        #2563eb;   /* 主色：鲜明蓝 */
+  --color-primary-hover:  #1d4ed8;   /* 悬停态：深蓝 */
+  --color-primary-light:  #dbeafe;   /* 浅色背景/标签：淡蓝 */
+  --color-primary-dark:   #1e40af;   /* 按下态：暗蓝 */
+  --color-primary-text:   #ffffff;   /* 主色上的文字：白色 */
+
+  /*---------------------------------------------
+   * 2. 语义色彩 (Semantic Colors)
+   *---------------------------------------------*/
+  --color-success:        #16a34a;   /* 成功：翠绿 */
+  --color-success-light:  #dcfce7;   /* 成功浅色背景 */
+  --color-warning:        #f59e0b;   /* 警告：琥珀 */
+  --color-warning-light:  #fef3c7;   /* 警告浅色背景 */
+  --color-error:          #dc2626;   /* 错误：朱红 */
+  --color-error-light:    #fee2e2;   /* 错误浅色背景 */
+  --color-info:           #0891b2;   /* 信息：青蓝 */
+  --color-info-light:     #cffafe;   /* 信息浅色背景 */
+
+  /*---------------------------------------------
+   * 3. 中性色彩 (Neutral Palette)
+   *    以 cool gray 为主，营造简洁感
+   *---------------------------------------------*/
+  --color-white:          #ffffff;
+  --color-gray-50:        #f9fafb;   /* 页面背景 */
+  --color-gray-100:       #f3f4f6;   /* 卡片/区块背景 */
+  --color-gray-200:       #e5e7eb;   /* 边框线 */
+  --color-gray-300:       #d1d5db;   /* 分割线 */
+  --color-gray-400:       #9ca3af;   /* 禁用文字/placeholder */
+  --color-gray-500:       #6b7280;   /* 辅助文字 */
+  --color-gray-600:       #4b5563;   /* 次要文字 */
+  --color-gray-700:       #374151;   /* 正文文字 */
+  --color-gray-800:       #1f2937;   /* 标题文字 */
+  --color-gray-900:       #111827;   /* 主要标题 */
+  --color-black:          #000000;
+
+  /*---------------------------------------------
+   * 4. 字体体系 (Typography Scale)
+   *    基于 1.25 比率 (Major Third)
+   *---------------------------------------------*/
+  --font-family-base:     'Inter', -apple-system, BlinkMacSystemFont,
+                          'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+                          'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+  --font-family-mono:     'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+
+  --text-xs:              12px;      /* 辅助标签、角标 */
+  --text-sm:              13px;      /* 次要信息 */
+  --text-base:            14px;      /* 正文基准 */
+  --text-md:              16px;      /* 子标题 */
+  --text-lg:              18px;      /* 卡片标题 */
+  --text-xl:              20px;      /* 二级标题 */
+  --text-2xl:             24px;      /* 一级标题 */
+  --text-3xl:             30px;      /* 页面大标题 */
+
+  --font-weight-normal:   400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+
+  --line-height-tight:    1.25;      /* 标题 */
+  --line-height-normal:   1.5;       /* 正文 */
+  --line-height-relaxed:  1.75;      /* 长文本 */
+
+  /*---------------------------------------------
+   * 5. 间距体系 (Spacing Scale)
+   *    基于 4px 基准的 8 等分体系
+   *---------------------------------------------*/
+  --space-xs:             4px;
+  --space-sm:             8px;
+  --space-md:             12px;
+  --space-base:           16px;
+  --space-lg:             24px;
+  --space-xl:             32px;
+  --space-2xl:            48px;
+  --space-3xl:            64px;
+
+  /*---------------------------------------------
+   * 6. 圆角 (Border Radius)
+   *---------------------------------------------*/
+  --radius-sm:            4px;       /* 行内标签、小按钮 */
+  --radius-md:            8px;       /* 卡片、输入框 */
+  --radius-lg:            12px;      /* 模态框、大卡片 */
+  --radius-full:          9999px;    /* 药丸形、头像 */
+
+  /*---------------------------------------------
+   * 7. 阴影层级 (Box Shadows)
+   *    从低到高表示 z-index 层级递进
+   *---------------------------------------------*/
+  --shadow-card:          0 1px 3px 0 rgba(0, 0, 0, 0.06),
+                          0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover:    0 4px 6px -1px rgba(0, 0, 0, 0.08),
+                          0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-dropdown:      0 4px 16px rgba(0, 0, 0, 0.12);
+  --shadow-modal:         0 8px 32px rgba(0, 0, 0, 0.16);
+  --shadow-button:        0 1px 2px 0 rgba(0, 0, 0, 0.05);
+
+  /*---------------------------------------------
+   * 8. 过渡动画 (Transitions)
+   *---------------------------------------------*/
+  --transition-fast:      150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base:      250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow:      350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /*---------------------------------------------
+   * 9. z-index 层级
+   *---------------------------------------------*/
+  --z-dropdown:           100;
+  --z-sticky:             200;
+  --z-overlay:            300;
+  --z-modal:              400;
+  --z-toast:              500;
+
+  /*---------------------------------------------
+   * 10. 响应式断点 (作为参考，需配合 @media 使用)
+   *---------------------------------------------*/
+  --bp-sm:                640px;
+  --bp-md:                768px;
+  --bp-lg:                1024px;
+  --bp-xl:                1280px;
+
+  /*---------------------------------------------
+   * 11. 布局相关
+   *---------------------------------------------*/
+  --container-max-width:  1280px;
+  --header-height:        60px;
+  --footer-height:        48px;
+}
