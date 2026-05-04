@@ -6,15 +6,9 @@ import { Request, Response, NextFunction } from 'express';
 import { success, paginated } from '../utils/response';
 import { parsePagination } from '../utils/pagination';
 import { env } from '../config/env';
-import { AuthError } from '../utils/errors';
+import { getUserId } from '../utils/controller';
 import * as orderService from '../services/order.service';
 import { OrderStatus } from '../types';
-
-function getUserId(req: Request): number {
-  const userId = req.currentUserId;
-  if (!userId) throw new AuthError(4001, '未登录，请先进行认证');
-  return userId;
-}
 
 /**
  * POST /api/orders — 创建订单

@@ -47,9 +47,10 @@ export default function OrderDetail() {
     try {
       await cancelOrder(order.id);
       setOrder({ ...order, status: "cancelled" });
-      setShowCancelDialog(false);
     } catch (e) {
       alert(e instanceof Error ? e.message : "取消订单失败");
+    } finally {
+      setShowCancelDialog(false);
     }
   };
 

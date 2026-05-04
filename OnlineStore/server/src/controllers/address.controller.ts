@@ -4,14 +4,8 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { success } from '../utils/response';
-import { AuthError } from '../utils/errors';
+import { getUserId } from '../utils/controller';
 import * as addressService from '../services/address.service';
-
-function getUserId(req: Request): number {
-  const userId = req.currentUserId;
-  if (!userId) throw new AuthError(4001, '未登录，请先进行认证');
-  return userId;
-}
 
 /**
  * POST /api/addresses — 新增地址
