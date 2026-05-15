@@ -43,6 +43,8 @@ jobs:
         run: |
           cd MyBlog/client
           npm run build
+      - name: Copy index.html to 404.html (SPA routing)
+        run: cp MyBlog/client/dist/index.html MyBlog/client/dist/404.html
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
