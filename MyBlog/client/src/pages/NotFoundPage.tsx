@@ -1,4 +1,4 @@
-import Button from "../components/common/Button";
+import { Link } from "react-router-dom";
 
 /**
  * 404 页面
@@ -14,20 +14,17 @@ export default function NotFoundPage() {
         页面不存在
       </h2>
       <p className="mt-2 max-w-md text-neutral-500 dark:text-neutral-400 leading-relaxed">
-        抱歉，你访问的页面不存在或已被移除。请检查链接是否正确，或返回首页浏览。
+        抱歉，你访问的页面不存在或已被移除。
       </p>
 
       {/* 操作按钮 */}
       <div className="mt-8 flex gap-3">
-        <Button variant="primary" onClick={() => (window.location.href = "/")}>
-          返回首页
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={() => window.history.back()}
+        <Link
+          to="/"
+          className="inline-flex items-center justify-center px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl hover:from-primary-600 hover:to-primary-700 shadow-sm hover:shadow-glow transition-all duration-200"
         >
-          返回上页
-        </Button>
+          返回首页
+        </Link>
       </div>
     </div>
   );

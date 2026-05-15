@@ -1,92 +1,15 @@
-import api from "./api";
-import type {
-  Post,
-  CreatePostRequest,
-  UpdatePostRequest,
-  CoverUploadData,
-  PaginatedResponse,
-  PostQueryParams,
-  ApiResponse,
-} from "../types";
-
 /**
- * 获取文章列表（分页、搜索、筛选）
- * GET /api/posts
+ * 文章服务 — 本地 Markdown 版本
+ * 替代原来的 API 调用，改为从本地 Markdown 文件加载
  */
-export async function getPosts(
-  params?: PostQueryParams
-): Promise<PaginatedResponse<Post>> {
-  const res = await api.get<PaginatedResponse<Post>>("/posts", { params });
-  return res.data;
-}
+import { getAllPosts, getPostBySlug, searchPosts } from "../utils/posts-loader";
+import type { Post } from "../types/blog";
 
-/**
- * 根据 ID 获取文章详情（编辑用）
- * GET /api/posts/detail/:id
- */
-export async function getPostById(id: number): Promise<ApiResponse<Post>> {
-  const res = await api.get<ApiResponse<Post>>(`/posts/detail/${id}`);
-  return res.data;
-}
+export type { Post };
 
-/**
- * 根据 slug 获取文章详情
- * GET /api/posts/:slug
- */
-export async function getPostBySlug(slug: string): Promise<ApiResponse<Post>> {
-  const res = await api.get<ApiResponse<Post>>(`/posts/${slug}`);
-  return res.data;
-}
+export { getAllPosts, getPostBySlug, searchPosts };
 
-/**
- * 创建文章
- * POST /api/posts
- */
-export async function createPost(
-  data: CreatePostRequest
-): Promise<ApiResponse<Post>> {
-  const res = await api.post<ApiResponse<Post>>("/posts", data);
-  return res.data;
-}
-
-/**
- * 更新文章
- * PUT /api/posts/:id
- */
-export async function updatePost(
-  id: number,
-  data: UpdatePostRequest
-): Promise<ApiResponse<Post>> {
-  const res = await api.put<ApiResponse<Post>>(`/posts/${id}`, data);
-  return res.data;
-}
-
-/**
- * 删除文章
- * DELETE /api/posts/:id
- */
-export async function deletePost(id: number): Promise<ApiResponse<null>> {
-  const res = await api.delete<ApiResponse<null>>(`/posts/${id}`);
-  return res.data;
-}
-
-/**
- * 上传封面图
- * POST /api/posts/upload-cover
- */
-export async function uploadCover(
-  file: File
-): Promise<ApiResponse<CoverUploadData>> {
-  const formData = new FormData();
-  formData.append("cover", file);
-  const res = await api.post<ApiResponse<CoverUploadData>>(
-    "/posts/upload-cover",
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
-  );
-  return res.data;
+/** 获取所有文章（按日期倒序，用于首页列表） */
+export function getPosts(): Post[] {
+  return getAllPosts();
 }

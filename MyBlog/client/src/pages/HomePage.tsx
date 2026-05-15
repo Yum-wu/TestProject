@@ -1,57 +1,90 @@
-import { useEffect } from "react";
+import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import PostList from "../components/post/PostList";
-import { usePosts } from "../hooks/usePosts";
-import { useCategories } from "../hooks/useCategories";
+import { getAllPosts, getAllCategories, getAllTags, searchPosts } from "../utils/posts-loader";
+import type { Post } from "../types/blog";
+import type { PostListItem } from "../types/blog";
+import { estimateReadingTime } from "../utils/posts-loader";
+
+/**
+ * 将 Post 转换为 PostListItem（适配 PostCard 组件）
+ */
+function toListItem(post: Post): PostListItem {
+  return {
+    id: post.slug,
+    slug: post.slug,
+    title: post.title,
+    excerpt: post.excerpt || post.content.slice(0, 150) + "...",
+    coverUrl: post.cover,
+    category: post.category,
+    tags: post.tags,
+    author: {
+      name: post.author || "Yum",
+    },
+    createdAt: post.date,
+    viewCount: 0,
+    readingTime: estimateReadingTime(post.content),
+  };
+}
 
 /**
  * 首页
- * 包含文章列表、搜索栏、分类/标签筛选、分页
+ * 从本地 Markdown 文件加载文章列表，支持搜索和分类筛选
  */
 export default function HomePage() {
-  const {
-    posts,
-    loading,
-    currentPage,
-    totalPages,
-    totalItems,
-    search,
-    setPage,
-    setCategory,
-  } = usePosts();
-  const { categories } = useCategories();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
+  const activeCategory = searchParams.get("category") || "";
+  const currentPage = parseInt(searchParams.get("page") || "1", 10);
+  const pageSize = 10;
 
-  /* 搜索时跳转到文章列表 */
-  const handleSearch = (keyword: string) => {
-    search(keyword);
-  };
+  // 获取所有文章
+  const allPosts = useMemo(() => getAllPosts(), []);
 
-  /* Header 搜索回调 - 通过 URL 参数传递 */
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const keyword = params.get("q");
-    if (keyword) {
-      search(keyword);
+  // 搜索和筛选
+  const filteredPosts = useMemo(() => {
+    let posts = allPosts;
+    if (searchQuery) {
+      posts = searchPosts(searchQuery);
     }
-  }, [search]);
+    if (activeCategory) {
+      posts = posts.filter((p) => p.category === activeCategory);
+    }
+    return posts;
+  }, [allPosts, searchQuery, activeCategory]);
 
-  /* 分类名称列表（用于 PostList 组件） */
-  const categoryNames = categories.map((c) => c.name);
-
-  /* 当前分类筛选（通过 URL 参数） */
-  const currentCategory = new URLSearchParams(window.location.search).get(
-    "category"
+  // 分页
+  const totalPages = Math.ceil(filteredPosts.length / pageSize);
+  const pagedPosts = filteredPosts.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
   );
 
-  /* 分类切换时映射为 categoryId */
-  const handleCategoryChange = (categoryName: string) => {
-    if (!categoryName) {
-      setCategory(undefined);
-    } else {
-      const found = categories.find((c) => c.name === categoryName);
-      if (found) {
-        setCategory(found.id);
-      }
-    }
+  // 分类列表
+  const categories = useMemo(() => getAllCategories(), [allPosts]);
+
+  // 搜索回调
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    const params = new URLSearchParams();
+    if (query) params.set("q", query);
+    setSearchParams(params, { replace: true });
+  };
+
+  // 分页回调
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("page", String(page));
+    setSearchParams(params, { replace: true });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // 分类切换
+  const handleCategoryChange = (category: string) => {
+    const params = new URLSearchParams();
+    if (category) params.set("category", category);
+    params.set("page", "1");
+    setSearchParams(params, { replace: true });
   };
 
   return (
@@ -59,25 +92,25 @@ export default function HomePage() {
       {/* ===== 欢迎横幅 ===== */}
       <div className="mb-8">
         <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900 dark:text-neutral-100">
-          探索精彩内容
+          Yum 的博客
         </h1>
         <p className="mt-2 text-neutral-500 dark:text-neutral-400">
-          发现技术文章、分享编程心得、记录成长历程
+          记录技术成长，分享编程心得
         </p>
       </div>
 
       {/* ===== 文章列表 ===== */}
       <PostList
-        posts={posts}
-        loading={loading}
+        posts={pagedPosts.map(toListItem)}
+        loading={false}
         currentPage={currentPage}
         totalPages={totalPages}
-        totalItems={totalItems}
-        pageSize={10}
-        onPageChange={setPage}
+        totalItems={filteredPosts.length}
+        pageSize={pageSize}
+        onPageChange={handlePageChange}
         onSearch={handleSearch}
-        categories={categoryNames}
-        activeCategory={currentCategory || undefined}
+        categories={categories}
+        activeCategory={activeCategory || undefined}
         onCategoryChange={handleCategoryChange}
       />
     </div>
