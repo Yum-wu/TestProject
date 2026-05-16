@@ -4,9 +4,11 @@ import { BrowserRouter } from "react-router-dom";
 import "./index.css";
 import App from "./App";
 
+declare const __BASE_PATH__: string;
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={__BASE_PATH__ || undefined}>
       <App />
     </BrowserRouter>
   </StrictMode>
