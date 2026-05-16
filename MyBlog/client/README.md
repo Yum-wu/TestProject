@@ -1,73 +1,71 @@
-# React + TypeScript + Vite
+# MyBlog
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+基于 React + Vite + TypeScript 的静态技术博客。
 
-Currently, two official plugins are available:
+## 技术栈
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **框架**: React 19 + TypeScript
+- **构建**: Vite 8
+- **样式**: Tailwind CSS v4
+- **内容**: Markdown（含 YAML frontmatter），通过 `import.meta.glob` 批量加载
+- **部署**: GitHub Pages / Vercel 双平台
 
-## React Compiler
+## 目录结构
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+MyBlog/client/
+├── src/
+│   ├── components/       # UI 组件
+│   │   ├── common/       #   通用组件（Button, Tag, Loading…）
+│   │   ├── layout/       #   布局组件（Header, Footer, MainLayout）
+│   │   └── post/         #   文章组件（PostCard, PostList）
+│   ├── content/posts/    # Markdown 文章
+│   ├── pages/            # 路由页面
+│   ├── services/         # 数据读取（本地 markdown）
+│   ├── types/            # TypeScript 类型
+│   └── utils/            # 工具函数
+├── public/               # 静态资源
+├── vercel.json           # Vercel 部署配置
+└── vite.config.ts        # Vite 配置
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 本地开发
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cd MyBlog/client
+npm install
+npm run dev
 ```
+
+## 构建
+
+```bash
+npm run build
+# 输出在 dist/
+```
+
+## 新增文章
+
+在 `src/content/posts/` 下创建 `.md` 文件，文件头需包含 YAML frontmatter：
+
+```markdown
+---
+title: "文章标题"
+date: 2026-05-16
+slug: article-slug
+tags: [标签1, 标签2]
+category: 分类
+cover: /cover.png        # 可选
+excerpt: 文章摘要
+---
+
+文章正文 Markdown 内容...
+```
+
+## 部署
+
+### GitHub Pages
+推送后 GitHub Actions 自动构建部署，需 `GITHUB_ACTIONS` 环境变量（CI 自带）。
+
+### Vercel
+Vercel Dashboard 中设置 Root Directory 为 `MyBlog/client`，自动检测框架。
