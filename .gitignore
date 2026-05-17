@@ -12,3 +12,15 @@ debug.log
 
 # 忽略个人作品集（它有独立的 Git 仓库）
 Personal Portfolio/
+
+# 环境变量文件（含 API Key）
+.env
+
+# 运行时生成的记忆数据
+Chatbot/backend/offloads/
+
+# pytest 缓存
+.pytest_cache/
+
+# Python 打包
+*.egg-info/
