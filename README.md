@@ -52,6 +52,7 @@ AI 聊天助手（Agent 架构），支持多轮对话和工具调用。
 - **Agent 工具**：计算器、引用文件读取、Web 搜索（条件注册）
 - **四层记忆系统**：L0 对话记录 → L1 原子事实 → L2 场景总结 → L3 用户画像
 - 启动方式：`Chatbot/backend` 运行 `uvicorn` 后端 + `Chatbot/` 运行 `npm run dev` 前端
+- **Agent 评估**（2026-05-17）：工具调用准确率 80%（calculator 4/4 满分），中位延迟 1.57s，评估脚本见 `Chatbot/backend/tests/eval_agent.py`
 
 #### [AIImageGenerator](./AIImageGenerator)
 AI 图片生成器，通过文本描述生成图片。
