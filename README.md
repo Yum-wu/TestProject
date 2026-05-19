@@ -46,10 +46,12 @@
 ### AI 应用
 
 #### [Chatbot](./Chatbot)
-AI 聊天助手（Agent 架构），支持多轮对话和工具调用。
+AI 聊天助手（Agent 架构），支持多轮对话、工具调用、RAG 知识库问答。
 - **前端**：React 19 + TypeScript + Tailwind CSS 4 + SSE 流式响应
 - **后端**：Python FastAPI + LangChain 1.3 Agent 架构
-- **Agent 工具**：计算器、引用文件读取、Web 搜索（条件注册）
+- **Agent 工具**：计算器、引用文件读取、Web 搜索（条件注册）、知识库检索
+- **LangGraph 编排**：意图路由（chat/rag/tool）+ MCP 风格工具注册 + 条件跳转
+- **RAG 管道**：Chroma 向量库 + Sentence Embedding + MMR 重排序 + LLM 生成
 - **四层记忆系统**：L0 对话记录 → L1 原子事实 → L2 场景总结 → L3 用户画像
 - 启动方式：`Chatbot/backend` 运行 `uvicorn` 后端 + `Chatbot/` 运行 `npm run dev` 前端
 - **Agent 评估**（2026-05-17）：工具调用准确率 80%（calculator 4/4 满分），中位延迟 1.57s，评估脚本见 `Chatbot/backend/tests/eval_agent.py`

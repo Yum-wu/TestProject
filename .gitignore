@@ -16,6 +16,22 @@ Personal Portfolio/
 # 环境变量文件（含 API Key）
 .env
 
+# Python 虚拟环境
+venv/
+.venv/
+
+# 运行时生成的记忆数据
+Chatbot/backend/offloads/
+
+# Chroma 向量库数据
+Chatbot/backend/data/vectors/
+
+# Patch 文件
+*.patch
+
+# 个人目标文件
+目标.md
+
 # 运行时生成的记忆数据
 Chatbot/backend/offloads/
 

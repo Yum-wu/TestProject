@@ -1,67 +1,68 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+本文件为 Claude Code 在此仓库中工作时的指南。
+开始任何对话时调用/using-superpower
 
-## Repository Overview
+## 仓库概览
 
-Monorepo containing multiple independent frontend and full-stack projects for learning and practice purposes.
+本仓库是一个单体仓库（monorepo），包含多个独立的前端和全栈项目，用于学习和练习。
 
-## Project Quick Reference
+## 项目速查
 
-| Project | Type | Tech Stack |
-|---------|------|------------|
-| `OnlineStore/` | Full-stack | Next.js 14, Prisma, PostgreSQL, Tailwind, TypeScript |
-| `MyBlog/` | Static blog | React 19 + Vite 8, Tailwind, local Markdown |
+| 项目 | 类型 | 技术栈 |
+|------|------|--------|
+| `OnlineStore/` | 全栈 | Next.js 14, Prisma, PostgreSQL, Tailwind, TypeScript |
+| `MyBlog/` | 静态博客 | React 19 + Vite 8, Tailwind, 本地 Markdown |
 | `Chatbot/` | AI Agent | React 19 + FastAPI + LangChain + Python + Tailwind |
-| `MarkdownNotes/` | Frontend | React + Vite, TypeScript, Tailwind, Markdown editor |
-| `AIImageGenerator/` | Frontend | React + Vite, JavaScript, Tailwind, OpenAI API |
-| `AIWritingAssistant/` | Frontend | React + Vite, JavaScript, Tailwind, OpenAI API |
-| `PomodoroTimer/` | Frontend | Webpack, JavaScript |
-| `WeatherInquiry/` | Frontend | Webpack, JavaScript |
-| `todo-app/` | Frontend | React + Vite, JavaScript |
-| `VoiceRecognition/` | Frontend | Express, HTML/CSS/JS |
+| `MarkdownNotes/` | 前端 | React + Vite, TypeScript, Tailwind, Markdown 编辑器 |
+| `AIImageGenerator/` | 前端 | React + Vite, JavaScript, Tailwind, OpenAI API |
+| `AIWritingAssistant/` | 前端 | React + Vite, JavaScript, Tailwind, OpenAI API |
+| `PomodoroTimer/` | 前端 | Webpack, JavaScript |
+| `WeatherInquiry/` | 前端 | Webpack, JavaScript |
+| `todo-app/` | 前端 | React + Vite, JavaScript |
+| `VoiceRecognition/` | 前端 | Express, HTML/CSS/JS |
 
-## Build & Development Commands
+## 构建与开发命令
 
-### All Vite projects (most projects)
+### 所有 Vite 项目（大部分项目）
 ```bash
-# Install dependencies
-cd <project-dir> && npm install
+# 安装依赖
+cd <项目目录> && npm install
 
-# Start dev server
-cd <project-dir> && npm run dev
+# 启动开发服务器
+cd <项目目录> && npm run dev
 
-# Build for production
-cd <project-dir> && npm run build
+# 构建生产版本
+cd <项目目录> && npm run build
 
-# Preview production build
-cd <project-dir> && npm run preview
+# 预览生产构建
+cd <项目目录> && npm run preview
 ```
 
-### OnlineStore (Next.js full-stack)
+### OnlineStore（Next.js 全栈）
 ```bash
 cd OnlineStore
 
-# Install dependencies
+# 安装依赖
 npm install
 
-# Generate Prisma client (after schema changes)
+# 生成 Prisma 客户端（schema 变更后）
 npx prisma generate
 
-# Run database migrations
+# 运行数据库迁移
 npx prisma migrate dev
 
-# Start dev server
+# 启动开发服务器
 npm run dev
 
-# Build for production
+# 构建生产版本
 npm run build
 
-# Run lint
+# 运行 lint
 npm run lint
 ```
 
-### MyBlog (static)
+### MyBlog（静态博客）
 ```bash
 cd MyBlog/client && npm install && npm run dev
 ```
@@ -69,28 +70,28 @@ cd MyBlog/client && npm install && npm run dev
 **部署：** 推送到 `main` 分支后 GitHub Actions 自动构建并部署到 Pages。
 URL：`https://yum-wu.github.io/TestProject/`
 
-### Chatbot (Agent: FastAPI + React)
+### Chatbot（Agent：FastAPI + React）
 ```bash
-# Backend
+# 后端
 cd Chatbot/backend && pip install -r requirements.txt
 # 先配置 backend/.env（复制 .env.example 填入 API Key）
 uvicorn app.main:app --reload --port 8000
 
-# Frontend (另一个终端)
+# 前端（另开终端）
 cd Chatbot && npm install && npm run dev
 ```
 
-## Language & Communication
+## 语言与沟通
 
-- All dialogue and thinking should be in Chinese (or Chinese/English bilingual), as specified by project rules in `.trae/rules/`.
+- 所有对话和思考应使用中文（或中英双语）。
 
-## Code Conventions
+## 代码规范
 
-- **TypeScript** is used in: `OnlineStore/`, `MyBlog/client`, `Chatbot/`, `MarkdownNotes/`
-- **JavaScript** is used in: `AIImageGenerator/`, `AIWritingAssistant/`, `PomodoroTimer/`, `WeatherInquiry/`, `todo-app/`
-- **Python** is used in: `Chatbot/backend/` (FastAPI + LangChain)
-- All Vite projects use `npm run dev` / `npm run build`
-- OnlineStore uses Next.js App Router (`app/` directory)
-- MyBlog has a client/server split with separate `package.json` files
-- Component libraries: Tailwind CSS across all recent projects
-- State management: React hooks (no external state libs)
+- **TypeScript** 用于：`OnlineStore/`、`MyBlog/client`、`Chatbot/`、`MarkdownNotes/`
+- **JavaScript** 用于：`AIImageGenerator/`、`AIWritingAssistant/`、`PomodoroTimer/`、`WeatherInquiry/`、`todo-app/`
+- **Python** 用于：`Chatbot/backend/`（FastAPI + LangChain）
+- 所有 Vite 项目使用 `npm run dev` / `npm run build`
+- OnlineStore 使用 Next.js App Router（`app/` 目录）
+- MyBlog 有 client/server 分离，各自有独立的 `package.json`
+- 组件库：近期项目均使用 Tailwind CSS
+- 状态管理：React hooks（无外部状态库）

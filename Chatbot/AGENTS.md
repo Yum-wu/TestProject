@@ -15,11 +15,13 @@ Chatbot/
 │   │   ├── agent/       # LLM 工厂、Agent 工厂、流式执行器
 │   │   ├── tools/       # @tool 装饰器定义，统一在 __init__.py 注册
 │   │   ├── memory/      # L0-L3 四层记忆 + 上下文卸载
+│   │   ├── rag/         # RAG 知识库（ChromaDB + Zhipu Embedding + MMR）
+│   │   ├── langgraph/   # LangGraph 工作流引擎 + MCP 注册中心
 │   │   ├── api/         # Pydantic 模型
 │   │   ├── config.py    # pydantic_settings 加载 .env
 │   │   └── main.py      # FastAPI 应用入口
 │   ├── offloads/        # 记忆外存文件（自动生成）
-│   ├── tests/           # pytest 测试
+│   ├── tests/           # pytest 测试（test_agent, test_tools, test_memory, test_rag, test_langgraph, test_manager, test_api）
 │   ├── requirements.txt
 │   └── .env             # LLM_API_KEY, LLM_MODEL, LLM_BASE_URL, TAVILY_API_KEY
 ├── src/                 # React 前端
@@ -27,6 +29,7 @@ Chatbot/
 │   ├── hooks/           # useChat（状态管理）
 │   ├── services/        # api.ts（后端通信）、storage.ts（LocalStorage）
 │   └── types/           # Message 类型
+├── rag-ui/              # RAG 搜索独立前端（React + Vite + Tailwind）
 └── openspec/            # OpenSpec 规格文档
 ```
 
@@ -35,7 +38,7 @@ Chatbot/
 - 所有 Python 代码遵循 `AGENTS.md` 的「脚本语言代码最佳实践」
 - 工具定义用 `@tool` 装饰器 + 类型注解 + docstring（作为 LLM 的 tool description）
 - 工具在 `app/tools/__init__.py` 统一注册到 `ALL_TOOLS`，有新 Key 条件注册
-- Agent 类型：`create_tool_calling_agent`（LangChain 内置）
+- Agent 工厂：`from langchain.agents import create_agent`（LangChain v1.x API，非 v0.3）
 - 记忆模块请遵循 delta-memory.md 的四层架构
 - SSE 事件格式见 delta-api.md，前后端严格对齐
 - 测试放在 `tests/`，用 pytest + pytest-asyncio
@@ -57,6 +60,9 @@ uvicorn app.main:app --reload --port 8000
 
 # 前端
 cd Chatbot && npm install && npm run dev
+
+# 测试（需要先启动 venv）
+cd Chatbot/backend && source .venv/bin/activate 2>/dev/null && python -m pytest tests/ -v
 ```
 
 ## 记忆系统概要
