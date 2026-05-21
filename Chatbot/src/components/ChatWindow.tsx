@@ -15,7 +15,7 @@ export function ChatWindow() {
   } = useChat();
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-full bg-gray-50">
       <header className="flex items-center justify-between bg-white border-b border-gray-200 px-6 py-3 shadow-sm">
         <h1 className="text-lg font-semibold text-gray-800">🤖 AI 聊天助手</h1>
         <button

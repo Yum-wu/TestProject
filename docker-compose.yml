@@ -35,5 +35,15 @@ services:
     volumes:
       - ./Chatbot/src:/app/src
 
+  crew-generator:
+    build:
+      context: ./Chatbot/crew
+      dockerfile: Dockerfile
+    container_name: crew-generator
+    ports:
+      - "8001:8001"
+    env_file:
+      - ./Chatbot/backend/.env
+
 volumes:
   chatbot-data:
