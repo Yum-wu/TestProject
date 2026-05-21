@@ -2,7 +2,7 @@
 
 **变更 ID:** `docker-containerize-chatbot`
 **创建日期:** 2026-05-21
-**状态:** In Progress
+**状态:** Archived
 
 ---
 
@@ -87,12 +87,12 @@ Chatbot 当前依赖本机分别启动 FastAPI 后端和 Vite 前端。环境配
 
 ## 成功标准
 
-- [ ] Backend image builds successfully
-- [ ] Frontend image builds successfully
-- [ ] `docker compose up` starts required services
-- [ ] Frontend can reach backend through documented URL/config
-- [ ] Missing env/config failure mode is documented or visible
-- [ ] README contains container run commands, ports, and env requirements
+- [x] Backend image builds successfully
+- [x] Frontend image builds successfully
+- [x] `docker compose up` starts required services
+- [x] Frontend can reach backend through documented URL/config
+- [x] Missing env/config failure mode is documented or visible
+- [x] README contains container run commands, ports, and env requirements
 
 ## 风险与应对
 
@@ -102,3 +102,22 @@ Chatbot 当前依赖本机分别启动 FastAPI 后端和 Vite 前端。环境配
 | Frontend points to wrong backend URL | Med | Med | Document browser URL vs container service URL difference |
 | depends_on starts frontend before backend ready | Med | Med | Add healthcheck or document manual readiness check |
 | Build context includes too much monorepo content | Med | Low | Narrow context + .dockerignore |
+
+---
+
+## 归档信息
+
+**归档日期:** 2026-05-21
+**历时:** 0 天
+**结果:** 成功实施
+
+### 创建文件
+
+- `Chatbot/frontend.Dockerfile` — Node 22 Alpine 开发容器
+- `Chatbot/.dockerignore` — 排除 node_modules、.env、.git 等
+- `docker-compose.yml` — 前后端 Compose 编排
+- `Chatbot/backend/Dockerfile` — Python 3.12-slim 后端容器（已有）
+
+### 更新规范
+
+- `openspec/specs/infrastructure.md` — Chatbot Container Runtime 基础设施规范
