@@ -1,7 +1,6 @@
 """Multi-Agent Article Generator — Task Definitions"""
 
-from crewai import Task
-from crewai import Agent
+from crewai import Agent, Task
 
 
 def create_research_task(agent: Agent) -> Task:

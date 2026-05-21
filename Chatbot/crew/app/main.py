@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import logging
 import os
 import time
 from contextlib import asynccontextmanager
@@ -10,11 +11,14 @@ from typing import AsyncGenerator
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from app.crew_setup import generate_article
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 # Map project env vars to OpenAI-compatible ones (CrewAI needs OPENAI_API_KEY)
 if os.getenv("LLM_API_KEY") and not os.getenv("OPENAI_API_KEY"):
@@ -23,8 +27,6 @@ if os.getenv("LLM_BASE_URL") and not os.getenv("OPENAI_BASE_URL"):
     os.environ["OPENAI_BASE_URL"] = os.getenv("LLM_BASE_URL", "")
 if os.getenv("LLM_MODEL") and not os.getenv("OPENAI_MODEL_NAME"):
     os.environ["OPENAI_MODEL_NAME"] = os.getenv("LLM_MODEL", "GLM-4-Flash-250414")
-
-# ── Event collector for SSE ──
 
 
 class EventCollector:
@@ -48,12 +50,8 @@ class EventCollector:
         yield "data: {\"type\": \"done\"}\n\n"
 
 
-# ── Models ──
-
-
 class GenerateRequest(BaseModel):
     topic: str = Field(..., min_length=2, max_length=500, description="Article topic")
-    # CrewAI 0.11.x runs synchronously; streaming is managed via step_callback
 
 
 class AgentResult(BaseModel):
@@ -68,17 +66,13 @@ class GenerateResponse(BaseModel):
     agents: list[AgentResult]
 
 
-# ── App ──
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: verify LLM config
     missing = []
     if not os.getenv("LLM_API_KEY"):
         missing.append("LLM_API_KEY")
     if missing:
-        print(f"[crew] WARNING: Missing env vars: {', '.join(missing)}")
+        logger.warning("Missing env vars: %s", ", ".join(missing))
     yield
 
 
@@ -97,11 +91,8 @@ app.add_middleware(
 )
 
 
-# ── Sync endpoint ──
-
-
 @app.post("/api/crew/generate", response_model=GenerateResponse)
-async def generate_sync(req: GenerateRequest):
+def generate_sync(req: GenerateRequest):
     """Generate article via 3-agent crew. Returns full result on completion."""
     try:
         start = time.time()
@@ -115,9 +106,6 @@ async def generate_sync(req: GenerateRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Generation failed: {str(e)}")
-
-
-# ── SSE streaming endpoint ──
 
 
 @app.post("/api/crew/generate/stream")
@@ -141,18 +129,14 @@ async def generate_stream(req: GenerateRequest, request: Request):
 
     task = asyncio.create_task(run_crew())
 
-    return StreamingResponse(
-        content=collector.stream(),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",
-        },
-    )
-
-
-# ── Health ──
+    try:
+        async for chunk in collector.stream():
+            if await request.is_disconnected():
+                break
+            yield chunk
+    finally:
+        if not task.done():
+            task.cancel()
 
 
 @app.get("/api/crew/health")
@@ -162,8 +146,3 @@ async def health():
         "service": "crew-generator",
         "llm_configured": bool(os.getenv("LLM_API_KEY")),
     }
-
-
-# ── Needed for StreamingResponse ──
-
-from fastapi.responses import StreamingResponse

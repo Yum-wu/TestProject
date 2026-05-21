@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -18,8 +18,13 @@ interface LogEntry {
   agent: string;
   status: "running" | "complete" | "error";
   detail: string;
-  timestamp: number;
 }
+
+const statusDot: Record<LogEntry["status"], string> = {
+  running: "inline-block w-2 h-2 rounded-full bg-blue-500 animate-pulse",
+  complete: "inline-block w-2 h-2 rounded-full bg-green-500",
+  error: "inline-block w-2 h-2 rounded-full bg-red-500",
+};
 
 export function CrewLog({ entries }: { entries: LogEntry[] }) {
   if (entries.length === 0) return null;
@@ -36,15 +41,7 @@ export function CrewLog({ entries }: { entries: LogEntry[] }) {
             className="flex items-start gap-3 text-sm px-3 py-2 rounded-lg bg-white border border-gray-100"
           >
             <span className="mt-0.5">
-              {entry.status === "running" && (
-                <span className="inline-block w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-              )}
-              {entry.status === "complete" && (
-                <span className="inline-block w-2 h-2 rounded-full bg-green-500" />
-              )}
-              {entry.status === "error" && (
-                <span className="inline-block w-2 h-2 rounded-full bg-red-500" />
-              )}
+              <span className={statusDot[entry.status]} />
             </span>
             <div className="flex-1 min-w-0">
               <span className="font-medium text-gray-800">{entry.agent}</span>
@@ -65,12 +62,19 @@ export function CrewGenerator() {
   const [duration, setDuration] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const logIdRef = useRef(0);
+  const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
 
   const addLog = useCallback(
     (agent: string, status: LogEntry["status"], detail: string) => {
       setLogs((prev) => [
         ...prev,
-        { id: ++logIdRef.current, agent, status, detail, timestamp: Date.now() },
+        { id: ++logIdRef.current, agent, status, detail },
       ]);
     },
     []
@@ -82,6 +86,10 @@ export function CrewGenerator() {
       setError("Topic must be at least 2 characters");
       return;
     }
+
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     setLoading(true);
     setLogs([]);
@@ -95,6 +103,7 @@ export function CrewGenerator() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topic: trimmed }),
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -132,6 +141,7 @@ export function CrewGenerator() {
         }
       }
     } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
       setError(
         err instanceof Error ? err.message : "Network error"
       );
@@ -157,14 +167,12 @@ export function CrewGenerator() {
         setError(event.message || "Unknown error");
         break;
       case "done":
-        // stream complete
         break;
     }
   };
 
   return (
     <div className="flex flex-col h-full">
-      {/* Input area */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
         <label
           htmlFor="topic-input"
@@ -184,8 +192,6 @@ export function CrewGenerator() {
             placeholder="Enter a topic for the AI agent team to write about..."
             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             disabled={loading}
-            minLength={2}
-            maxLength={500}
           />
           <button
             onClick={handleGenerate}
@@ -197,7 +203,6 @@ export function CrewGenerator() {
         </div>
       </div>
 
-      {/* Content area */}
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
