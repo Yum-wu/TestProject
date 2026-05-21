@@ -16,6 +16,13 @@ Chatbot/
 │   │   ├── tools/       # @tool 装饰器定义，统一在 __init__.py 注册
 │   │   ├── memory/      # L0-L3 四层记忆 + 上下文卸载
 │   │   ├── rag/         # RAG 知识库（ChromaDB + Zhipu Embedding + MMR）
+│   │   │   ├── loader.py       # Markdown 文章加载与解析
+│   │   │   ├── vector_store.py # Chroma 向量库 + 检索 + 索引
+│   │   │   ├── qa_chain.py     # RAG pipeline（检索→生成→来源）
+│   │   │   ├── evaluator.py    # 评估（Recall + Faithfulness + 延迟）
+│   │   │   ├── prompt_experiment.py  # Prompt 策略对比实验
+│   │   │   ├── test_data.py    # 16 组 Q&A 评估数据集
+│   │   │   └── models.py       # Pydantic 请求/响应
 │   │   ├── langgraph/   # LangGraph 工作流引擎 + MCP 注册中心
 │   │   ├── api/         # Pydantic 模型
 │   │   ├── config.py    # pydantic_settings 加载 .env
@@ -99,3 +106,16 @@ cd Chatbot/backend && source .venv/bin/activate 2>/dev/null && python -m pytest 
 - **eval 沙箱**：计算器工具用 `ast.parse` + 白名单运算符，禁止 `__import__`/`exec`/`compile`
 - **SSE 输出**：所有用户可见文本必须 `json.dumps(..., ensure_ascii=False)` 防编码问题
 - **条件注册**：依赖 API Key 的工具（web_search），Key 缺失时不注册，不暴露配置状态
+
+## API 端点一览
+
+| 方法 | 路径 | 说明 |
+| POST | /api/chat/stream | Agent 对话 SSE 流式 |
+| GET | /api/sessions | 活跃会话列表 |
+| DELETE | /api/sessions/{id} | 清除会话 |
+| POST | /api/rag/query | RAG 知识库查询 |
+| POST | /api/rag/index | 重建索引 |
+| POST | /api/rag/evaluate | RAG 全量评估 |
+| POST | /api/rag/experiment | Prompt 策略对比实验 |
+| POST | /api/langgraph/run | LangGraph 工作流 |
+| GET | /api/health | 健康检查 |

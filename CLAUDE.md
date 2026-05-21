@@ -13,7 +13,7 @@
 |------|------|--------|
 | `OnlineStore/` | 全栈 | Next.js 14, Prisma, PostgreSQL, Tailwind, TypeScript |
 | `MyBlog/` | 静态博客 | React 19 + Vite 8, Tailwind, 本地 Markdown |
-| `Chatbot/` | AI Agent | React 19 + FastAPI + LangChain + Python + Tailwind |
+| `Chatbot/` | AI Agent + 文章生成 | React 19 + FastAPI + LangChain + CrewAI + Python + Tailwind |
 | `MarkdownNotes/` | 前端 | React + Vite, TypeScript, Tailwind, Markdown 编辑器 |
 | `AIImageGenerator/` | 前端 | React + Vite, JavaScript, Tailwind, OpenAI API |
 | `AIWritingAssistant/` | 前端 | React + Vite, JavaScript, Tailwind, OpenAI API |
@@ -70,15 +70,19 @@ cd MyBlog/client && npm install && npm run dev
 **部署：** 推送到 `main` 分支后 GitHub Actions 自动构建并部署到 Pages。
 URL：`https://yum-wu.github.io/TestProject/`
 
-### Chatbot（Agent：FastAPI + React）
+### Chatbot（主 Agent + 文章生成）
 ```bash
-# 后端
+# 后端（主 Agent）
 cd Chatbot/backend && pip install -r requirements.txt
 # 先配置 backend/.env（复制 .env.example 填入 API Key）
 uvicorn app.main:app --reload --port 8000
 
-# 前端（另开终端）
+# 前端
 cd Chatbot && npm install && npm run dev
+
+# 文章生成服务（CrewAI，端口 8001）
+cd Chatbot/crew && pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8001
 ```
 
 ## 语言与沟通

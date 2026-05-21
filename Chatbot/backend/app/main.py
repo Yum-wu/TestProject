@@ -15,6 +15,10 @@ from app.memory.manager import manager as memory_manager
 from app.config import settings
 from app.rag.models import RAGQueryRequest, RAGQueryResponse, RAGIndexResponse
 from app.rag.qa_chain import rag_query, run_index_pipeline
+from app.rag.evaluator import run_full_evaluation
+from app.rag.prompt_experiment import run_experiment, STRATEGIES
+from app.rag.test_data import TEST_QA_PAIRS
+from app.rag.vector_store import retrieve
 
 logger = logging.getLogger(__name__)
 
@@ -103,6 +107,43 @@ async def rag_index_endpoint():
     """Re-index all articles into Chroma."""
     articles_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "articles")
     result = run_index_pipeline(articles_dir)
+    return result
+
+
+@app.post("/api/rag/evaluate")
+async def rag_evaluate_endpoint():
+    """Run full RAG evaluation: Recall@k, Faithfulness, Latency."""
+    from app.agent.llm import create_llm
+
+    llm = create_llm(streaming=False)
+
+    def _retrieve(q: str, top_k: int = 3):
+        return retrieve(q, top_k=top_k)
+
+    def _rag_query(q: str):
+        from app.rag.qa_chain import rag_query as rq
+        def llm_call(messages):
+            return llm.invoke(messages).content
+        return rq(q, llm_call)
+
+    result = run_full_evaluation(_retrieve, _rag_query, llm)
+    return result
+
+
+@app.post("/api/rag/experiment")
+async def rag_experiment_endpoint():
+    """Run prompt strategy experiment on test dataset."""
+    from app.agent.llm import create_llm
+
+    llm = create_llm(streaming=False)
+
+    def _rag_query(q: str):
+        from app.rag.qa_chain import rag_query as rq
+        def llm_call(messages):
+            return llm.invoke(messages).content
+        return rq(q, llm_call)
+
+    result = run_experiment(TEST_QA_PAIRS, _rag_query, llm)
     return result
 
 
