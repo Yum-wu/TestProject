@@ -83,7 +83,7 @@ uvicorn app.main:app --reload --port 8001
 
 ## 前端页面
 
-Chatbot 前端 App.tsx 导航栏包含 "Article Generator" 标签页，使用 SSE 连接 `/api/crew/generate/stream` 实时展示 Agent 进度。
+Chatbot 前端 App.tsx 导航栏包含 "文章生成" 标签页，使用 SSE 连接 `/api/crew/generate/stream` 实时展示 Agent 进度。
 
 ## 限制
 

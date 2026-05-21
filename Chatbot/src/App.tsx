@@ -19,7 +19,7 @@ function App() {
               : "border-transparent text-gray-500 hover:text-gray-700"
           }`}
         >
-          AI Chat
+          AI 聊天
         </button>
         <button
           onClick={() => setPage("crew")}
@@ -29,7 +29,7 @@ function App() {
               : "border-transparent text-gray-500 hover:text-gray-700"
           }`}
         >
-          Article Generator
+          文章生成
         </button>
       </nav>
 

@@ -32,7 +32,7 @@ export function CrewLog({ entries }: { entries: LogEntry[] }) {
   return (
     <div className="space-y-2">
       <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-        Agent Progress
+        Agent 进度
       </h3>
       <div className="space-y-1">
         {entries.map((entry) => (
@@ -83,7 +83,7 @@ export function CrewGenerator() {
   const handleGenerate = async () => {
     const trimmed = topic.trim();
     if (!trimmed || trimmed.length < 2) {
-      setError("Topic must be at least 2 characters");
+      setError("主题至少需要 2 个字符");
       return;
     }
 
@@ -109,12 +109,12 @@ export function CrewGenerator() {
       if (!response.ok) {
         const errBody = await response.text().catch(() => "");
         throw new Error(
-          errBody || `Request failed (${response.status})`
+          errBody || `请求失败 (${response.status})`
         );
       }
 
       const reader = response.body?.getReader();
-      if (!reader) throw new Error("Cannot read response stream");
+      if (!reader) throw new Error("无法读取响应流");
 
       const decoder = new TextDecoder();
       let buffer = "";
@@ -143,7 +143,7 @@ export function CrewGenerator() {
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
       setError(
-        err instanceof Error ? err.message : "Network error"
+        err instanceof Error ? err.message : "网络异常"
       );
     } finally {
       setLoading(false);
@@ -156,7 +156,7 @@ export function CrewGenerator() {
         addLog(
           event.agent || "Agent",
           "running",
-          event.detail?.slice(0, 120) || "Working..."
+          event.detail?.slice(0, 120) || "处理中..."
         );
         break;
       case "result":
@@ -164,7 +164,7 @@ export function CrewGenerator() {
         setDuration(event.duration_ms || null);
         break;
       case "error":
-        setError(event.message || "Unknown error");
+        setError(event.message || "未知错误");
         break;
       case "done":
         break;
@@ -178,7 +178,7 @@ export function CrewGenerator() {
           htmlFor="topic-input"
           className="block text-sm font-medium text-gray-700 mb-2"
         >
-          Article Topic
+          文章主题
         </label>
         <div className="flex gap-3">
           <input
@@ -189,7 +189,7 @@ export function CrewGenerator() {
             onKeyDown={(e) => {
               if (e.key === "Enter" && !loading) handleGenerate();
             }}
-            placeholder="Enter a topic for the AI agent team to write about..."
+            placeholder="输入主题，AI 团队将为你撰写文章..."
             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             disabled={loading}
           />
@@ -198,7 +198,7 @@ export function CrewGenerator() {
             disabled={loading || topic.trim().length < 2}
             className="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? "Generating..." : "Generate"}
+            {loading ? "生成中..." : "生成文章"}
           </button>
         </div>
       </div>
@@ -212,7 +212,7 @@ export function CrewGenerator() {
 
         {loading && logs.length === 0 && (
           <div className="text-center py-12 text-gray-400 text-sm">
-            Initializing AI agent team...
+            正在启动 AI 团队...
           </div>
         )}
 
@@ -220,7 +220,7 @@ export function CrewGenerator() {
 
         {duration !== null && loading && (
           <div className="text-center text-xs text-gray-400">
-            Running: Researcher → Writer → Editor
+            执行中：研究员 → 写手 → 编辑
           </div>
         )}
 
@@ -228,7 +228,7 @@ export function CrewGenerator() {
           <div className="space-y-4">
             {duration !== null && (
               <div className="text-xs text-gray-400 text-right">
-                Completed in {(duration / 1000).toFixed(1)}s
+                完成耗时 {(duration / 1000).toFixed(1)} 秒
               </div>
             )}
             <div className="bg-white border border-gray-200 rounded-lg px-6 py-4 prose prose-sm max-w-none">
