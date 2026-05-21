@@ -1,121 +1,115 @@
-# Delta: Chatbot Backend (RAG 模块)
+# 增量： RAG Pipeline
 
-**Change ID:** `rag-demo`
-**Affects:** `Chatbot/backend/app/`
-
----
-
-## ADDED
-
-### Module: `app/rag/` — RAG 知识库引擎
-
-RAG 核心模块，包含文档加载、向量化、检索、QA 生成全流程。
-
-#### 架构说明
-
-```
-data/articles/ → loader → text_splitter → embed(Zhipu API) → ChromaDB
-用户查询 → ChromaDB(query) → MMR rerank → LLM(generate) → 回答+来源
-```
-
-- Embedding: 智谱 AI `embedding-2` 模型（requests 调用，无需额外依赖）
-- 向量存储: ChromaDB PersistentClient（本地持久化）
-- 检索策略: 余弦相似度 + MMR 多样性重排序（`lambda_mult=0.5`）
-- 文本切片: `RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)`
-
-#### Scenario: 文档索引
-- GIVEN MyBlog 的博文 Markdown 文件存在于 `data/articles/`
-- WHEN 调用索引接口 `POST /api/rag/index`
-- THEN 文档被加载、切片、通过 Zhipu API 向量化后存入 ChromaDB
-- AND 返回索引状态（文档数、切片数）
-
-#### Scenario: 知识检索
-- GIVEN ChromaDB 中已索引博文
-- WHEN 调用检索接口 `POST /api/rag/query` 携带用户问题
-- THEN ChromaDB 返回 top_k 个最相关切片（含 MMR 重排序）
-- AND 返回基于检索结果的 LLM 生成回答及来源元数据
-- AND 结果按相似度降序排列（score ∈ [0, 1]）
-
-#### Scenario: Agent Tool 集成
-- GIVEN Agent 正在处理用户请求
-- WHEN 用户问题涉及知识库内容
-- THEN Agent 调用 `knowledge_retrieval` Tool（`@tool` 装饰器注册）
-- AND Tool 内部调用 RAG pipeline 获取答案
-- AND Agent 最终回答包含知识库引用来源
-
-### API: `POST /api/rag/query`
-
-**请求体：**
-```json
-{
-  "query": "Hermes Agent 的分层记忆系统有几层？",
-  "top_k": 3,
-  "use_mmr": true
-}
-```
-
-**响应体：**
-```json
-{
-  "answer": "Hermes Agent 采用四层记忆架构：L0 Conversation（原始对话记录）、L1 Atoms（原子事实）、L2 Scenarios（场景聚合）、L3 Persona（用户画像）。[引用自:《Hermes Agent 实战》]",
-  "sources": [
-    {
-      "title": "Hermes Agent 实战 — 分层记忆系统与技能生态整合",
-      "slug": "hermes-agent-practical-guide",
-      "chunk": "四层记忆模型...",
-      "score": 0.92
-    }
-  ]
-}
-```
-
-### API: `POST /api/rag/index`
-
-**请求体：** `{}`（空，触发重新索引）
-
-**响应体：**
-```json
-{
-  "status": "ok",
-  "documents_indexed": 2,
-  "chunks_created": 5,
-  "elapsed_seconds": 1.6
-}
-```
+**变更 ID:** `rag-demo`
+**影响范围:** Chatbot backend retrieval pipeline, API, agent tool integration
 
 ---
 
-## MODIFIED
+## 新增
+
+### 需求： Document ingestion and vector indexing
+
+System SHALL load MyBlog markdown articles, split into chunks, embed via Zhipu API, and store in ChromaDB.
+
+#### 场景： Happy path
+
+- 给定 MyBlog markdown articles exist in `data/articles/`
+- 当 index API `POST /api/rag/index` is called
+- 则 documents are loaded, chunked (`chunk_size=500`, overlap=50), embedded via Zhipu API, stored in ChromaDB
+- AND API returns document count and chunk count
+
+#### 场景： Invalid or empty source directory
+
+- 给定 source directory is missing or empty
+- 当 index pipeline runs
+- 则 pipeline reports clear error or warning
+- AND does not crash the backend
+
+#### 场景： Embedding API unavailable
+
+- 给定 Zhipu embedding API is unreachable or returns error
+- 当 index pipeline tries to embed
+- 则 pipeline fails with descriptive error
+- AND does not leave Chroma in partial state
+
+---
+
+### 需求： Retrieval-augmented QA
+
+System SHALL retrieve relevant chunks and generate answers via LLM with cited sources.
+
+#### 场景： Happy path with citations
+
+- 给定 ChromaDB has indexed articles
+- 当 POST /api/rag/query with relevant question
+- 则 ChromaDB returns top-k chunks with MMR rerank (`lambda_mult=0.5`)
+- AND LLM generates answer with cited sources
+- AND response includes answer text + sources array (title, slug, chunk excerpt, score)
+
+#### 场景： Empty query
+
+- 给定 user submits empty query
+- 当 API endpoint receives request
+- 则 API returns 400 validation error
+- AND no retrieval or LLM call occurs
+
+#### 场景： No relevant content found
+
+- 给定 user query has no semantic match
+- 当 retrieval returns zero chunks above threshold
+- 则 system returns graceful message indicating no matching content
+- AND does not hallucinate from LLM knowledge alone
+
+#### 场景： LLM generation failure
+
+- 给定 retrieval succeeds but LLM call fails
+- 当 QA pipeline runs
+- 则 error response returned with retrieval context preserved for debugging
+
+---
+
+### 需求： Logging for retrieval observability
+
+System SHALL log query text, hit count, and retrieval latency per request.
+
+#### 场景： Retrieval log on each query
+
+- 给定 query is processed
+- 当 QA pipeline completes
+- 则 log entry includes query (truncated), chunk count, retrieval duration
+
+---
+
+### 需求： Agent Tool integration
+
+System SHALL expose RAG query as a `@tool` decorated function registered in `tools/__init__.py`.
+
+#### 场景： Agent calls knowledge retrieval tool
+
+- 给定 Agent is processing user request
+- 当 user asks knowledge-based question
+- 则 Agent triggers `knowledge_retrieval` Tool
+- AND Tool internally calls RAG pipeline and returns answer with sources
+
+---
+
+## 修改
 
 ### File: `Chatbot/backend/requirements.txt`
 
-**变更：** 新增 RAG 相关依赖
-
-新增依赖：
-- `chromadb>=0.5,<0.6` — 向量数据库（替代 chromadb + langchain-chroma + sentence-transformers）
-- `numpy` — MMR 重排序矩阵运算
-- `langchain-text-splitters` — 文本切片（LangChain v1 独立包）
-
-> 注：embedding 通过智谱 AI HTTP API 完成，无需 sentence-transformers 等本地模型依赖。
-> 注：`langchain-chroma` 未使用——通过 chromadb Python SDK 直连，避免 LangChain 集成层带来的版本兼容问题。
+Added: `chromadb>=0.5,<0.6`, `numpy`, `langchain-text-splitters`  
+Note: embedding via Zhipu HTTP API, not sentence-transformers. No `langchain-chroma` to avoid version compatibility issues.
 
 ### File: `Chatbot/backend/app/tools/__init__.py`
 
-**变更：** 注册 `knowledge_retrieval` Tool（含 `@tool` 装饰器）
-```python
-from app.tools.knowledge import knowledge_retrieval
-```
+Registered `knowledge_retrieval` Tool.
 
 ### File: `Chatbot/backend/app/rag/vector_store.py`
 
-**变更：** 从 numpy + pickle 手写向量存储迁移到 ChromaDB PersistentClient
-- `ZhipuEmbeddingFn` — 自定义 EmbeddingFunction 适配 Chroma
-- `save_index()` — 写入 Chroma collection（自动计算 embedding）
-- `retrieve()` — Chroma query + MMR 重排序
-- 旧版 numpy + pickle 持久化已废弃
+Migrated from numpy + pickle to ChromaDB PersistentClient with `ZhipuEmbeddingFn`.
 
 ---
 
-## REMOVED
+## 删除
 
 (None)

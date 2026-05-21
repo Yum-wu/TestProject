@@ -32,9 +32,6 @@ Chatbot/backend/data/vectors/
 # 个人目标文件
 目标.md
 
-# 运行时生成的记忆数据
-Chatbot/backend/offloads/
-
 # pytest 缓存
 .pytest_cache/
 

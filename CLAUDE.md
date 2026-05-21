@@ -17,8 +17,8 @@
 | `MarkdownNotes/` | 前端 | React + Vite, TypeScript, Tailwind, Markdown 编辑器 |
 | `AIImageGenerator/` | 前端 | React + Vite, JavaScript, Tailwind, OpenAI API |
 | `AIWritingAssistant/` | 前端 | React + Vite, JavaScript, Tailwind, OpenAI API |
-| `PomodoroTimer/` | 前端 | Webpack, JavaScript |
-| `WeatherInquiry/` | 前端 | Webpack, JavaScript |
+| `PomodoroTimer/` | 前端 | React + Vite, TypeScript, Tailwind |
+| `WeatherInquiry/` | 前端 | React + Vite, TypeScript, Tailwind |
 | `todo-app/` | 前端 | React + Vite, JavaScript |
 | `VoiceRecognition/` | 前端 | Express, HTML/CSS/JS |
 
@@ -87,11 +87,11 @@ cd Chatbot && npm install && npm run dev
 
 ## 代码规范
 
-- **TypeScript** 用于：`OnlineStore/`、`MyBlog/client`、`Chatbot/`、`MarkdownNotes/`
-- **JavaScript** 用于：`AIImageGenerator/`、`AIWritingAssistant/`、`PomodoroTimer/`、`WeatherInquiry/`、`todo-app/`
+- **TypeScript** 用于：`OnlineStore/`、`MyBlog/client`、`Chatbot/`、`MarkdownNotes/`、`PomodoroTimer/`、`WeatherInquiry/`
+- **JavaScript** 用于：`AIImageGenerator/`、`AIWritingAssistant/`、`todo-app/`
 - **Python** 用于：`Chatbot/backend/`（FastAPI + LangChain）
 - 所有 Vite 项目使用 `npm run dev` / `npm run build`
 - OnlineStore 使用 Next.js App Router（`app/` 目录）
-- MyBlog 有 client/server 分离，各自有独立的 `package.json`
+- MyBlog 是纯静态博客，Markdown 文件在 `client/src/content/posts/`
 - 组件库：近期项目均使用 Tailwind CSS
 - 状态管理：React hooks（无外部状态库）

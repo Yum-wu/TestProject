@@ -1,77 +1,83 @@
-# Implementation Tasks: LangGraph 多 Agent 编排 + MCP 协议
+# 实施任务： LangGraph Multi-Agent Orchestration + MCP Protocol
 
-**Change ID:** `langgraph-mcp`
-
----
-
-## Phase 1: 依赖与基础结构
-
-- [x] 1.1 更新 requirements.txt 添加 langgraph ✓ 2026-05-18
-- [x] 1.2 创建 `langgraph/` 模块目录 ✓ 2026-05-18
-- [x] 1.3 定义 `state.py` ✓ 2026-05-18
-- [x] 1.4 创建 `/api/langgraph/run` 路由 ✓ 2026-05-18
-
-**Quality Gate:**
-- [ ] pip install 无冲突
-- [ ] 状态类型定义正确
+**变更 ID:** `langgraph-mcp`
 
 ---
 
-## Phase 2: 节点实现
+## 阶段 1: Foundation
 
-- [x] 2.1 意图理解节点 `nodes/intent.py` ✓ 2026-05-18
-- [x] 2.2 RAG 检索节点 `nodes/rag.py` ✓ 2026-05-18
-- [x] 2.3 Agent 执行节点 `nodes/agent.py` ✓ 2026-05-18
-- [x] 2.4 生成节点 `nodes/generate.py` ✓ 2026-05-18
+- [ ] 1.1 Define graph state schema (AgentState TypedDict)
+- [ ] 1.2 Define node boundaries: intent / rag / agent / generate
+- [ ] 1.3 Define routing rules: intent → rag | agent | mixed | chat
+- [ ] 1.4 Add langgraph to requirements.txt
+- [ ] 1.5 Document graph config and MCP tool registration approach
 
-**Quality Gate:**
-- [ ] 每个节点可独立运行
-- [ ] 节点间状态传递正确
+**质量门禁:**
 
----
-
-## Phase 3: 图编排
-
-- [x] 3.1 定义 `graph.py`：StateGraph + 条件边路由 ✓ 2026-05-18
-- [x] 3.2 配置路由逻辑 ✓ 2026-05-18
-- [x] 3.3 checkpointing（状态持久化）✓ 2026-05-18
-- [ ] 3.4 human-in-the-loop（待 UI 支持确认）
-
-**Quality Gate:**
-- [ ] 三种路由路径全部通过测试
-- [ ] checkpointing 支持节点级恢复
+- [ ] Contract is explicit
+- [ ] Config/env requirements are documented
 
 ---
 
-## Phase 4: MCP 协议集成
+## 阶段 2: Core Logic
 
-- [x] 4.1 实现 `mcp/server.py`：注册所有 tool ✓ 2026-05-18
-- [x] 4.2 实现 `mcp/client.py`：远程调用支持 ✓ 2026-05-18
-- [ ] 4.3 MCP 调用测试
+- [ ] 2.1 Implement intent classification node (LLM-based routing)
+- [ ] 2.2 Implement RAG retrieval node (encapsulate P1)
+- [ ] 2.3 Implement Agent execution node (encapsulate P0 tools)
+- [ ] 2.4 Implement generate node (aggregate output + sources)
+- [ ] 2.5 Implement StateGraph with conditional edges
+- [ ] 2.6 Implement MCP tool registration (intent_classify, knowledge_retrieval, agent_execute)
+- [ ] 2.7 Implement checkpointing for node-level state persistence
+- [ ] 2.8 Log each node execution with node name and duration_ms
 
-**Quality Gate:**
-- [ ] MCP server 正确注册所有 tool
-- [ ] MCP client 正确调用远端 tool
+**质量门禁:**
 
----
-
-## Phase 5: 集成测试
-
-- [ ] 5.1 知识问答路径测试（意图→RAG→生成）
-- [ ] 5.2 工具调用路径测试（意图→Agent→生成）
-- [ ] 5.3 混合场景路径测试（意图→RAG+Agent→生成）
-- [ ] 5.4 错误路径测试
-
-**Quality Gate:**
-- [ ] 端到端完成率 ≥ 85%
-- [ ] 所有路径测试通过
+- [ ] Happy path implemented
+- [ ] Failure path implemented
+- [ ] Logs expose key execution state
 
 ---
 
-## Completion Checklist
+## 阶段 3: Interface/API
 
-- [ ] 所有 Phase 完成
-- [ ] LangGraph 工作流可独立运行
-- [ ] MCP 节点间通信正常
-- [ ] 可演示三种路由路径
-- [ ] Ready for `/openspec-archive`
+- [ ] 3.1 Add API endpoint `POST /api/langgraph/run`
+- [ ] 3.2 Validate malformed/empty query input
+- [ ] 3.3 Return structured response: answer + route + nodes_executed + node_times + mcp_calls
+
+**质量门禁:**
+
+- [ ] API contract is stable
+- [ ] Invalid input returns predictable error
+
+---
+
+## 阶段 4: Verification
+
+- [ ] 4.1 Run Python lint/type checks
+- [ ] 4.2 Verify knowledge-query routing (intent → rag → generate)
+- [ ] 4.3 Verify tool-query routing (intent → agent → generate)
+- [ ] 4.4 Verify invalid input returns error
+- [ ] 4.5 Verify tool failure does not crash graph
+- [ ] 4.6 Update docs with run instructions and API contract
+- [ ] 4.7 Fill Verification Log
+
+**质量门禁:**
+
+- [ ] Lint/type checks pass
+- [ ] Required scenarios verified
+- [ ] Docs synced
+- [ ] Verification Log updated
+
+---
+
+## 完成清单
+
+- [ ] All phases complete
+- [ ] All quality gates passed or explicitly marked not applicable
+- [ ] Documentation synced
+- [ ] Ready for `Verified` status or `/openspec-archive`
+
+## 验证日志
+
+| 日期 | 检查项 | 命令/方法 | 结果 | 备注 |
+|------|-------|------------------|--------|-------|

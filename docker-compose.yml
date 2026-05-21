@@ -1,0 +1,39 @@
+# Chatbot Local Dev Stack
+# Usage: docker compose up --build
+#        docker compose down
+
+services:
+  backend:
+    build:
+      context: ./Chatbot
+      dockerfile: backend/Dockerfile
+    container_name: chatbot-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./Chatbot/backend/.env
+    volumes:
+      - ./Chatbot/backend:/app
+      - chatbot-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')\""]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  frontend:
+    build:
+      context: ./Chatbot
+      dockerfile: frontend.Dockerfile
+    container_name: chatbot-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      backend:
+        condition: service_started
+    volumes:
+      - ./Chatbot/src:/app/src
+
+volumes:
+  chatbot-data:

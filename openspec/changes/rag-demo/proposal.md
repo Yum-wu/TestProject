@@ -1,132 +1,99 @@
-# Proposal: RAG 知识库问答系统
+# 方案： RAG Knowledge Base QA System
 
-**Change ID:** `rag-demo`
-**Created:** 2026-05-18
-**Status:** Implementation Complete ✓
-**Created:** 2026-05-18
-**Completed:** 2026-05-18
+**变更 ID:** `rag-demo`
+**创建日期:** 2026-05-18
+**状态:** Implemented
 
 ---
 
-## Problem Statement
+## 问题分析
 
-根据 AI Agent 技能补齐路线的规划，当前已完成 P0 的 Chatbot Agent（LangChain + Tool Calling + Memory），下一步需要补齐 **RAG（检索增强生成）** 技能。RAG 是 AI Agent 工程师岗位的核心能力之一，面试中高频考察。
+当前 Chatbot Agent 缺少基于自有知识库的问答能力。Agent 只能依赖 LLM 自身知识或外部搜索，无法基于本地文档（如 MyBlog 博文）回答问题。需要补齐 RAG（检索增强生成）能力。
 
-现状：
-- Chatbot 已有 Agent 框架、Tool Calling、分层记忆系统（L0-L3）
-- MyBlog 下有 2 篇高质量博文可作为知识源
-- **缺少**向量检索能力，Agent 无法基于自有知识库回答
+## 解决方案
 
-## Proposed Solution
+在 Chatbot 项目中新建 RAG pipeline：
+- Chroma 向量数据库存储文档切片
+- Embedding 模型将文本向量化
+- 相似度检索 + MMR 重排序
+- LLM 基于检索结果生成带引用的回答
 
-在 `Chatbot/` 项目中新建 `rag/` 模块，使用 Chroma（本地轻量向量数据库）实现 RAG pipeline：
+## 范围
 
-1. **文档加载与切片**：从 MyBlog 加载 Markdown 博文，按章节切片
-2. **向量化与存储**：使用 Embedding 模型将切片向量化，存入 Chroma
-3. **检索 + 生成**：收到用户提问后，检索相关切片，拼接上下文后调用 LLM 生成回答
-4. **对话 UI**：提供简单的 Web 界面（可复用 Chatbot 前端或新建简洁 UI）
+### 包含
 
-架构设计：
-- 在 Chatbot 后端内新增 `rag/` 模块，利用已有的 FastAPI + LangChain 基础设施
-- 与现有 Agent 松耦合：Agent 可将知识库查询作为一个 Tool 注册
-- Chroma 使用本地持久化存储，无需额外数据库
+- Chroma 向量数据库搭建与持久化
+- MyBlog 博文加载、切片、向量化
+- 检索 + 生成 QA 接口
+- Agent 以 Tool 形式接入 RAG
+- 对话 UI（输入问题 → 显示回答 + 引用来源）
 
-### 关键组件
+### 不包含
 
-| 组件 | 技术选型 | 说明 |
-|------|----------|------|
-| 向量数据库 | Chroma | 本地轻量，适合学习入门 |
-| Embedding | text-embedding-ada-002 / 智谱 Embedding | 与现有 LLM API 保持一致 |
-| 文档加载 | LangChain Document Loaders | 加载 Markdown 文件 |
-| 文本切片 | LangChain Text Splitters | RecursiveCharacterTextSplitter |
-| 检索策略 | 相似度检索 + MMR | 兼顾相关性与多样性 |
-| API | FastAPI | 复用现有后端 |
-| 前端 | React (Vite) 简单 UI | 或集成到 Chatbot 前端 |
+- 多轮对话记忆管理（已有 L0-L3 记忆系统，不额外工作）
+- 复杂文档格式支持（仅 Markdown）
+- 生产级部署
+- 多智能体协作
 
-## Scope
+## 影响分析
 
-### In Scope
-- Chroma 向量数据库的搭建与持久化
-- MyBlog 博文的加载、切片、向量化 pipeline
-- 基于检索的 QA 接口（RAG query → retrieve → generate）
-- 简单的对话 UI（输入问题 → 显示回答 + 引用来源）
-- Chatbot Agent 以 Tool 形式接入 RAG
-- 评估指标：检索准确率、回答质量
+| 组件 | 变更 | 说明 |
+|------|-----------------|---------|
+| Retrieval pipeline | Yes | Chroma + embedding + retrieval + rerank |
+| LLM response generation | Yes | Context-augmented QA synthesis |
+| API surface | Yes | Query endpoint for RAG |
+| Agent integration | Yes | RAG exposed as Tool |
+| Frontend | Yes | Simple query UI with citations |
+| Dependencies | Yes | chromadb, langchain-chroma, sentence-transformers |
 
-### Out of Scope
-- 多轮对话中的记忆管理（已有 L0-L3 记忆系统，本次不做额外工作）
-- 复杂的文档格式支持（仅 Markdown）
-- 生产级部署（仅本地开发）
-- 多智能体协作（P2 阶段再做）
+## 依赖与复用
 
-## Impact Analysis
+### 依赖
 
-| Component | Change Required | Details |
-|-----------|-----------------|---------|
-| Chatbot Backend | Yes | 新增 `rag/` 模块，新增 API 路由 |
-| Chatbot Frontend | Maybe | 可复用现有前端或新建独立 UI |
-| Agent | Minimal | 为 Agent 注册一个 `knowledge_retrieval` Tool |
-| MyBlog | No | 只读取博文文件，不做修改 |
-| Dependencies | Yes | 新增 `chromadb`、`langchain-chroma` 等 Python 包 |
+- Chatbot backend (FastAPI + LLM config)
+- MyBlog markdown articles as knowledge source
 
-## Architecture Considerations
+### 复用
 
-### 目录结构
+- Existing LLM config (same provider/model)
+- Existing FastAPI route patterns
+- Existing logging infrastructure
 
-```
-Chatbot/
-├── backend/
-│   ├── app/
-│   │   ├── rag/                      # 新增 RAG 模块
-│   │   │   ├── __init__.py
-│   │   │   ├── loader.py             # 文档加载与切片
-│   │   │   ├── vector_store.py       # Chroma 向量库管理
-│   │   │   ├── retriever.py          # 检索逻辑
-│   │   │   ├── qa_chain.py           # RAG QA 链
-│   │   │   └── models.py            # Pydantic 模型
-│   │   ├── api/
-│   │   │   └── routes.py             # 新增 RAG API 路由
-│   │   └── tools/
-│   │       └── knowledge.py          # Agent 用的知识库 Tool
-│   │── data/
-│   │   └── chroma/                   # Chroma 持久化存储（.gitignored）
-│   │   └── articles/                 # 博文副本或符号链接
-│   └── requirements.txt              # 更新依赖
-├── rag-ui/                           # 新增：RAG 独立前端（可选）
-└── docs/
-    └── rag-design.md                 # 设计文档
-```
+### 后续能力
 
-### 数据流
+- Agent ability to answer knowledge-based questions
+- Foundation for advanced RAG (hybrid search, reranking)
 
-```
-用户提问
-  ↓
-检索相关切片 (Chroma, top_k=3)
-  ↓
-拼接上下文 + 问题 → LLM
-  ↓
-生成回答 + 返回引用来源
-```
+## 非功能约束
 
-### 与现有系统的关系
-- **松耦合**：RAG 模块独立，不修改现有 Agent 核心逻辑
-- **可选集成**：Agent 通过 Tool 调用 RAG，默认不启用
-- **复用基础设施**：使用已有的 LLM 配置、FastAPI 模式、日志体系
+- Logging: log query text, hit count, retrieval latency per request
+- Error handling: empty query returns 400; no hit returns graceful message
+- Timeout/retry: embedding and retrieval should complete within reasonable time; LLM generation uses existing timeout
+- Config/env: embedding model / Chroma path configurable
+- Security/secrets: no secrets in retrieval pipeline
+- Local vs production: Chroma file-based storage works for local dev; production would need remote vector store
 
-## Success Criteria
+## 架构设计
 
-- [ ] 能成功加载 MyBlog 博文并向量化存入 Chroma
-- [ ] 检索接口返回的相关切片在语义上正确匹配用户问题
-- [ ] QA 接口能基于博文内容回答，并标注引用来源
-- [ ] Agent 通过 Tool 调用 RAG 时，回答质量优于无检索的纯 LLM 回答
-- [ ] 对话 UI 可正常交互（输入提问、显示回答、显示引用）
+- RAG module is independent from Agent core logic
+- Agent can optionally call RAG via Tool
+- Chroma stores data locally at `data/vectors/`
+- Supports both synchronous query and streaming response
+- Existing LLM configuration reused, no extra provider needed
 
-## Risks & Mitigations
+## 成功标准
 
-| Risk | Probability | Impact | Mitigation |
+- [ ] MyBlog articles loaded, chunked, and indexed into Chroma
+- [ ] Retrieval returns semantically relevant chunks for test queries
+- [ ] QA endpoint returns answer with cited sources
+- [ ] Agent Tool integration returns RAG-augmented answers
+- [ ] Basic UI shows query, answer, and source citations
+
+## 风险与应对
+
+| 风险 | 概率 | 影响 | 应对 |
 |------|-------------|--------|------------|
-| Embedding API 不可用或限流 | Low | High | 支持本地 Embedding 模型（如 `sentence-transformers`）作为 fallback |
-| Chroma 与现有 LangChain 版本兼容性问题 | Medium | Medium | pip 安装指定兼容版本，做集成测试 |
-| 只 2 篇博文，检索效果有限 | High | Low | 先以少量文档验证 pipeline，后续可扩展知识源 |
-| 现有 Chatbot 前端改造复杂 | Medium | Low | 新建独立简洁 UI，不做深度集成 |
+| Embedding API unavailable or rate-limited | Low | High | Support local embedding (sentence-transformers) as fallback |
+| Chroma version incompatible with LangChain | Med | Medium | Pin compatible versions, test integration |
+| Only 2 blog articles limit retrieval quality | High | Low | Accept for MVP, extendable later |
+| Existing frontend integration complexity | Med | Low | Build simple standalone query UI |

@@ -30,8 +30,9 @@ Chatbot/
 │   ├── services/        # api.ts（后端通信）、storage.ts（LocalStorage）
 │   └── types/           # Message 类型
 ├── rag-ui/              # RAG 搜索独立前端（React + Vite + Tailwind）
-└── openspec/            # OpenSpec 规格文档
 ```
+
+（OpenSpec 规格文档统一在仓库根 `openspec/changes/`）
 
 ## 后端开发规范
 

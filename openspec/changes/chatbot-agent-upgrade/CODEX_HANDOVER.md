@@ -1,4 +1,6 @@
-# Chatbot Agent 升级 — Codex 实施提示词
+# Chatbot Agent 升级 — Codex 实施指南
+
+> **注意：** 本文件是实施阶段的补充参考，包含详细的代码片段、SQL 建表和配置示例。并非标准 OpenSpec 制品（proposal/tasks/delta），仅供实施时查阅。
 
 ## 项目背景
 
