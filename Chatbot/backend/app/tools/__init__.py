@@ -7,8 +7,16 @@ from app.config import settings
 ALL_TOOLS = [
     calculator,
     read_ref,
-    knowledge_retrieval,
 ]
+
+# Conditionally register RAG tool (only if Chroma index exists)
+try:
+    from app.rag.vector_store import load_index
+    chunks, _ = load_index()
+    if chunks is not None:
+        ALL_TOOLS.append(knowledge_retrieval)
+except Exception:
+    pass  # No index — RAG tool not registered
 
 if settings.tavily_api_key:
     ALL_TOOLS.append(web_search)

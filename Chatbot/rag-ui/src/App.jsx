@@ -98,11 +98,20 @@ function App() {
                         📄 {src.title}
                       </span>
                       {src.score !== null && (
-                        <span className="text-xs text-gray-400">
-                          相关度: {(src.score * 100).toFixed(0)}%
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded ${
+                          src.score > 0.8 ? 'bg-green-100 text-green-700' :
+                          src.score > 0.5 ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-red-100 text-red-700'
+                        }`}>
+                          {(src.score * 100).toFixed(0)}%
                         </span>
                       )}
                     </div>
+                    {src.slug && (
+                      <p className="mt-1 text-xs text-gray-400">
+                        {src.slug}
+                      </p>
+                    )}
                     {expandedSource === idx && (
                       <p className="mt-2 text-sm text-gray-600 leading-relaxed">
                         {src.chunk}

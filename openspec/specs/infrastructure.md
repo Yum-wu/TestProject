@@ -99,3 +99,30 @@
 - 当 user performs backend-dependent action
 - 则 failure can be diagnosed using documented service names, ports, and logs
 - AND docs distinguish browser host URL from compose service URL
+
+---
+
+### 需求： Crew-generator service runs in container
+
+系统应提供 Docker 服务配置，使 CrewAI 文章生成器可在容器中运行。
+
+#### 场景： Crew image builds
+
+- 给定 crew source code and requirements.txt exist
+- 当 crew image build command runs
+- 则 Docker build completes successfully
+- AND crew dependencies are installed inside image
+
+#### 场景： Crew starts with valid config
+
+- 给定 LLM_API_KEY and other env vars provided via compose
+- 当 crew service starts via `docker compose up`
+- 则 CrewAI FastAPI listens on port 8001
+- AND `GET /api/crew/health` returns ok
+
+#### 场景： Compose with all three services
+
+- 给定 env file exists with required vars
+- 当 `docker compose up` runs
+- 则 backend (8000), frontend (5173), crew-generator (8001) all start
+- AND each service is independently reachable
