@@ -31,3 +31,7 @@
 - 修改 `vite.config.ts` 的 `base` 需同步更新 `__BASE_PATH__` define
 - git push / rebase / reset 须先问我
 - 不改 .env、密钥、CI/CD 配置
+
+## 语言规则
+- 所有回复必须使用中文
+
