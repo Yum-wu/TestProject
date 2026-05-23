@@ -41,7 +41,9 @@ export async function getPosts(): Promise<{ items: PostListItem[] }> {
 
   for (const [, loader] of entries) {
     const raw = await loader();
-    const { frontmatter } = parseFrontmatter(raw);
+    const { frontmatter, content } = parseFrontmatter(raw);
+    const wordCount = content.replace(/[\s\n\r]+/g, " ").split(" ").filter(Boolean).length;
+    const readingTime = Math.max(1, Math.round(wordCount / 200));
     posts.push({
       id: frontmatter.slug as string,
       slug: frontmatter.slug as string,
@@ -53,7 +55,7 @@ export async function getPosts(): Promise<{ items: PostListItem[] }> {
       author: { name: "MyBlog" },
       createdAt: frontmatter.date as string,
       viewCount: 0,
-      readingTime: 0,
+      readingTime,
     });
   }
 

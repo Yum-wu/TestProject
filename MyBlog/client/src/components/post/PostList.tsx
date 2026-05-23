@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import PostCard from "./PostCard";
 import type { Post } from "./PostCard";
 import EmptyState from "../common/EmptyState";
 import { PostCardSkeleton } from "../common/Loading";
+import Pagination from "../common/Pagination";
+
+const PAGE_SIZE = 9;
 
 interface PostListProps {
   posts: Post[];
@@ -14,6 +17,19 @@ interface PostListProps {
  */
 export default function PostList({ posts, loading = false }: PostListProps) {
   const [layout, setLayout] = useState<"grid" | "list">("grid");
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
+
+  const pagedPosts = useMemo(
+    () => posts.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [posts, currentPage]
+  );
+
+  /* 翻页时重置到首页 */
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <div className="space-y-6">
@@ -54,22 +70,34 @@ export default function PostList({ posts, loading = false }: PostListProps) {
           ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
           : "space-y-4"
         }>
-          <PostCardSkeleton count={layout === "grid" ? 6 : 4} />
+          <PostCardSkeleton count={layout === "grid" ? PAGE_SIZE : 4} />
         </div>
-      ) : posts.length === 0 ? (
+      ) : pagedPosts.length === 0 ? (
         <EmptyState
           title="暂无文章"
           description="还没有发布任何文章，敬请期待精彩内容。"
         />
       ) : (
-        <div className={layout === "grid"
-          ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-          : "space-y-4"
-        }>
-          {posts.map((post) => (
-            <PostCard key={post.id} post={post} variant={layout === "list" ? "horizontal" : "vertical"} />
-          ))}
-        </div>
+        <>
+          <div className={layout === "grid"
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            : "space-y-4"
+          }>
+            {pagedPosts.map((post) => (
+              <PostCard key={post.id} post={post} variant={layout === "list" ? "horizontal" : "vertical"} />
+            ))}
+          </div>
+          {totalPages > 1 && (
+            <Pagination
+              current={currentPage}
+              total={totalPages}
+              totalItems={posts.length}
+              pageSize={PAGE_SIZE}
+              onChange={handlePageChange}
+              showJumper
+            />
+          )}
+        </>
       )}
     </div>
   );
