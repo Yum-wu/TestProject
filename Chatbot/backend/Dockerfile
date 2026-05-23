@@ -17,7 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/ .
 
 # Chroma 向量库持久化目录
-RUN mkdir -p /data/vectors /data/articles
+RUN mkdir -p /app/data/vectors
 
 EXPOSE 8000
 
