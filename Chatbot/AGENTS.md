@@ -119,3 +119,7 @@ cd Chatbot/backend && source .venv/bin/activate 2>/dev/null && python -m pytest 
 | POST | /api/rag/experiment | Prompt 策略对比实验 |
 | POST | /api/langgraph/run | LangGraph 工作流 |
 | GET | /api/health | 健康检查 |
+
+## 语言规则
+- 所有回复必须使用中文
+
