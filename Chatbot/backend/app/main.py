@@ -26,7 +26,7 @@ app = FastAPI(title="Chatbot Agent API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[os.getenv("CORS_ORIGINS", "http://localhost:5173")],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -166,3 +166,4 @@ async def health():
         "model": settings.llm_model,
         "tools": [t.name for t in ALL_TOOLS],
     }
+

@@ -1,5 +1,5 @@
-# ── Chatbot Frontend: Vite + React ──
-FROM node:22-alpine AS frontend
+# ── Chatbot Frontend: Vite + React (Production Build) ──
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -8,6 +8,20 @@ RUN npm ci
 
 COPY . .
 
-EXPOSE 5173
+ARG VITE_API_URL
+ARG VITE_CREW_API_URL
+ENV VITE_API_URL=
+ENV VITE_CREW_API_URL=
 
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+RUN npm run build
+
+# ── Serve with nginx ──
+FROM nginx:stable-alpine
+
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
+
+

@@ -1,5 +1,5 @@
-/** 后端 API 地址 */
-const API_URL = "http://localhost:8000/api/chat/stream";
+/** 后端 API 地址（通过环境变量配置，默认本地开发） */
+const API_URL = (import.meta.env.VITE_API_URL as string) || "http://localhost:8000/api/chat/stream";
 
 /** SSE 事件数据结构 */
 export interface SSEEvent {
