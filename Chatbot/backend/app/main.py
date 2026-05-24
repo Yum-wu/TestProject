@@ -264,8 +264,11 @@ async def crew_generate(req: CrewGenerateRequest):
         os.environ.setdefault("OPENAI_BASE_URL", settings.llm_base_url)
         os.environ.setdefault("OPENAI_MODEL_NAME", f"openai/{settings.llm_model}")
 
+        from app.utils.lang_detect import detect_language
+        lang = detect_language(req.topic)
+
         start = time.time()
-        result = generate_article(topic=req.topic)
+        result = generate_article(topic=req.topic, lang=lang)
         duration_ms = int((time.time() - start) * 1000)
         return {
             "topic": result["topic"],
@@ -291,12 +294,15 @@ async def crew_generate_stream(req: CrewGenerateRequest, request: Request):
     os.environ.setdefault("OPENAI_BASE_URL", settings.llm_base_url)
     os.environ.setdefault("OPENAI_MODEL_NAME", f"openai/{settings.llm_model}")
 
+    from app.utils.lang_detect import detect_language
+    lang = detect_language(req.topic)
+
     collector = EventCollector()
 
     async def run_crew():
         try:
             result = await asyncio.to_thread(
-                generate_article, req.topic, collector.emit
+                generate_article, req.topic, collector.emit, lang
             )
             collector.emit("result", {
                 "final_output": result["final_output"],

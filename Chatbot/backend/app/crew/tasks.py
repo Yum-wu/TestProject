@@ -3,15 +3,23 @@
 from crewai import Agent, Task
 
 
-def create_research_task(agent: Agent) -> Task:
+LANG_INSTRUCTION = {
+    "zh": "全部使用中文回答。",
+    "en": "Answer entirely in English.",
+}
+
+
+def create_research_task(agent: Agent, lang: str = "zh") -> Task:
+    lang_instr = LANG_INSTRUCTION.get(lang, LANG_INSTRUCTION["zh"])
     return Task(
         description=(
-            "对用户指定的主题进行深入研究。\n"
-            "1. 搜索并收集与主题相关的信息\n"
+            "对用户指定的主题「{topic}」进行深入研究。\n"
+            "1. 搜索并收集与该主题相关的信息\n"
             "2. 整理关键发现、核心论点和重要数据\n"
             "3. 识别不同观点和争议点（如有）\n"
             "4. 列出推荐参考资源\n"
-            "5. 输出结构化研究简报"
+            "5. 输出结构化研究简报\n"
+            f"语言要求：{lang_instr}"
         ),
         expected_output=(
             "一份结构化的研究简报，包含：\n"
@@ -25,15 +33,17 @@ def create_research_task(agent: Agent) -> Task:
     )
 
 
-def create_write_task(agent: Agent, research_task: Task) -> Task:
+def create_write_task(agent: Agent, research_task: Task, lang: str = "zh") -> Task:
+    lang_instr = LANG_INSTRUCTION.get(lang, LANG_INSTRUCTION["zh"])
     return Task(
         description=(
-            "基于研究简报撰写完整文章。\n"
+            "基于研究简报撰写关于「{topic}」的完整文章。\n"
             "1. 确定文章结构和章节划分\n"
             "2. 撰写引人入胜的开头\n"
             "3. 按逻辑顺序展开论述\n"
             "4. 使用具体的例子和数据支撑观点\n"
-            "5. 写出有力的总结"
+            "5. 写出有力的总结\n"
+            f"语言要求：{lang_instr}"
         ),
         expected_output=(
             "一篇完整的 Markdown 格式文章，包含：\n"
@@ -48,17 +58,19 @@ def create_write_task(agent: Agent, research_task: Task) -> Task:
     )
 
 
-def create_review_task(agent: Agent, write_task: Task) -> Task:
+def create_review_task(agent: Agent, write_task: Task, lang: str = "zh") -> Task:
+    lang_instr = LANG_INSTRUCTION.get(lang, LANG_INSTRUCTION["zh"])
     return Task(
         description=(
-            "审阅文章草稿并提供质量评分和改进建议。\n"
+            "审阅关于「{topic}」的文章草稿并提供质量评分和改进建议。\n"
             "1. 检查事实准确性\n"
             "2. 评估逻辑连贯性\n"
             "3. 评价语言表达质量\n"
             "4. 检查格式规范性\n"
             "5. 给出 1-10 的总体评分\n"
             "6. 列出 3-5 条具体改进建议\n"
-            "7. 输出修订后的最终版本"
+            "7. 输出修订后的最终版本\n"
+            f"语言要求：{lang_instr}"
         ),
         expected_output=(
             "审阅报告包含：\n"
