@@ -6,7 +6,8 @@ __pycache__/
 *.pyc
 *.pyo
 
-# 忽略日志文件
+# 忽略构建输出
+dist/
 *.log
 debug.log
 

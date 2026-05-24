@@ -3,7 +3,7 @@ import logging
 import os
 from typing import Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -22,6 +22,9 @@ from app.rag.prompt_experiment import run_experiment, STRATEGIES
 from app.rag.test_data import TEST_QA_PAIRS
 from app.rag.vector_store import retrieve
 from app.utils.lang_detect import detect_language
+
+# ── CrewAI (merged, lazy-imported in route handlers) ──
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
@@ -162,6 +165,88 @@ async def langgraph_run(req: dict):
         return {"error": "query required"}
     result = run_workflow(query, session_id=session_id)
     return result
+
+
+# ── CrewAI Routes ──
+
+
+class CrewGenerateRequest(BaseModel):
+    topic: str = Field(..., min_length=2, max_length=500)
+
+
+@app.post("/api/crew/generate")
+async def crew_generate(req: CrewGenerateRequest):
+    """Generate article via 3-agent crew (synchronous)."""
+    import time
+    from app.crew.crew_setup import generate_article
+    try:
+        start = time.time()
+        result = generate_article(topic=req.topic)
+        duration_ms = int((time.time() - start) * 1000)
+        return {
+            "topic": result["topic"],
+            "final_output": result["final_output"],
+            "duration_ms": duration_ms,
+            "agents": result["agents"],
+        }
+    except Exception as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=f"Generation failed: {str(e)}")
+
+
+@app.post("/api/crew/generate/stream")
+async def crew_generate_stream(req: CrewGenerateRequest, request: Request):
+    """Generate article with real-time agent progress via SSE."""
+    import asyncio
+    from app.crew.crew_setup import generate_article
+    from app.crew.main_events import EventCollector
+
+    collector = EventCollector()
+
+    async def run_crew():
+        try:
+            result = await asyncio.to_thread(
+                generate_article, req.topic, collector.emit
+            )
+            collector.emit("result", {
+                "final_output": result["final_output"],
+                "duration_ms": result["duration_ms"],
+            })
+        except Exception as e:
+            collector.emit("error", {"message": str(e)})
+        finally:
+            collector.close()
+
+    task = asyncio.create_task(run_crew())
+
+    async def event_stream():
+        try:
+            async for chunk in collector.stream():
+                if await request.is_disconnected():
+                    break
+                yield chunk
+        finally:
+            if not task.done():
+                task.cancel()
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
+@app.get("/api/crew/health")
+async def crew_health():
+    return {
+        "status": "ok",
+        "service": "crew-generator",
+        "llm_configured": bool(os.getenv("LLM_API_KEY")),
+    }
 
 
 @app.get("/api/health")

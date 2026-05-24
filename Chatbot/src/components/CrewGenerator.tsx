@@ -3,8 +3,7 @@ import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-const CREW_API =
-  (import.meta.env.VITE_CREW_API_URL as string) || "http://localhost:8001/api/crew";
+const CREW_API = (import.meta.env.VITE_CREW_API_URL as string) || "/api/crew";
 
 interface CrewEvent {
   type: "agent_action" | "result" | "error" | "done";

@@ -21,3 +21,6 @@ chromadb>=0.5,<0.6
 
 # LangGraph dependencies (version resolved by langchain)
 langgraph
+
+# CrewAI (merged into main app)
+crewai>=0.11,<0.12

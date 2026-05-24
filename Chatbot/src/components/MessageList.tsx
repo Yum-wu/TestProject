@@ -17,14 +17,14 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
   const isAtBottom = useCallback(() => {
     const el = containerRef.current;
     if (!el) return true;
-    return el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 300;
   }, []);
 
   useEffect(() => {
     if (isAtBottom()) {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      bottomRef.current?.scrollIntoView({ behavior: isLoading ? "instant" : "smooth" });
     }
-  }, [messages, isAtBottom]);
+  }, [messages, isLoading, isAtBottom]);
 
   if (messages.length === 0) {
     return (
