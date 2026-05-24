@@ -1,0 +1,76 @@
+{
+  "app": {
+    "nav": {
+      "chat": "AI Chat",
+      "rag": "Knowledge Base",
+      "crew": "Article Generator"
+    },
+    "slogan": "AI Agent Demo — RAG, Tool Calling & Multi-Agent Collaboration"
+  },
+  "demoIntro": {
+    "title": "Welcome to AI Agent Demo",
+    "subtitle": "This demo showcases production-ready AI agent capabilities with measurable performance.",
+    "features": [
+      {
+        "icon": "🤖",
+        "title": "AI Chat with Tools",
+        "desc": "Multi-turn conversation with calculator, web search, file storage, and knowledge retrieval tools. 1.5s median response."
+      },
+      {
+        "icon": "📚",
+        "title": "RAG Knowledge Base",
+        "desc": "Ask questions over 18+ technical articles. Recall@3: 94%, with cited sources."
+      },
+      {
+        "icon": "👥",
+        "title": "Multi-Agent Pipeline",
+        "desc": "Researcher → Writer → Editor — three AI agents collaborating to produce quality content."
+      }
+    ],
+    "hint": "Try asking: \"What can you do?\" or \"Tell me about your RAG system\""
+  },
+  "chat": {
+    "title": "AI Chat Assistant",
+    "inputPlaceholder": "Type a message... (Enter to send, Shift+Enter for new line)",
+    "send": "Send",
+    "stop": "Stop",
+    "clear": "Clear",
+    "emptyTitle": "💬",
+    "emptySubtitle": "Start a conversation",
+    "emptyHint": "Ask me anything — I can search the web, calculate, or look up my knowledge base.",
+    "copy": "Copy",
+    "copied": "✓ Copied",
+    "stopped": "*[Generation stopped]*",
+    "calling": "Calling",
+    "completed": "completed"
+  },
+  "rag": {
+    "title": "Knowledge Base Q&A",
+    "description": "Ask questions over 18+ technical articles about AI Agent development, LangChain, deployment and more.",
+    "inputPlaceholder": "Ask a question about the knowledge base...",
+    "ask": "Ask",
+    "asking": "Querying...",
+    "sources": "Sources",
+    "score": "Score",
+    "noQuery": "Enter a question to search the knowledge base",
+    "error": "Query failed. The server may be waking up (cold start). Please try again.",
+    "examples": [
+      "What is Hermes Agent?",
+      "How to deploy SPA to GitHub Pages?",
+      "Explain LangGraph workflow"
+    ]
+  },
+  "crew": {
+    "title": "Multi-Agent Article Generator",
+    "topic": "Topic",
+    "inputPlaceholder": "Enter a topic, AI team will write for you...",
+    "generate": "Generate",
+    "generating": "Generating...",
+    "agentProgress": "Agent Progress",
+    "pipeline": "Researcher → Writer → Editor",
+    "starting": "Starting AI team...",
+    "completedIn": "Completed in",
+    "seconds": "seconds",
+    "errorShort": "Topic needs at least 2 characters"
+  }
+}

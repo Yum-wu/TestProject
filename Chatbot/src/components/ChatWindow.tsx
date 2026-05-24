@@ -1,9 +1,12 @@
+import { useTranslation } from "react-i18next";
 import { useChat } from "../hooks/useChat";
+import { DemoIntro } from "./DemoIntro";
 import { MessageList } from "./MessageList";
 import { InputArea } from "./InputArea";
 
-/** 主聊天窗口组件，组合标题栏、错误提示、消息列表和输入区域 */
+/** Main chat window — combines header, error toast, message list, and input area */
 export function ChatWindow() {
+  const { t } = useTranslation();
   const {
     messages,
     isLoading,
@@ -14,15 +17,19 @@ export function ChatWindow() {
     clearError,
   } = useChat();
 
+  const hasMessages = messages.length > 0;
+
   return (
     <div className="flex flex-col h-full bg-gray-50">
       <header className="flex items-center justify-between bg-white border-b border-gray-200 px-6 py-3 shadow-sm">
-        <h1 className="text-lg font-semibold text-gray-800">🤖 AI 聊天助手</h1>
+        <h1 className="text-lg font-semibold text-gray-800">
+          🤖 {t("chat.title")}
+        </h1>
         <button
           onClick={clearChat}
           className="text-sm text-gray-500 hover:text-red-500 transition-colors px-3 py-1 rounded-lg hover:bg-red-50"
         >
-          清空对话
+          {t("chat.clear")}
         </button>
       </header>
 
@@ -38,7 +45,12 @@ export function ChatWindow() {
         </div>
       )}
 
-      <MessageList messages={messages} isLoading={isLoading} />
+      {hasMessages ? (
+        <MessageList messages={messages} isLoading={isLoading} />
+      ) : (
+        <DemoIntro />
+      )}
+
       <InputArea
         onSend={sendMessage}
         isLoading={isLoading}

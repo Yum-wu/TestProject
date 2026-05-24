@@ -1,14 +1,14 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Message } from "../types/message";
 
 interface MessageItemProps {
-  /** 单条聊天消息 */
   message: Message;
 }
 
-/** 代码块简易渲染（避免 react-syntax-highlighter 懒加载导致的 DOM 冲突） */
+/** Simple code block renderer (avoids react-syntax-highlighter DOM issues) */
 function SimpleCode({ language, code }: { language?: string; code: string }) {
   return (
     <div className="relative group rounded-lg overflow-hidden my-2">
@@ -22,8 +22,9 @@ function SimpleCode({ language, code }: { language?: string; code: string }) {
   );
 }
 
-/** 消息项组件，用户消息纯文本显示，AI 消息支持 Markdown 渲染和复制 */
+/** Single message bubble — user plain text, AI rendered markdown + copy */
 export function MessageItem({ message }: MessageItemProps) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const isUser = message.role === "user";
 
@@ -37,10 +38,7 @@ export function MessageItem({ message }: MessageItemProps) {
     }
   };
 
-  /** 缓存 remarkPlugins 避免每次渲染创建新数组 */
   const remarkPlugins = useMemo(() => [remarkGfm], []);
-
-  /** 自定义 components：代码块用简易渲染，避免 react-syntax-highlighter DOM 冲突 */
   const components = useMemo(
     () => ({
       code({
@@ -54,11 +52,9 @@ export function MessageItem({ message }: MessageItemProps) {
         }) {
         const match = /language-(\w+)/.exec(className || "");
         const codeString = String(children).replace(/\n$/, "");
-
         if (match) {
           return <SimpleCode language={match[1]} code={codeString} />;
         }
-
         return (
           <code
             className={`px-1.5 py-0.5 rounded text-sm font-mono ${
@@ -70,7 +66,6 @@ export function MessageItem({ message }: MessageItemProps) {
           </code>
         );
       },
-      // 用 div 包裹预格式化文本，避免片段节点导致的 removeChild 错误
       pre({ children }: { children?: React.ReactNode }) {
         return <div className="my-2">{children}</div>;
       },
@@ -105,7 +100,7 @@ export function MessageItem({ message }: MessageItemProps) {
             onClick={handleCopy}
             className="absolute -bottom-6 right-2 text-xs text-gray-400 hover:text-gray-600 transition-colors"
           >
-            {copied ? "✓ 已复制" : "复制"}
+            {copied ? t("chat.copied") : t("chat.copy")}
           </button>
         )}
       </div>

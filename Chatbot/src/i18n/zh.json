@@ -1,0 +1,76 @@
+{
+  "app": {
+    "nav": {
+      "chat": "AI 聊天",
+      "rag": "知识库",
+      "crew": "文章生成"
+    },
+    "slogan": "AI Agent 演示 — RAG、工具调用与多 Agent 协作"
+  },
+  "demoIntro": {
+    "title": "欢迎使用 AI Agent 演示",
+    "subtitle": "这个演示展示了生产级 AI Agent 的能力，所有功能都有可测量的性能数据。",
+    "features": [
+      {
+        "icon": "🤖",
+        "title": "AI 聊天 + 工具调用",
+        "desc": "多轮对话，支持计算器、联网搜索、文件存储、知识库检索。中位数响应时间 1.5s。"
+      },
+      {
+        "icon": "📚",
+        "title": "RAG 知识库问答",
+        "desc": "对 18+ 篇技术文章提问。检索召回率 Recall@3: 94%，附来源引用。"
+      },
+      {
+        "icon": "👥",
+        "title": "多 Agent 文章生成",
+        "desc": "研究员 → 写手 → 编辑，三个 AI Agent 协作生成优质内容。"
+      }
+    ],
+    "hint": "试试问：\"你能做什么？\" 或 \"介绍一下 RAG 系统\""
+  },
+  "chat": {
+    "title": "AI 聊天助手",
+    "inputPlaceholder": "输入消息... (Enter 发送，Shift+Enter 换行)",
+    "send": "发送",
+    "stop": "停止",
+    "clear": "清空",
+    "emptyTitle": "💬",
+    "emptySubtitle": "开始对话",
+    "emptyHint": "问我任何问题——我可以搜索网络、计算、或查询知识库。",
+    "copy": "复制",
+    "copied": "✓ 已复制",
+    "stopped": "*[已停止生成]*",
+    "calling": "正在调用",
+    "completed": "完成"
+  },
+  "rag": {
+    "title": "知识库问答",
+    "description": "对 18+ 篇 AI Agent 开发、LangChain、部署运维等技术文章提问。",
+    "inputPlaceholder": "输入知识库相关的问题...",
+    "ask": "提问",
+    "asking": "查询中...",
+    "sources": "来源",
+    "score": "相关度",
+    "noQuery": "输入问题开始检索知识库",
+    "error": "查询失败。服务器可能正在冷启动，请重试。",
+    "examples": [
+      "Hermes Agent 是什么？",
+      "如何将 SPA 部署到 GitHub Pages？",
+      "解释 LangGraph 工作流"
+    ]
+  },
+  "crew": {
+    "title": "多 Agent 文章生成器",
+    "topic": "文章主题",
+    "inputPlaceholder": "输入主题，AI 团队将为你撰写文章...",
+    "generate": "生成文章",
+    "generating": "生成中...",
+    "agentProgress": "Agent 进度",
+    "pipeline": "研究员 → 写手 → 编辑",
+    "starting": "正在启动 AI 团队...",
+    "completedIn": "完成耗时",
+    "seconds": "秒",
+    "errorShort": "主题至少需要 2 个字符"
+  }
+}

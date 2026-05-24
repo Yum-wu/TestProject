@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
+import i18n from "i18next";
 import type { Message } from "../types/message";
 import { streamChat, type SSEEvent } from "../services/api";
 import {
@@ -114,13 +115,13 @@ export function useChat() {
           if (last && last.role === "assistant" && last.id === assistantId) {
             let suffix = "";
             if (event.type === "tool_start") {
-              suffix = `\n\n> 正在调用 ${toolName}...`;
+              suffix = `\n\n> ${i18n.t("chat.calling")} ${toolName}...`;
             } else {
               const result = String(info.result ?? "");
               const preview = result.length > 100
                 ? result.slice(0, 100) + "..."
                 : result;
-              suffix = `\n\n> ${toolName} 完成: ${preview}`;
+              suffix = `\n\n> ${toolName} ${i18n.t("chat.completed")}: ${preview}`;
             }
             updated[updated.length - 1] = {
               ...last,
@@ -224,7 +225,7 @@ export function useChat() {
         } else {
           updated[updated.length - 1] = {
             ...last,
-            content: last.content + "\n\n*[已停止生成]*",
+            content: last.content + `\n\n*[${i18n.t("chat.stopped")}]*`,
           };
         }
       }

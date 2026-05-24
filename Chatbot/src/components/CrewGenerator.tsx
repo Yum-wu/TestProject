@@ -1,8 +1,10 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-const CREW_API = (import.meta.env.VITE_CREW_API_URL as string) || "http://localhost:8001/api/crew";
+const CREW_API =
+  (import.meta.env.VITE_CREW_API_URL as string) || "http://localhost:8001/api/crew";
 
 interface CrewEvent {
   type: "agent_action" | "result" | "error" | "done";
@@ -27,12 +29,13 @@ const statusDot: Record<LogEntry["status"], string> = {
 };
 
 export function CrewLog({ entries }: { entries: LogEntry[] }) {
+  const { t } = useTranslation();
   if (entries.length === 0) return null;
 
   return (
     <div className="space-y-2">
       <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-        Agent 进度
+        {t("crew.agentProgress")}
       </h3>
       <div className="space-y-1">
         {entries.map((entry) => (
@@ -55,6 +58,7 @@ export function CrewLog({ entries }: { entries: LogEntry[] }) {
 }
 
 export function CrewGenerator() {
+  const { t } = useTranslation();
   const [topic, setTopic] = useState("");
   const [loading, setLoading] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -77,13 +81,13 @@ export function CrewGenerator() {
         { id: ++logIdRef.current, agent, status, detail },
       ]);
     },
-    []
+    [],
   );
 
   const handleGenerate = async () => {
     const trimmed = topic.trim();
     if (!trimmed || trimmed.length < 2) {
-      setError("主题至少需要 2 个字符");
+      setError(t("crew.errorShort"));
       return;
     }
 
@@ -108,13 +112,11 @@ export function CrewGenerator() {
 
       if (!response.ok) {
         const errBody = await response.text().catch(() => "");
-        throw new Error(
-          errBody || `请求失败 (${response.status})`
-        );
+        throw new Error(errBody || `Request failed (${response.status})`);
       }
 
       const reader = response.body?.getReader();
-      if (!reader) throw new Error("无法读取响应流");
+      if (!reader) throw new Error("Failed to read response stream");
 
       const decoder = new TextDecoder();
       let buffer = "";
@@ -136,15 +138,13 @@ export function CrewGenerator() {
             const event: CrewEvent = JSON.parse(data);
             handleEvent(event);
           } catch {
-            // skip unparseable events
+            // skip unparseable
           }
         }
       }
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
-      setError(
-        err instanceof Error ? err.message : "网络异常"
-      );
+      setError(err instanceof Error ? err.message : "Network error");
     } finally {
       setLoading(false);
     }
@@ -153,18 +153,14 @@ export function CrewGenerator() {
   const handleEvent = (event: CrewEvent) => {
     switch (event.type) {
       case "agent_action":
-        addLog(
-          event.agent || "Agent",
-          "running",
-          event.detail?.slice(0, 120) || "处理中..."
-        );
+        addLog(event.agent || "Agent", "running", event.detail?.slice(0, 120) || "Processing...");
         break;
       case "result":
         setArticle(event.final_output || "");
         setDuration(event.duration_ms || null);
         break;
       case "error":
-        setError(event.message || "未知错误");
+        setError(event.message || "Unknown error");
         break;
       case "done":
         break;
@@ -178,7 +174,7 @@ export function CrewGenerator() {
           htmlFor="topic-input"
           className="block text-sm font-medium text-gray-700 mb-2"
         >
-          文章主题
+          {t("crew.topic")}
         </label>
         <div className="flex gap-3">
           <input
@@ -189,7 +185,7 @@ export function CrewGenerator() {
             onKeyDown={(e) => {
               if (e.key === "Enter" && !loading) handleGenerate();
             }}
-            placeholder="输入主题，AI 团队将为你撰写文章..."
+            placeholder={t("crew.inputPlaceholder")}
             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             disabled={loading}
           />
@@ -198,7 +194,7 @@ export function CrewGenerator() {
             disabled={loading || topic.trim().length < 2}
             className="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? "生成中..." : "生成文章"}
+            {loading ? t("crew.generating") : t("crew.generate")}
           </button>
         </div>
       </div>
@@ -212,7 +208,7 @@ export function CrewGenerator() {
 
         {loading && logs.length === 0 && (
           <div className="text-center py-12 text-gray-400 text-sm">
-            正在启动 AI 团队...
+            {t("crew.starting")}
           </div>
         )}
 
@@ -220,7 +216,7 @@ export function CrewGenerator() {
 
         {duration !== null && loading && (
           <div className="text-center text-xs text-gray-400">
-            执行中：研究员 → 写手 → 编辑
+            {t("crew.pipeline")}
           </div>
         )}
 
@@ -228,7 +224,8 @@ export function CrewGenerator() {
           <div className="space-y-4">
             {duration !== null && (
               <div className="text-xs text-gray-400 text-right">
-                完成耗时 {(duration / 1000).toFixed(1)} 秒
+                {t("crew.completedIn")} {(duration / 1000).toFixed(1)}{" "}
+                {t("crew.seconds")}
               </div>
             )}
             <div className="bg-white border border-gray-200 rounded-lg px-6 py-4 prose prose-sm max-w-none">
@@ -242,4 +239,3 @@ export function CrewGenerator() {
     </div>
   );
 }
-
