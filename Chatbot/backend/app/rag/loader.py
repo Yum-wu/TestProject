@@ -40,7 +40,7 @@ def load_markdown_files(articles_dir: str) -> List[Dict[str, Any]]:
         print(f"[RAG] Articles dir not found: {articles_dir}")
         return docs
 
-    for fpath in sorted(path.glob("*.md")):
+    for fpath in sorted(path.rglob("*.md")):
         content = fpath.read_text(encoding="utf-8")
         metadata, body = parse_frontmatter(content)
         doc = {
