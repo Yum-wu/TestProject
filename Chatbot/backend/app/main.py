@@ -184,7 +184,7 @@ async def crew_generate(req: CrewGenerateRequest):
         # litellm (used by crewai 0.80+) needs standard OpenAI env vars
         os.environ.setdefault("OPENAI_API_KEY", settings.llm_api_key)
         os.environ.setdefault("OPENAI_BASE_URL", settings.llm_base_url)
-        os.environ.setdefault("OPENAI_MODEL_NAME", settings.llm_model)
+        os.environ.setdefault("OPENAI_MODEL_NAME", f"openai/{settings.llm_model}")
 
         start = time.time()
         result = generate_article(topic=req.topic)
@@ -211,7 +211,7 @@ async def crew_generate_stream(req: CrewGenerateRequest, request: Request):
     # litellm (used by crewai 0.80+) needs standard OpenAI env vars
     os.environ.setdefault("OPENAI_API_KEY", settings.llm_api_key)
     os.environ.setdefault("OPENAI_BASE_URL", settings.llm_base_url)
-    os.environ.setdefault("OPENAI_MODEL_NAME", settings.llm_model)
+    os.environ.setdefault("OPENAI_MODEL_NAME", f"openai/{settings.llm_model}")
 
     collector = EventCollector()
 
