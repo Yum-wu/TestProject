@@ -32,6 +32,51 @@ def parse_frontmatter(content: str) -> tuple[Dict[str, Any], str]:
     return metadata, body
 
 
+def load_single_document(filepath: str) -> Dict[str, Any]:
+    """Load a single .md or .txt file and return {metadata, content}.
+
+    Args:
+        filepath: Absolute path to .md or .txt file.
+
+    Returns:
+        dict with keys: metadata, content
+    """
+    fpath = Path(filepath)
+    suffix = fpath.suffix.lower()
+
+    if suffix == ".md":
+        content = fpath.read_text(encoding="utf-8")
+        metadata, body = parse_frontmatter(content)
+        return {
+            "metadata": {
+                "source": fpath.name,
+                "title": metadata.get("title", fpath.stem),
+                "slug": metadata.get("slug", fpath.stem),
+                "tags": metadata.get("tags", []),
+                "category": metadata.get("category", ""),
+                "filepath": str(fpath),
+                "uploaded": True,
+            },
+            "content": body,
+        }
+    elif suffix == ".txt":
+        content = fpath.read_text(encoding="utf-8")
+        return {
+            "metadata": {
+                "source": fpath.name,
+                "title": fpath.stem,
+                "slug": fpath.stem,
+                "tags": [],
+                "category": "upload",
+                "filepath": str(fpath),
+                "uploaded": True,
+            },
+            "content": content,
+        }
+    else:
+        raise ValueError(f"Unsupported file type: {suffix}")
+
+
 def load_markdown_files(articles_dir: str) -> List[Dict[str, Any]]:
     """Load all Markdown files from directory. Return list of {metadata, content, filepath}."""
     docs = []

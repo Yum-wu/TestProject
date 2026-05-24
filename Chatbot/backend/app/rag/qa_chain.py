@@ -110,6 +110,57 @@ def rag_query(
     return RAGQueryResponse(answer=answer, sources=sources)
 
 
+def run_incremental_index(filepath: str) -> dict:
+    """Incremental index for a single uploaded file.
+
+    Loads → splits → adds to existing Chroma collection (does NOT rebuild).
+    """
+    start = time.time()
+
+    from app.rag.loader import load_single_document
+    try:
+        from langchain.text_splitter import RecursiveCharacterTextSplitter
+    except ImportError:
+        from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+    # 1. Load single document
+    doc = load_single_document(filepath)
+    if not doc or not doc.get("content", "").strip():
+        return {
+            "status": "error",
+            "filename": os.path.basename(filepath),
+            "documents_indexed": 0,
+            "chunks_created": 0,
+            "elapsed_seconds": 0,
+            "message": "文件为空或无法读取",
+        }
+
+    # 2. Split
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=500,
+        chunk_overlap=50,
+        separators=["\n## ", "\n### ", "\n\n", "\n", " ", ""],
+    )
+
+    texts = splitter.split_text(doc["content"])
+    chunks = [{"text": t, "metadata": doc["metadata"]} for t in texts]
+
+    # 3. Add to existing index (incremental)
+    from app.rag.vector_store import add_to_index
+    add_to_index(chunks)
+
+    elapsed = time.time() - start
+    print(f"[RAG] Incremental index: {os.path.basename(filepath)} → {len(chunks)} chunks in {elapsed:.1f}s")
+
+    return {
+        "status": "ok",
+        "filename": os.path.basename(filepath),
+        "documents_indexed": 1,
+        "chunks_created": len(chunks),
+        "elapsed_seconds": round(elapsed, 1),
+    }
+
+
 def run_index_pipeline(
     articles_dir: str,
     llm_call_fn = None,

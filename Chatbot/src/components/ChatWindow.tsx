@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 import { useChat } from "../hooks/useChat";
-import { DemoIntro } from "./DemoIntro";
 import { MessageList } from "./MessageList";
 import { InputArea } from "./InputArea";
 
@@ -48,7 +47,14 @@ export function ChatWindow() {
       {hasMessages ? (
         <MessageList messages={messages} isLoading={isLoading} />
       ) : (
-        <DemoIntro />
+        <div className="flex-1 flex items-center justify-center text-gray-400">
+          <div className="text-center px-4">
+            <div className="text-5xl mb-4">💬</div>
+            <p className="text-base font-medium">{t("chat.emptyTitle")}</p>
+            <p className="text-sm mt-1">{t("chat.emptySubtitle")}</p>
+            <p className="text-xs mt-2 text-gray-300 max-w-xs mx-auto">{t("chat.emptyHint")}</p>
+          </div>
+        </div>
       )}
 
       <InputArea

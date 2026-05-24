@@ -8,26 +8,45 @@
     "slogan": "AI Agent Demo — RAG, Tool Calling & Multi-Agent Collaboration"
   },
   "demoIntro": {
-    "title": "Welcome to AI Agent Demo",
-    "subtitle": "This demo showcases production-ready AI agent capabilities with measurable performance.",
-    "features": [
+    "hero": {
+      "title": "Production-Grade AI Agent Demo",
+      "subtitle": "Multi-turn Chat · RAG Knowledge Base · Multi-Agent Collaboration — all with measurable performance metrics."
+    },
+    "badges": [
+      { "value": "94%", "label": "Recall@3" },
+      { "value": "1.5s", "label": "P50 Latency" },
+      { "value": "3", "label": "Strategies" }
+    ],
+    "capabilities": [
       {
-        "icon": "🤖",
-        "title": "AI Chat with Tools",
-        "desc": "Multi-turn conversation with calculator, web search, file storage, and knowledge retrieval tools. 1.5s median response."
+        "icon": "🧠",
+        "title": "RAG Knowledge Base",
+        "desc": "Vector search with MMR reranking over 18+ technical articles. Every answer cites its sources.",
+        "metric": "Recall@3 = 94%"
       },
       {
-        "icon": "📚",
-        "title": "RAG Knowledge Base",
-        "desc": "Ask questions over 18+ technical articles. Recall@3: 94%, with cited sources."
+        "icon": "🧪",
+        "title": "Prompt Experiments",
+        "desc": "Compare Direct, Chain-of-Thought, and Few-shot strategies side by side on the same test set.",
+        "metric": "3 Strategies"
       },
       {
         "icon": "👥",
         "title": "Multi-Agent Pipeline",
-        "desc": "Researcher → Writer → Editor — three AI agents collaborating to produce quality content."
+        "desc": "Researcher → Writer → Editor: three AI agents collaborate in real-time with SSE streaming.",
+        "metric": "3 Agents"
       }
     ],
-    "hint": "Try asking: \"What can you do?\" or \"Tell me about your RAG system\""
+    "cta": {
+      "chat": "Try AI Chat",
+      "rag": "Query Knowledge Base"
+    },
+    "differentiators": [
+      { "icon": "⚡", "text": "Token ↓61% vs baseline" },
+      { "icon": "🎯", "text": "Success rate ↑51%" },
+      { "icon": "🌐", "text": "Deployed on Railway" },
+      { "icon": "📡", "text": "SSE Real-time streaming" }
+    ]
   },
   "chat": {
     "title": "AI Chat Assistant",
@@ -58,7 +77,15 @@
       "What is Hermes Agent?",
       "How to deploy SPA to GitHub Pages?",
       "Explain LangGraph workflow"
-    ]
+    ],
+    "upload": {
+      "toggle": "Upload Document",
+      "hint": "Click or drag & drop a file here",
+      "formats": "Supports .md and .txt files",
+      "uploading": "Uploading and indexing...",
+      "success": "✅ {filename} indexed — {chunks} chunks created",
+      "badFormat": "Unsupported file format. Only .md and .txt are supported."
+    }
   },
   "crew": {
     "title": "Multi-Agent Article Generator",

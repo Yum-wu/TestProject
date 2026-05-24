@@ -8,26 +8,45 @@
     "slogan": "AI Agent 演示 — RAG、工具调用与多 Agent 协作"
   },
   "demoIntro": {
-    "title": "欢迎使用 AI Agent 演示",
-    "subtitle": "这个演示展示了生产级 AI Agent 的能力，所有功能都有可测量的性能数据。",
-    "features": [
+    "hero": {
+      "title": "生产级 AI Agent 演示平台",
+      "subtitle": "多轮对话 · RAG 知识库 · 多 Agent 协作 — 所有功能均有可测量的性能指标。"
+    },
+    "badges": [
+      { "value": "94%", "label": "检索召回率" },
+      { "value": "1.5s", "label": "中位延迟" },
+      { "value": "3", "label": "实验策略" }
+    ],
+    "capabilities": [
       {
-        "icon": "🤖",
-        "title": "AI 聊天 + 工具调用",
-        "desc": "多轮对话，支持计算器、联网搜索、文件存储、知识库检索。中位数响应时间 1.5s。"
+        "icon": "🧠",
+        "title": "RAG 知识库问答",
+        "desc": "向量检索 + MMR 重排序，覆盖 18+ 篇技术文章，每回答均附来源引用。",
+        "metric": "Recall@3 = 94%"
       },
       {
-        "icon": "📚",
-        "title": "RAG 知识库问答",
-        "desc": "对 18+ 篇技术文章提问。检索召回率 Recall@3: 94%，附来源引用。"
+        "icon": "🧪",
+        "title": "Prompt 策略实验",
+        "desc": "同数据集上对比 Direct、Chain-of-Thought、Few-shot 三种策略的效果差异。",
+        "metric": "3 种策略"
       },
       {
         "icon": "👥",
         "title": "多 Agent 文章生成",
-        "desc": "研究员 → 写手 → 编辑，三个 AI Agent 协作生成优质内容。"
+        "desc": "研究员 → 写手 → 编辑，三个 AI Agent 通过 SSE 实时协同写作。",
+        "metric": "3 个 Agent"
       }
     ],
-    "hint": "试试问：\"你能做什么？\" 或 \"介绍一下 RAG 系统\""
+    "cta": {
+      "chat": "试用 AI 聊天",
+      "rag": "查询知识库"
+    },
+    "differentiators": [
+      { "icon": "⚡", "text": "Token 降低 61%" },
+      { "icon": "🎯", "text": "成功率提升 51%" },
+      { "icon": "🌐", "text": "Railway 在线部署" },
+      { "icon": "📡", "text": "SSE 实时流式推送" }
+    ]
   },
   "chat": {
     "title": "AI 聊天助手",
@@ -58,7 +77,15 @@
       "Hermes Agent 是什么？",
       "如何将 SPA 部署到 GitHub Pages？",
       "解释 LangGraph 工作流"
-    ]
+    ],
+    "upload": {
+      "toggle": "上传文档",
+      "hint": "点击或拖拽文件到此处",
+      "formats": "支持 .md 和 .txt 文件",
+      "uploading": "上传并索引中...",
+      "success": "✅ {filename} 已索引 — 创建 {chunks} 个片段",
+      "badFormat": "不支持的文件格式，仅支持 .md 和 .txt。"
+    }
   },
   "crew": {
     "title": "多 Agent 文章生成器",

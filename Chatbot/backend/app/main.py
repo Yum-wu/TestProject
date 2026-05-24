@@ -3,7 +3,7 @@ import logging
 import os
 from typing import Any
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -15,7 +15,7 @@ from app.tools import ALL_TOOLS
 from app.memory.db import init_db
 from app.memory.manager import manager as memory_manager
 from app.config import settings
-from app.rag.models import RAGQueryRequest, RAGQueryResponse, RAGIndexResponse
+from app.rag.models import RAGQueryRequest, RAGQueryResponse, RAGIndexResponse, RAGUploadResponse
 from app.rag.qa_chain import rag_query, run_index_pipeline
 from app.rag.evaluator import run_full_evaluation
 from app.rag.prompt_experiment import run_experiment, STRATEGIES
@@ -115,6 +115,41 @@ async def rag_index_endpoint():
     """Re-index all articles into Chroma."""
     articles_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "articles")
     result = run_index_pipeline(articles_dir)
+    return result
+
+
+@app.post("/api/rag/upload", response_model=RAGUploadResponse)
+async def rag_upload_endpoint(file: UploadFile = File(...)):
+    """Upload a .md or .txt file and incrementally index it."""
+    import time
+    import shutil
+
+    # Validate extension
+    allowed = {".md", ".txt"}
+    ext = os.path.splitext(file.filename or "")[1].lower()
+    if ext not in allowed:
+        raise HTTPException(
+            status_code=400,
+            detail=f"不支持的文件格式: {ext}，仅支持 {', '.join(allowed)}",
+        )
+
+    # Save to uploads directory
+    upload_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "articles", "uploads")
+    os.makedirs(upload_dir, exist_ok=True)
+    dest = os.path.join(upload_dir, file.filename)
+
+    try:
+        content = await file.read()
+        with open(dest, "wb") as f:
+            f.write(content)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"文件保存失败: {str(e)}")
+
+    # Incremental index
+    result = run_incremental_index(dest)
+    if result["status"] == "error":
+        raise HTTPException(status_code=500, detail=result.get("message", "索引失败"))
+
     return result
 
 

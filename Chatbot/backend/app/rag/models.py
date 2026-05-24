@@ -29,3 +29,11 @@ class RAGIndexResponse(BaseModel):
     documents_indexed: int
     chunks_created: int
     elapsed_seconds: float
+
+
+class RAGUploadResponse(BaseModel):
+    status: str
+    filename: str
+    documents_indexed: int = 1
+    chunks_created: int
+    elapsed_seconds: float

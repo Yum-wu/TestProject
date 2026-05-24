@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
 const RAG_API_URL =
   (import.meta.env.VITE_API_RAG_URL as string) || "/api/rag/query";
+
+const RAG_UPLOAD_URL =
+  (import.meta.env.VITE_API_RAG_URL as string)?.replace(/\/query$/, "") || "/api/rag/upload";
 
 interface Source {
   title: string;
@@ -22,6 +25,68 @@ export function RagQuery() {
   const [result, setResult] = useState<RagResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Upload state
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUpload = useCallback(async (file: File) => {
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    if (ext !== "md" && ext !== "txt") {
+      setUploadMessage({ type: "error", text: t("rag.upload.badFormat") });
+      return;
+    }
+
+    setUploading(true);
+    setUploadMessage(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch(RAG_UPLOAD_URL, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        throw new Error(body || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      setUploadMessage({
+        type: "success",
+        text: t("rag.upload.success", { filename: file.name, chunks: data.chunks_created }),
+      });
+    } catch (err) {
+      setUploadMessage({
+        type: "error",
+        text: err instanceof Error ? err.message : String(err),
+      });
+    } finally {
+      setUploading(false);
+    }
+  }, [t]);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleUpload(file);
+  }, [handleUpload]);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setDragOver(false);
+  }, []);
 
   const handleSubmit = async () => {
     const trimmed = query.trim();
@@ -56,10 +121,20 @@ export function RagQuery() {
     <div className="flex flex-col h-full bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-3 shadow-sm">
-        <h1 className="text-lg font-semibold text-gray-800">
-          📚 {t("rag.title")}
-        </h1>
-        <p className="text-xs text-gray-500 mt-0.5">{t("rag.description")}</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-lg font-semibold text-gray-800">
+              📚 {t("rag.title")}
+            </h1>
+            <p className="text-xs text-gray-500 mt-0.5">{t("rag.description")}</p>
+          </div>
+          <button
+            onClick={() => setUploadOpen(!uploadOpen)}
+            className="text-xs px-3 py-1.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 transition-colors shrink-0 ml-4"
+          >
+            {uploadOpen ? "▼" : "▲"} {t("rag.upload.toggle")}
+          </button>
+        </div>
       </header>
 
       {/* Input */}
@@ -101,6 +176,60 @@ export function RagQuery() {
           )}
         </div>
       </div>
+
+      {/* Upload panel */}
+      {uploadOpen && (
+        <div className="bg-white border-b border-gray-200 px-6 py-4">
+          <div
+            ref={fileInputRef}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onClick={() => document.getElementById("rag-upload-input")?.click()}
+            className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
+              dragOver
+                ? "border-blue-400 bg-blue-50"
+                : "border-gray-300 hover:border-gray-400 bg-gray-50"
+            }`}
+          >
+            <input
+              id="rag-upload-input"
+              type="file"
+              accept=".md,.txt"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleUpload(file);
+                e.target.value = "";
+              }}
+            />
+            {uploading ? (
+              <div className="text-sm text-gray-500">
+                <span className="inline-block animate-spin mr-2">⏳</span>
+                {t("rag.upload.uploading")}
+              </div>
+            ) : (
+              <>
+                <div className="text-2xl mb-2">📄</div>
+                <p className="text-sm text-gray-600">{t("rag.upload.hint")}</p>
+                <p className="text-xs text-gray-400 mt-1">{t("rag.upload.formats")}</p>
+              </>
+            )}
+          </div>
+          {uploadMessage && (
+            <div
+              className={`mt-3 text-sm px-3 py-2 rounded-lg ${
+                uploadMessage.type === "success"
+                  ? "bg-green-50 text-green-700 border border-green-200"
+                  : "bg-red-50 text-red-700 border border-red-200"
+              }`}
+            >
+              {uploadMessage.type === "success" ? "✅ " : "⚠️ "}
+              {uploadMessage.text}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Content area */}
       <div className="flex-1 overflow-y-auto px-6 py-4">

@@ -80,6 +80,43 @@ def _get_collection(client, name: str = "articles"):
 
 # ── Public API ──
 
+def add_to_index(chunks: List[Dict[str, Any]], path: str = None):
+    """Add chunks to an EXISTING Chroma collection (incremental).
+
+    Unlike save_index() which deletes and recreates, this appends to
+    the existing 'articles' collection.  Creates the collection on first call.
+    """
+    save_path = path or VECTOR_DIR
+    os.makedirs(save_path, exist_ok=True)
+
+    client = _get_client(save_path)
+    collection = _get_collection(client)
+
+    # Determine starting ID offset
+    existing_count = collection.count()
+    ids = [f"chunk_{existing_count + i}" for i in range(len(chunks))]
+    documents = [c["text"] for c in chunks]
+    metadatas = [
+        {
+            "source": c["metadata"].get("source", ""),
+            "title": c["metadata"].get("title", ""),
+            "slug": c["metadata"].get("slug", ""),
+        }
+        for c in chunks
+    ]
+
+    batch_size = 20
+    for start in range(0, len(chunks), batch_size):
+        end = min(start + batch_size, len(chunks))
+        collection.add(
+            ids=ids[start:end],
+            documents=documents[start:end],
+            metadatas=metadatas[start:end],
+        )
+
+    print(f"[VectorStore] Added {len(chunks)} chunks to existing Chroma ({save_path})")
+
+
 def save_index(chunks: List[Dict[str, Any]], embeddings: np.ndarray = None, path: str = None):
     """Save chunks to Chroma persistent storage (embeddings computed automatically)."""
     save_path = path or VECTOR_DIR
