@@ -84,7 +84,10 @@
       "formats": "Supports .md and .txt files",
       "uploading": "Uploading and indexing...",
       "success": "✅ {filename} indexed — {chunks} chunks created",
-      "badFormat": "Unsupported file format. Only .md and .txt are supported."
+      "badFormat": "Unsupported file format. Only .md and .txt are supported.",
+      "files": "Uploaded files:",
+      "delete": "Delete",
+      "deleted": "Deleted {filename}"
     }
   },
   "crew": {

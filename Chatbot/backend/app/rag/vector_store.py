@@ -117,6 +117,23 @@ def add_to_index(chunks: List[Dict[str, Any]], path: str = None):
     print(f"[VectorStore] Added {len(chunks)} chunks to existing Chroma ({save_path})")
 
 
+def delete_from_index(source_filename: str, path: str = None):
+    """Delete all chunks whose metadata.source == source_filename from Chroma."""
+    save_path = path or VECTOR_DIR
+    try:
+        client = _get_client(save_path)
+        collection = _get_collection(client)
+    except Exception as e:
+        print(f"[VectorStore] Cannot open Chroma for delete: {e}")
+        return
+
+    count_before = collection.count()
+    collection.delete(where={"source": source_filename})
+    count_after = collection.count()
+    deleted = count_before - count_after
+    print(f"[VectorStore] Deleted {deleted} chunks for '{source_filename}' from Chroma ({save_path})")
+
+
 def save_index(chunks: List[Dict[str, Any]], embeddings: np.ndarray = None, path: str = None):
     """Save chunks to Chroma persistent storage (embeddings computed automatically)."""
     save_path = path or VECTOR_DIR

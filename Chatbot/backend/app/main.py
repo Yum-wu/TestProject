@@ -153,6 +153,46 @@ async def rag_upload_endpoint(file: UploadFile = File(...)):
     return result
 
 
+@app.get("/api/rag/uploads")
+async def rag_list_uploads():
+    """List all uploaded files in the uploads directory."""
+    upload_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "articles", "uploads")
+    if not os.path.isdir(upload_dir):
+        return {"files": []}
+    files = sorted(
+        {"filename": f, "size": os.path.getsize(os.path.join(upload_dir, f))}
+        for f in os.listdir(upload_dir)
+        if os.path.isfile(os.path.join(upload_dir, f))
+    )
+    return {"files": files}
+
+
+@app.delete("/api/rag/upload/{filename}", response_model=StatusResponse)
+async def rag_delete_upload(filename: str):
+    """Delete an uploaded file and its chunks from the index."""
+    import os
+
+    # Security: prevent path traversal
+    if ".." in filename or "/" in filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
+    upload_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "articles", "uploads")
+    filepath = os.path.join(upload_dir, filename)
+
+    # 1. Remove from Chroma index
+    from app.rag.vector_store import delete_from_index
+    delete_from_index(filename)
+
+    # 2. Delete physical file
+    if os.path.isfile(filepath):
+        os.remove(filepath)
+        logger.info("Deleted uploaded file: %s", filepath)
+    else:
+        logger.warning("File not found on disk (already deleted): %s", filepath)
+
+    return StatusResponse(status="deleted", session_id=filename)
+
+
 @app.post("/api/rag/evaluate")
 async def rag_evaluate_endpoint():
     """Run full RAG evaluation: Recall@k, Faithfulness, Latency."""

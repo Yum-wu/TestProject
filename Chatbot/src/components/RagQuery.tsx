@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 const RAG_API_URL =
@@ -33,6 +33,38 @@ export function RagQuery() {
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Uploaded files list
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+
+  const fetchUploadedFiles = useCallback(async () => {
+    try {
+      const res = await fetch(RAG_UPLOAD_URL.replace("/upload", "/uploads"));
+      if (!res.ok) return;
+      const data = await res.json();
+      setUploadedFiles((data.files || []).map((f: { filename: string }) => f.filename));
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => { fetchUploadedFiles(); }, [fetchUploadedFiles]);
+
+  const handleDeleteFile = useCallback(async (filename: string) => {
+    try {
+      const res = await fetch(`${RAG_UPLOAD_URL}/${encodeURIComponent(filename)}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setUploadedFiles((prev) => prev.filter((f) => f !== filename));
+      setUploadMessage({ type: "success", text: t("rag.upload.deleted", { filename }) });
+    } catch (err) {
+      setUploadMessage({
+        type: "error",
+        text: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }, [t]);
+
   const handleUpload = useCallback(async (file: File) => {
     const ext = file.name.split(".").pop()?.toLowerCase();
     if (ext !== "md" && ext !== "txt") {
@@ -62,6 +94,7 @@ export function RagQuery() {
         type: "success",
         text: t("rag.upload.success", { filename: file.name, chunks: data.chunks_created }),
       });
+      fetchUploadedFiles();
     } catch (err) {
       setUploadMessage({
         type: "error",
@@ -226,6 +259,29 @@ export function RagQuery() {
             >
               {uploadMessage.type === "success" ? "✅ " : "⚠️ "}
               {uploadMessage.text}
+            </div>
+          )}
+
+          {/* Uploaded files list */}
+          {uploadedFiles.length > 0 && (
+            <div className="mt-4">
+              <p className="text-xs font-medium text-gray-500 mb-2">{t("rag.upload.files")}</p>
+              <div className="space-y-1.5">
+                {uploadedFiles.map((fname) => (
+                  <div
+                    key={fname}
+                    className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <span className="text-gray-700 truncate mr-2">📄 {fname}</span>
+                    <button
+                      onClick={() => handleDeleteFile(fname)}
+                      className="text-xs text-red-500 hover:text-red-700 hover:bg-red-50 px-2 py-0.5 rounded transition-colors shrink-0"
+                    >
+                      {t("rag.upload.delete")}
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
