@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Tag from "../common/Tag";
 
 /* ===== 文章数据接口 ===== */
@@ -11,6 +12,7 @@ export type Post = {
   coverUrl?: string;
   category: string;
   tags: string[];
+  lang?: string;
   author: {
     name: string;
     avatarUrl?: string;
@@ -34,6 +36,8 @@ interface PostCardProps {
  * 使用 React.memo 优化，避免父组件重渲染时不必要的更新
  */
 function PostCard({ post, variant = "vertical" }: PostCardProps) {
+  const { t } = useTranslation();
+
   /* 水平布局 */
   if (variant === "horizontal") {
     return (
@@ -98,7 +102,7 @@ function PostCard({ post, variant = "vertical" }: PostCardProps) {
                     d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                {post.readingTime} 分钟
+                {t("postCard.readingTime", { n: post.readingTime })}
               </span>
               <span className="flex items-center gap-1">
                 <svg
@@ -208,7 +212,7 @@ function PostCard({ post, variant = "vertical" }: PostCardProps) {
                   d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              {post.readingTime}分钟
+              {t("postCard.readingTime", { n: post.readingTime })}
             </span>
             <span className="flex items-center gap-1">
               <svg

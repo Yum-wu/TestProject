@@ -1,7 +1,7 @@
 import type { Post, PostListItem } from "../types";
 
 /* ===== Vite 批量导入 Markdown 文章 ===== */
-const modules = import.meta.glob("../content/posts/*.md", {
+const modules = import.meta.glob("../content/posts/**/*.md", {
   query: "?raw",
   import: "default",
 }) as Record<string, () => Promise<string>>;
@@ -33,15 +33,17 @@ function parseFrontmatter(raw: string): {
 }
 
 /**
- * 获取所有文章列表
+ * 获取所有文章列表，可选按语言过滤
  */
-export async function getPosts(): Promise<{ items: PostListItem[] }> {
+export async function getPosts(lang?: string): Promise<{ items: PostListItem[] }> {
   const entries = Object.entries(modules);
   const posts: PostListItem[] = [];
 
   for (const [, loader] of entries) {
     const raw = await loader();
     const { frontmatter, content } = parseFrontmatter(raw);
+    const postLang = (frontmatter.lang as string) || "zh";
+    if (lang && postLang !== lang) continue;
     const wordCount = content.replace(/[\s\n\r]+/g, " ").split(" ").filter(Boolean).length;
     const readingTime = Math.max(1, Math.round(wordCount / 200));
     posts.push({
@@ -52,7 +54,7 @@ export async function getPosts(): Promise<{ items: PostListItem[] }> {
       coverUrl: (frontmatter.cover as string) || undefined,
       category: (frontmatter.category as string) || "未分类",
       tags: (frontmatter.tags as string[]) || [],
-      lang: (frontmatter.lang as string) || "zh",
+      lang: postLang,
       author: { name: "MyBlog" },
       createdAt: frontmatter.date as string,
       viewCount: 0,
@@ -68,17 +70,19 @@ export async function getPosts(): Promise<{ items: PostListItem[] }> {
 }
 
 /**
- * 根据 slug 获取文章详情
+ * 根据 slug 获取文章详情，可选按语言过滤
  */
 export async function getPostBySlug(
-  slug: string
+  slug: string,
+  lang?: string
 ): Promise<{ data: Post | null }> {
   const entries = Object.entries(modules);
 
   for (const [, loader] of entries) {
     const raw = await loader();
     const { frontmatter, content } = parseFrontmatter(raw);
-    if (frontmatter.slug === slug) {
+    const postLang = (frontmatter.lang as string) || "zh";
+    if (frontmatter.slug === slug && (!lang || postLang === lang)) {
       return {
         data: {
           id: frontmatter.slug as string,

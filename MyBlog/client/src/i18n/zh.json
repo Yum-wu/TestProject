@@ -33,5 +33,21 @@
   },
   "lang": {
     "switch": "English"
+  },
+  "postList": {
+    "emptyTitle": "暂无文章",
+    "emptyDesc": "还没有发布任何文章，敬请期待精彩内容。",
+    "gridView": "网格视图",
+    "listView": "列表视图"
+  },
+  "postCard": {
+    "readingTime": "{n} 分钟",
+    "views": "阅读"
+  },
+  "postDetail": {
+    "loading": "加载文章中..."
+  },
+  "app": {
+    "loading": "页面加载中..."
   }
 }

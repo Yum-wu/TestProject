@@ -9,16 +9,17 @@ import type { PostListItem } from "../types";
  * 展示文章列表（从本地 Markdown 读取）
  */
 export default function HomePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [posts, setPosts] = useState<PostListItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    postService.getPosts().then((res) => {
+    setLoading(true);
+    postService.getPosts(i18n.language).then((res) => {
       setPosts(res.items);
       setLoading(false);
     });
-  }, []);
+  }, [i18n.language]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -17,6 +18,7 @@ import { PageLoading } from "../components/common/Loading";
 export default function PostDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
 
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
@@ -25,7 +27,7 @@ export default function PostDetailPage() {
     if (!slug) return;
     setLoading(true);
     postService
-      .getPostBySlug(slug)
+      .getPostBySlug(slug, i18n.language)
       .then((res) => {
         if (!res.data) {
           navigate("/", { replace: true });
@@ -37,9 +39,9 @@ export default function PostDetailPage() {
         navigate("/", { replace: true });
       })
       .finally(() => setLoading(false));
-  }, [slug, navigate]);
+  }, [slug, navigate, i18n.language]);
 
-  if (loading) return <PageLoading text="加载文章中..." />;
+  if (loading) return <PageLoading text={t("postDetail.loading")} />;
   if (!post) return null;
 
   return (

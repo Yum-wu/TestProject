@@ -1,5 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import MainLayout from "./components/layout/MainLayout";
 import { Spinner } from "./components/common/Loading";
 import { getDarkMode, setDarkMode } from "./utils/storage";
@@ -13,11 +14,12 @@ const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
  * 页面加载 fallback 组件
  */
 function PageLoadingFallback() {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center py-20">
       <Spinner size="md" />
       <p className="mt-3 text-sm text-neutral-500 dark:text-neutral-400">
-        页面加载中...
+        {t("app.loading")}
       </p>
     </div>
   );

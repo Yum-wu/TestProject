@@ -99,3 +99,10 @@ uvicorn app.main:app --reload --port 8001
 - MyBlog 是纯静态博客，Markdown 文件在 `client/src/content/posts/`
 - 组件库：近期项目均使用 Tailwind CSS
 - 状态管理：React hooks（无外部状态库）
+
+## MyBlog 博客文章双语言约定
+
+- 每篇新文章必须同时创建中文版 (`xxx.md`, `lang: zh`) 和英文版 (`en/xxx.md`, `lang: en`)
+- 中英文版使用相同 `slug`，中文放 `posts/` 根目录，英文放 `posts/en/` 子目录
+- 标题、分类、标签、正文需各自语言独立编写
+- 英文页面的分类和标签使用英文名称（如 Technology, Life, AI）
