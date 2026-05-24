@@ -227,7 +227,7 @@ export function CrewGenerator() {
                 {t("crew.seconds")}
               </div>
             )}
-            <div className="bg-white border border-gray-200 rounded-lg px-6 py-4 prose prose-sm max-w-none">
+            <div className="bg-white border border-gray-200 rounded-lg px-6 py-4 prose max-w-none">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {article}
               </ReactMarkdown>

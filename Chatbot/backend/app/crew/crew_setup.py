@@ -56,9 +56,9 @@ def generate_article(topic: str, event_callback: Callable | None = None, lang: s
     if lang is None:
         lang = detect_language(topic)
 
-    researcher = create_researcher()
-    writer = create_writer()
-    editor = create_editor()
+    researcher = create_researcher(lang=lang)
+    writer = create_writer(lang=lang)
+    editor = create_editor(lang=lang)
 
     research_task = create_research_task(researcher, lang=lang)
     write_task = create_write_task(writer, research_task, lang=lang)
