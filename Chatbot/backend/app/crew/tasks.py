@@ -1,4 +1,4 @@
-"""Multi-Agent Article Generator — Task Definitions"""
+"""Multi-Agent Article Generator — Task Definitions (crewai 0.80+)"""
 
 from crewai import Agent, Task
 
@@ -11,8 +11,7 @@ def create_research_task(agent: Agent) -> Task:
             "2. 整理关键发现、核心论点和重要数据\n"
             "3. 识别不同观点和争议点（如有）\n"
             "4. 列出推荐参考资源\n"
-            "5. 输出结构化研究简报\n\n"
-            "主题：{topic}"
+            "5. 输出结构化研究简报"
         ),
         expected_output=(
             "一份结构化的研究简报，包含：\n"
@@ -26,7 +25,7 @@ def create_research_task(agent: Agent) -> Task:
     )
 
 
-def create_write_task(agent: Agent) -> Task:
+def create_write_task(agent: Agent, research_task: Task) -> Task:
     return Task(
         description=(
             "基于研究简报撰写完整文章。\n"
@@ -34,8 +33,7 @@ def create_write_task(agent: Agent) -> Task:
             "2. 撰写引人入胜的开头\n"
             "3. 按逻辑顺序展开论述\n"
             "4. 使用具体的例子和数据支撑观点\n"
-            "5. 写出有力的总结\n\n"
-            "研究简报：{research_output}"
+            "5. 写出有力的总结"
         ),
         expected_output=(
             "一篇完整的 Markdown 格式文章，包含：\n"
@@ -46,10 +44,11 @@ def create_write_task(agent: Agent) -> Task:
             "- 全文 1000-2000 字"
         ),
         agent=agent,
+        context=[research_task],
     )
 
 
-def create_review_task(agent: Agent) -> Task:
+def create_review_task(agent: Agent, write_task: Task) -> Task:
     return Task(
         description=(
             "审阅文章草稿并提供质量评分和改进建议。\n"
@@ -59,8 +58,7 @@ def create_review_task(agent: Agent) -> Task:
             "4. 检查格式规范性\n"
             "5. 给出 1-10 的总体评分\n"
             "6. 列出 3-5 条具体改进建议\n"
-            "7. 输出修订后的最终版本\n\n"
-            "文章草稿：{writer_output}"
+            "7. 输出修订后的最终版本"
         ),
         expected_output=(
             "审阅报告包含：\n"
@@ -70,4 +68,5 @@ def create_review_task(agent: Agent) -> Task:
             "- 最终修订版文章（Markdown 格式）"
         ),
         agent=agent,
+        context=[write_task],
     )

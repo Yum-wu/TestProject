@@ -1,4 +1,4 @@
-"""Multi-Agent Article Generator — Crew Orchestration with SSE support"""
+"""Multi-Agent Article Generator — Crew Orchestration with SSE support (crewai 0.80+)"""
 
 import logging
 import time
@@ -13,27 +13,27 @@ logger = logging.getLogger(__name__)
 def generate_article(topic: str, event_callback: Callable | None = None) -> dict:
     """Run the full crew pipeline for a given topic.
 
-    CrewAI 0.11.x doesn't support kickoff(inputs=...).
-    Task descriptions are set dynamically before execution.
+    crewai 0.80+ supports kickoff(inputs=...) and context parameter
+    for passing task outputs between dependent tasks.
     """
     researcher = create_researcher()
     writer = create_writer()
     editor = create_editor()
 
     research_task = create_research_task(researcher)
-    write_task = create_write_task(writer)
-    review_task = create_review_task(editor)
+    write_task = create_write_task(writer, research_task)
+    review_task = create_review_task(editor, write_task)
 
-    research_task.description = research_task.description.replace("{topic}", topic)
-    write_task.description = write_task.description.replace("{research_output}", "[Will be filled after research step]")
-    review_task.description = review_task.description.replace("{writer_output}", "[Will be filled after writing step]")
-
-    def on_step(step):
+    def on_step(output):
+        """Crew-level step_callback receives TaskOutput objects."""
         if not event_callback:
             return
         try:
-            agent_role = getattr(step, "role", None) or "unknown"
-            text = str(step)[:200] if not isinstance(step, str) else step[:200]
+            agent_role = "unknown"
+            agent = getattr(output, "agent", None)
+            if agent is not None:
+                agent_role = getattr(agent, "role", None) or str(agent)
+            text = output.raw[:200] if hasattr(output, "raw") else str(output)[:200]
             event_callback("agent_action", {"agent": agent_role, "detail": text})
         except Exception:
             logger.debug("Step callback failed", exc_info=True)
@@ -43,24 +43,24 @@ def generate_article(topic: str, event_callback: Callable | None = None) -> dict
         tasks=[research_task, write_task, review_task],
         process=Process.sequential,
         verbose=True,
+        step_callback=on_step if event_callback else None,
     )
-
-    if event_callback:
-        for agent in crew.agents:
-            agent.step_callback = on_step
 
     start = time.time()
 
     try:
-        result = crew.kickoff()
+        result = crew.kickoff(inputs={"topic": topic})
     except Exception as e:
         raise RuntimeError(f"Crew execution failed: {e}")
 
     duration_ms = int((time.time() - start) * 1000)
 
+    # crewai 0.80+: crew.kickoff() returns CrewOutput with .raw property
+    final_output = result.raw if hasattr(result, "raw") else str(result)
+
     return {
         "topic": topic,
-        "final_output": str(result),
+        "final_output": final_output,
         "duration_ms": duration_ms,
         "agents": [researcher.role, writer.role, editor.role],
     }

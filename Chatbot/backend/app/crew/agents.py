@@ -2,7 +2,7 @@
 
 import os
 from crewai import Agent
-from langchain.tools import tool
+from crewai.tools import tool
 
 
 @tool("web_search")
