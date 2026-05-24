@@ -13,6 +13,9 @@ function generateId(): string {
 
 const SESSION_KEY = "chatbot_session_id";
 
+/** SSE 文本块累积刷新间隔（ms） */
+const FLUSH_INTERVAL = 60;
+
 export function useChat() {
   const [messages, setMessages] = useState<Message[]>(loadMessages);
   const [isLoading, setIsLoading] = useState(false);
@@ -24,6 +27,55 @@ export function useChat() {
   const abortControllerRef = useRef<AbortController | null>(null);
   const sendingRef = useRef(false);
   const messagesRef = useRef(messages);
+
+  /** 文本累积缓冲 — 减少 setMessages 频率 */
+  const textBufferRef = useRef<string>("");
+  const assistantIdRef = useRef<string>("");
+  const flushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const scheduleFlush = useCallback(() => {
+    if (flushTimerRef.current) return;
+    flushTimerRef.current = setTimeout(() => {
+      flushTimerRef.current = null;
+      const buf = textBufferRef.current;
+      if (!buf) return;
+      textBufferRef.current = "";
+      const aid = assistantIdRef.current;
+      setMessages((prev) => {
+        const updated = [...prev];
+        const last = updated[updated.length - 1];
+        if (last && last.role === "assistant" && last.id === aid) {
+          updated[updated.length - 1] = {
+            ...last,
+            content: last.content + buf,
+          };
+        }
+        return updated;
+      });
+    }, FLUSH_INTERVAL);
+  }, []);
+
+  const flushNow = useCallback(() => {
+    if (flushTimerRef.current) {
+      clearTimeout(flushTimerRef.current);
+      flushTimerRef.current = null;
+    }
+    const buf = textBufferRef.current;
+    if (!buf) return;
+    textBufferRef.current = "";
+    const aid = assistantIdRef.current;
+    setMessages((prev) => {
+      const updated = [...prev];
+      const last = updated[updated.length - 1];
+      if (last && last.role === "assistant" && last.id === aid) {
+        updated[updated.length - 1] = {
+          ...last,
+          content: last.content + buf,
+        };
+      }
+      return updated;
+    });
+  }, []);
 
   useEffect(() => {
     messagesRef.current = messages;
@@ -47,48 +99,32 @@ export function useChat() {
       }
       case "text": {
         const chunk = event.content as string;
-        setMessages((prev) => {
-          const updated = [...prev];
-          const last = updated[updated.length - 1];
-          if (last && last.role === "assistant" && last.id === assistantId) {
-            updated[updated.length - 1] = {
-              ...last,
-              content: last.content + chunk,
-            };
-          }
-          return updated;
-        });
+        textBufferRef.current += chunk;
+        scheduleFlush();
         break;
       }
-      case "tool_start": {
-        const info = event.content as { tool: string; args: unknown };
-        setMessages((prev) => {
-          const updated = [...prev];
-          const last = updated[updated.length - 1];
-          if (last && last.role === "assistant" && last.id === assistantId) {
-            updated[updated.length - 1] = {
-              ...last,
-              content: last.content
-                + `\n\n> 正在调用 ${info.tool}...`,
-            };
-          }
-          return updated;
-        });
-        break;
-      }
+      case "tool_start":
       case "tool_end": {
-        const info = event.content as { tool: string; result: string };
+        flushNow();
+        const info = event.content as Record<string, unknown>;
+        const toolName = String(info.tool ?? "");
         setMessages((prev) => {
           const updated = [...prev];
           const last = updated[updated.length - 1];
           if (last && last.role === "assistant" && last.id === assistantId) {
-            const preview = info.result.length > 100
-              ? info.result.slice(0, 100) + "..."
-              : info.result;
+            let suffix = "";
+            if (event.type === "tool_start") {
+              suffix = `\n\n> 正在调用 ${toolName}...`;
+            } else {
+              const result = String(info.result ?? "");
+              const preview = result.length > 100
+                ? result.slice(0, 100) + "..."
+                : result;
+              suffix = `\n\n> ${toolName} 完成: ${preview}`;
+            }
             updated[updated.length - 1] = {
               ...last,
-              content: last.content
-                + `\n\n> ${info.tool} 完成: ${preview}`,
+              content: last.content + suffix,
             };
           }
           return updated;
@@ -96,12 +132,13 @@ export function useChat() {
         break;
       }
       case "error": {
+        flushNow();
         const err = event.content as { message: string };
         setError(err.message);
         break;
       }
     }
-  }, []);
+  }, [scheduleFlush, flushNow]);
 
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim() || sendingRef.current) return;
@@ -124,6 +161,7 @@ export function useChat() {
     };
 
     setMessages((prev) => [...prev, userMessage, assistantMessage]);
+    assistantIdRef.current = assistantMessage.id;
     setIsLoading(true);
 
     const abortController = new AbortController();
@@ -134,6 +172,7 @@ export function useChat() {
       sessionId: sessionIdRef.current,
       onEvent: (event) => handleEvent(event, assistantMessage.id),
       onError: (errMsg) => {
+        flushNow();
         setError(errMsg);
         setMessages((prev) => {
           const updated = [...prev];
@@ -150,19 +189,21 @@ export function useChat() {
       signal: abortController.signal,
     });
 
+    flushNow();
     setIsLoading(false);
     abortControllerRef.current = null;
     sendingRef.current = false;
-  }, [handleEvent]);
+  }, [handleEvent, flushNow]);
 
   const clearChat = useCallback(() => {
     abortControllerRef.current?.abort();
+    flushNow();
     setMessages([]);
     clearStorage();
     setIsLoading(false);
     setError(null);
     sendingRef.current = false;
-  }, []);
+  }, [flushNow]);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -170,6 +211,7 @@ export function useChat() {
 
   const stopGeneration = useCallback(() => {
     abortControllerRef.current?.abort();
+    flushNow();
     setIsLoading(false);
     sendingRef.current = false;
 
@@ -188,7 +230,7 @@ export function useChat() {
       }
       return updated;
     });
-  }, []);
+  }, [flushNow]);
 
   return {
     messages,
