@@ -2,12 +2,48 @@
 
 import logging
 import time
+import re
 from typing import Callable
 from crewai import Crew, Process
 from app.crew.agents import create_researcher, create_writer, create_editor
 from app.crew.tasks import create_research_task, create_write_task, create_review_task
 
 logger = logging.getLogger(__name__)
+
+
+def _clean_detail(text: str, max_len: int = 200) -> str:
+    """Clean raw agent output for display — strip AgentFinish / parse-fail noise."""
+    if not text:
+        return "Processing..."
+    # Strip langchain AgentFinish wrapper
+    text = re.sub(r"AgentFinish\([^)]*output='?", "", text)
+    text = re.sub(r"AgentAction\([^)]*", "", text)
+    # Strip trailing single-quote from AgentFinish regex artifacts
+    text = text.rstrip("')")
+    return text.strip()[:max_len] or "Processing..."
+
+
+def _make_task_callback(event_callback: Callable | None, agent_role: str):
+    """Create a task-level callback that knows the agent role."""
+    if not event_callback:
+        return None
+
+    def callback(output):
+        try:
+            if isinstance(output, str):
+                text = output
+            elif hasattr(output, "raw"):
+                text = output.raw or ""
+            else:
+                text = str(output)
+            event_callback("agent_action", {
+                "agent": agent_role,
+                "detail": _clean_detail(text),
+            })
+        except Exception:
+            logger.debug("Task callback failed", exc_info=True)
+
+    return callback
 
 
 def generate_article(topic: str, event_callback: Callable | None = None) -> dict:
@@ -24,26 +60,16 @@ def generate_article(topic: str, event_callback: Callable | None = None) -> dict
     write_task = create_write_task(writer, research_task)
     review_task = create_review_task(editor, write_task)
 
-    def on_step(output):
-        """Crew-level step_callback receives TaskOutput objects."""
-        if not event_callback:
-            return
-        try:
-            agent_role = "unknown"
-            agent = getattr(output, "agent", None)
-            if agent is not None:
-                agent_role = getattr(agent, "role", None) or str(agent)
-            text = output.raw[:200] if hasattr(output, "raw") else str(output)[:200]
-            event_callback("agent_action", {"agent": agent_role, "detail": text})
-        except Exception:
-            logger.debug("Step callback failed", exc_info=True)
+    # Attach per-task callbacks so we know the agent role
+    research_task.callback = _make_task_callback(event_callback, researcher.role)
+    write_task.callback = _make_task_callback(event_callback, writer.role)
+    review_task.callback = _make_task_callback(event_callback, editor.role)
 
     crew = Crew(
         agents=[researcher, writer, editor],
         tasks=[research_task, write_task, review_task],
         process=Process.sequential,
         verbose=True,
-        step_callback=on_step if event_callback else None,
     )
 
     start = time.time()
