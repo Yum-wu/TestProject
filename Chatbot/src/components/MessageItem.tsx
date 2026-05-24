@@ -9,7 +9,7 @@ interface MessageItemProps {
 }
 
 /** 代码块简易渲染（避免 react-syntax-highlighter 懒加载导致的 DOM 冲突） */
-function SimpleCode({ language, code }: { language: string; code: string }) {
+function SimpleCode({ language, code }: { language?: string; code: string }) {
   return (
     <div className="relative group rounded-lg overflow-hidden my-2">
       <div className="flex items-center justify-between bg-gray-800 px-4 py-2 text-xs text-gray-400">
