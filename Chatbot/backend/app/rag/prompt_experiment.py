@@ -10,7 +10,7 @@ from app.utils.lang_detect import lang_instruction
 
 logger = logging.getLogger(__name__)
 
-# ── System Prompt templates ──
+# ── System Prompt templates (Chinese) ──
 
 DIRECT_PROMPT = """你是知识库问答助手。基于提供的参考文档回答用户问题。
 
@@ -71,10 +71,77 @@ FEW_SHOT_PROMPT = """你是知识库问答助手。基于提供的参考文档�
 问题：{question}
 """
 
+# ── English templates ──
+
+DIRECT_PROMPT_EN = """You are a knowledge base QA assistant. Answer user questions based on the provided reference documents.
+
+Rules:
+1. Only answer based on the reference documents. If information is not in the documents, say "not mentioned in the documents".
+2. Cite sources at the end of your answer, format: [Source: Article Title].
+3. If the question is unrelated to the documents, politely explain that you cannot answer.
+4. Keep answers concise and accurate.
+{lang_instruction}
+
+Reference documents:
+{context}
+"""
+
+COT_PROMPT_EN = """You are a knowledge base QA assistant. Answer user questions based on the provided reference documents.
+
+Reasoning steps (must follow):
+1. Read the reference documents carefully and identify content relevant to the question
+2. List the relevant evidence you found
+3. Derive the answer based on the evidence
+4. Check if the answer fully covers the question
+
+Rules:
+- Only answer based on the reference documents. If information is not in the documents, say "not mentioned in the documents".
+- Cite sources at the end of your answer, format: [Source: Article Title].
+- If the question is unrelated to the documents, politely explain that you cannot answer.
+{lang_instruction}
+
+First write out your reasoning process, then give the final answer.
+
+Reference documents:
+{context}
+"""
+
+FEW_SHOT_PROMPT_EN = """You are a knowledge base QA assistant. Answer user questions based on the provided reference documents.
+
+Here are some examples:
+
+Example 1:
+Reference: Hermes Agent has 4 memory layers: L0 Conversation, L1 Atoms, L2 Scenarios, L3 Persona
+Question: How many memory layers does Hermes Agent have?
+Answer: 4 layers. L0 Conversation (raw conversation), L1 Atoms (atomic fact extraction), L2 Scenarios (scenario aggregation), L3 Persona (user profile). [Source: Hermes Agent in Practice]
+
+Example 2:
+Reference: GitHub Pages SPA deployment requires setting base: "/TestProject/" and basename="/TestProject"
+Question: What path parameters need to be configured for SPA deployment on GitHub Pages?
+Answer: Configure Vite's base parameter as "/TestProject/" and React Router's basename as "/TestProject/". base controls static asset paths, basename controls frontend routing paths — both must be set. [Source: SPA Deployment on GitHub Pages]
+
+---
+
+{lang_instruction}
+
+Now answer the following question:
+
+Reference documents:
+{context}
+
+Question: {question}
+"""
+
 STRATEGIES = {
     "direct": DIRECT_PROMPT,
     "cot": COT_PROMPT,
     "few_shot": FEW_SHOT_PROMPT,
+}
+
+STRATEGIES_EN = {
+    "direct": DIRECT_PROMPT_EN,
+    "cot": COT_PROMPT_EN,
+    "few_shot": FEW_SHOT_PROMPT_EN,
 }
 
 
@@ -85,14 +152,17 @@ def run_experiment(
     rag_query_fn: Callable,
     llm,
     strategies: List[str] = None,
+    lang: str = "zh",
 ) -> Dict[str, Any]:
     """Run prompt experiment on Q&A pairs for each strategy."""
     if strategies is None:
         strategies = list(STRATEGIES.keys())
 
+    strategy_templates = STRATEGIES_EN if lang == "en" else STRATEGIES
+
     results = {}
     for strategy in strategies:
-        template = STRATEGIES.get(strategy)
+        template = strategy_templates.get(strategy)
         if template is None:
             continue
         logger.info("Running strategy: %s", strategy)

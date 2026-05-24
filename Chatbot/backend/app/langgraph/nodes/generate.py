@@ -18,6 +18,18 @@ GENERATE_PROMPT = """你是 AI 助手。根据以下信息生成最终回答。
 请给出完整、准确的回答。如有引用来源，在末尾标注。
 """
 
+GENERATE_PROMPT_EN = """You are an AI assistant. Generate a final answer based on the information below.
+
+Intent: {intent}
+
+{rag_section}
+{agent_section}
+
+{lang_instruction}
+
+Please provide a complete and accurate answer. If citing sources, include them at the end.
+"""
+
 
 def run_generate_node(
     query: str,
@@ -45,7 +57,7 @@ def run_generate_node(
 
     if not rag_section and not agent_section:
         # Direct LLM response for chat intent
-        sys_prompt = f"你是一个友好的 AI 助手。{lang_instr}"
+        sys_prompt = f"You are a friendly AI assistant. {lang_instr}" if lang == "en" else f"你是一个友好的 AI 助手。{lang_instr}"
         if llm_call_fn:
             return llm_call_fn([
                 {"role": "system", "content": sys_prompt},
@@ -53,7 +65,8 @@ def run_generate_node(
             ])
         return query
 
-    prompt = GENERATE_PROMPT.format(
+    generate_template = GENERATE_PROMPT_EN if lang == "en" else GENERATE_PROMPT
+    prompt = generate_template.format(
         intent=intent,
         rag_section=rag_section,
         agent_section=agent_section,
