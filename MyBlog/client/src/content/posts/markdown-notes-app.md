@@ -5,6 +5,7 @@ slug: markdown-notes-app
 tags: [React, Markdown, TypeScript, 工具]
 category: 技术
 excerpt: 开发 Markdown 笔记应用的架构设计分享，包括三栏布局、防抖保存和实时预览的实现。
+lang: zh
 ---
 
 ## 项目背景

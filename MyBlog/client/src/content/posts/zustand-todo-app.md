@@ -5,6 +5,7 @@ slug: zustand-todo-app
 tags: [React, Zustand, 状态管理, TypeScript]
 category: 技术
 excerpt: 使用 Zustand 替代 Redux 进行 React 状态管理，从我的 Todo Manager 项目总结一些实践经验。
+lang: zh
 ---
 
 ## 前言

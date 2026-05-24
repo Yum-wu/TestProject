@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+from typing import Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,6 +21,7 @@ from app.rag.evaluator import run_full_evaluation
 from app.rag.prompt_experiment import run_experiment, STRATEGIES
 from app.rag.test_data import TEST_QA_PAIRS
 from app.rag.vector_store import retrieve
+from app.utils.lang_detect import detect_language
 
 logger = logging.getLogger(__name__)
 
@@ -32,18 +34,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-_agent = None
+_agents: dict[str, Any] = {}
 _agent_lock = asyncio.Lock()
 
 
-async def _get_agent():
-    global _agent
-    if _agent is None:
+async def _get_agent(lang: str = "zh"):
+    """Get or create a chat agent for the given language."""
+    global _agents
+    if lang not in _agents:
         async with _agent_lock:
-            if _agent is None:
+            if lang not in _agents:
                 llm = create_llm()
-                _agent = create_chat_agent(llm)
-    return _agent
+                _agents[lang] = create_chat_agent(llm, lang=lang)
+    return _agents[lang]
 
 
 @app.on_event("startup")
@@ -61,7 +64,8 @@ async def shutdown():
 
 @app.post("/api/chat/stream")
 async def chat_stream(req: ChatRequest):
-    agent = await _get_agent()
+    lang = detect_language(req.message)
+    agent = await _get_agent(lang)
     return StreamingResponse(
         stream_agent_with_memory(
             agent, req.message, req.session_id or "",

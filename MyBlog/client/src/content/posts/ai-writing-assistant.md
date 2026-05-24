@@ -5,6 +5,7 @@ slug: ai-writing-assistant
 tags: [AI, React, 流式输出, 前端]
 category: 技术
 excerpt: 分享 AI 写作助手和 AI Chatbot 两个项目的开发经验，重点介绍流式输出 SSE 和 Prompt 工程。
+lang: zh
 ---
 
 ## 项目简介

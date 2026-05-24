@@ -5,6 +5,7 @@ slug: weather-app-api-integration
 tags: [React, API, 地理定位, TypeScript]
 category: 技术
 excerpt: 从我的天气查询项目总结第三方 API 集成、地理定位和多城市对比功能的实现经验。
+lang: zh
 ---
 
 ## 项目概览

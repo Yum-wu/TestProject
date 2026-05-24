@@ -5,6 +5,7 @@ slug: hermes-agent-practical-guide
 tags: [AI, Hermes Agent, 开源, 实战]
 category: 技术
 excerpt: 深入探索 Hermes Agent 的分层记忆系统、三大核心技能集成，以及从零搭建 AI Agent 工作流的完整实践记录。
+lang: zh
 ---
 
 # Hermes Agent 实战 — 分层记忆系统与技能生态整合

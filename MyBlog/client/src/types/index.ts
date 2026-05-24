@@ -24,6 +24,7 @@ export interface PostListItem {
   coverUrl?: string;
   category: string;
   tags: string[];
+  lang?: string;
   author: { name: string; avatarUrl?: string };
   createdAt: string;
   viewCount: number;

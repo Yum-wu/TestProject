@@ -1,17 +1,18 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 /* ===== 导航链接配置 ===== */
 interface NavItem {
-  label: string;
+  labelKey: string;
   href: string;
 }
 
 const navItems: NavItem[] = [
-  { label: "首页", href: "/" },
-  { label: "文章", href: "/posts" },
-  { label: "标签", href: "/tags" },
-  { label: "关于", href: "/about" },
+  { labelKey: "header.nav.home", href: "/" },
+  { labelKey: "header.nav.posts", href: "/posts" },
+  { labelKey: "header.nav.tags", href: "/tags" },
+  { labelKey: "header.nav.about", href: "/about" },
 ];
 
 interface HeaderProps {
@@ -23,7 +24,13 @@ interface HeaderProps {
  * 顶部导航栏
  */
 export default function Header({ isDark = false, onToggleDark }: HeaderProps) {
+  const { t, i18n } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const toggleLang = () => {
+    const next = i18n.language === "zh" ? "en" : "zh";
+    i18n.changeLanguage(next);
+  };
 
   return (
     <header className="sticky top-0 z-50 glass border-b border-neutral-200 dark:border-neutral-700/50">
@@ -51,7 +58,7 @@ export default function Header({ isDark = false, onToggleDark }: HeaderProps) {
                   to={item.href}
                   className="px-3 py-2 text-sm font-medium text-neutral-600 dark:text-neutral-300 rounded-lg hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-950/30 transition-colors duration-200"
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                 </Link>
               ))}
             </nav>
@@ -59,12 +66,22 @@ export default function Header({ isDark = false, onToggleDark }: HeaderProps) {
 
           {/* 右侧操作 */}
           <div className="flex items-center gap-2">
+            {/* 语言切换 */}
+            <button
+              type="button"
+              onClick={toggleLang}
+              className="flex h-9 px-2 items-center justify-center rounded-lg text-xs font-medium text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+              aria-label={t("lang.switch")}
+            >
+              {t("lang.switch")}
+            </button>
+
             {/* 暗色模式切换 */}
             <button
               type="button"
               onClick={onToggleDark}
               className="flex h-9 w-9 items-center justify-center rounded-lg text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-accent-500 transition-colors"
-              aria-label={isDark ? "切换亮色模式" : "切换暗色模式"}
+              aria-label={isDark ? t("header.toggleLight") : t("header.toggleDark")}
             >
               {isDark ? (
                 <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -82,7 +99,7 @@ export default function Header({ isDark = false, onToggleDark }: HeaderProps) {
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="flex md:hidden h-9 w-9 items-center justify-center rounded-lg text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
-              aria-label="菜单"
+              aria-label={t("header.menu")}
             >
               {mobileMenuOpen ? (
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -108,7 +125,7 @@ export default function Header({ isDark = false, onToggleDark }: HeaderProps) {
                   onClick={() => setMobileMenuOpen(false)}
                   className="px-3 py-2.5 text-sm font-medium text-neutral-600 dark:text-neutral-300 rounded-lg hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-950/30 transition-colors"
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                 </Link>
               ))}
             </nav>

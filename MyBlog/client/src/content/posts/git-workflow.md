@@ -5,6 +5,7 @@ slug: git-workflow-best-practices
 tags: [Git, 工具, 工作流]
 category: 技术
 excerpt: 团队协作中常用的 Git 工作流模式，以及 commit 规范、分支管理的最佳实践。
+lang: zh
 ---
 
 ## 为什么需要规范的工作流？

@@ -5,6 +5,7 @@ slug: hello-world
 tags: [生活, 博客]
 category: 随笔
 excerpt: 这是我的个人博客的第一篇文章，记录一下搭建博客的心路历程。
+lang: zh
 ---
 
 # Hello World!

@@ -5,6 +5,7 @@ slug: chatbot-railway-deployment
 tags: [技术, Railway, Docker, FastAPI, AI, 部署]
 category: 技术
 excerpt: 把一个 React 19 + FastAPI + LangChain + Chroma RAG 的 AI Agent 项目部署到 Railway 云平台，涉及 Docker 多阶段构建、SSE 流式传输、持久化向量存储、白屏 Bug 排查。本文记录完整过程与关键决策。
+lang: zh
 ---
 
 # AI Chatbot 部署 Railway 全记录

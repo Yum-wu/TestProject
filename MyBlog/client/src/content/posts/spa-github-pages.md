@@ -5,6 +5,7 @@ slug: spa-github-pages
 tags: [技术, GitHub Pages, SPA, 前端]
 category: 技术
 excerpt: 把 React SPA 部署到 GitHub Pages，你以为跑一下 build 就行？我前后修了 7 个问题才让页面正常渲染。这篇文章记录了完整的踩坑路径和修复方案。
+lang: zh
 ---
 
 # SPA 部署 GitHub Pages 踩坑实录

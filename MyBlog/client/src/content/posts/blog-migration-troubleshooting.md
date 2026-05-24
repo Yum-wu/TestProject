@@ -5,6 +5,7 @@ slug: blog-migration-troubleshooting
 tags: [Vercel, 部署, Git, 前端, 踩坑]
 category: 技术
 excerpt: 一次代码清理引发的连锁灾难——13 个文件被 Git 报错信息覆盖、GitHub Pages 白屏、Vercel 反复部署失败。这篇文章记录了从排查到修复的完整过程。
+lang: zh
 ---
 
 # 博客搬家记 — 从 Git 报错到 Vercel 部署的全栈踩坑

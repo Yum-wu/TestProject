@@ -3,12 +3,17 @@
 汇总所有中间结果，生成最终回答。
 """
 
+from app.utils.lang_detect import detect_language, lang_instruction
+
+
 GENERATE_PROMPT = """你是 AI 助手。根据以下信息生成最终回答。
 
 意图：{intent}
 
 {rag_section}
 {agent_section}
+
+{lang_instruction}
 
 请给出完整、准确的回答。如有引用来源，在末尾标注。
 """
@@ -23,6 +28,9 @@ def run_generate_node(
     llm_call_fn = None,
 ) -> str:
     """Generate final answer from all intermediate results."""
+    lang = detect_language(query)
+    lang_instr = lang_instruction(lang).strip()
+
     rag_section = ""
     if rag_context:
         rag_sources_text = ""
@@ -37,9 +45,10 @@ def run_generate_node(
 
     if not rag_section and not agent_section:
         # Direct LLM response for chat intent
+        sys_prompt = f"你是一个友好的 AI 助手。{lang_instr}"
         if llm_call_fn:
             return llm_call_fn([
-                {"role": "system", "content": "你是一个友好的 AI 助手。"},
+                {"role": "system", "content": sys_prompt},
                 {"role": "user", "content": query},
             ])
         return query
@@ -48,6 +57,7 @@ def run_generate_node(
         intent=intent,
         rag_section=rag_section,
         agent_section=agent_section,
+        lang_instruction=lang_instr,
     )
 
     if llm_call_fn:
@@ -57,7 +67,7 @@ def run_generate_node(
         ])
 
     # Fallback
-    parts = [query]
+    parts = [query, f"\n\n[{lang_instr}]"]
     if rag_context:
         parts.append(f"\n\n[知识库]\n{rag_context}")
     if agent_result:

@@ -5,6 +5,7 @@ slug: wechat-miniprogram-ai-agent
 tags: [微信小程序, AI, CloudBase, 前端]
 category: 技术
 excerpt: 用微信小程序 + 腾讯云开发 CloudBase + 混元大模型做了一个 AI 销售助手，记录开发中遇到的坑和解决方案。
+lang: zh
 ---
 
 ## 背景

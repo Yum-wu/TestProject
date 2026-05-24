@@ -1,36 +1,36 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 /* ===== 页脚链接分组配置 ===== */
 interface FooterLinkGroup {
-  title: string;
-  links: { label: string; href: string }[];
+  titleKey: string;
+  links: { labelKey: string; href: string }[];
 }
 
 const footerLinkGroups: FooterLinkGroup[] = [
   {
-    title: "导航",
+    titleKey: "footer.nav",
     links: [
-      { label: "首页", href: "/" },
-      { label: "文章", href: "/posts" },
-      { label: "分类", href: "/categories" },
-      { label: "标签", href: "/tags" },
+      { labelKey: "footer.posts", href: "/posts" },
+      { labelKey: "footer.categories", href: "/categories" },
+      { labelKey: "footer.tags", href: "/tags" },
     ],
   },
   {
-    title: "关于",
+    titleKey: "footer.about",
     links: [
-      { label: "关于我们", href: "/about" },
-      { label: "联系方式", href: "/contact" },
-      { label: "隐私政策", href: "/privacy" },
-      { label: "服务条款", href: "/terms" },
+      { labelKey: "footer.aboutUs", href: "/about" },
+      { labelKey: "footer.contact", href: "/contact" },
+      { labelKey: "footer.privacy", href: "/privacy" },
+      { labelKey: "footer.terms", href: "/terms" },
     ],
   },
   {
-    title: "社交",
+    titleKey: "footer.social",
     links: [
-      { label: "GitHub", href: "https://github.com" },
-      { label: "Twitter", href: "https://twitter.com" },
-      { label: "RSS 订阅", href: "/rss" },
+      { labelKey: "footer.github", href: "https://github.com/Yum-wu" },
+      { labelKey: "footer.twitter", href: "https://twitter.com" },
+      { labelKey: "footer.rss", href: "/rss" },
     ],
   },
 ];
@@ -40,6 +40,7 @@ const footerLinkGroups: FooterLinkGroup[] = [
  * 包含版权信息、链接分组、社交图标
  */
 export default function Footer() {
+  const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -69,24 +70,24 @@ export default function Footer() {
                 <span className="text-gradient">MyBlog</span>
               </Link>
               <p className="mt-4 text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed max-w-xs">
-                记录技术成长，分享编程心得。用文字连接思想，用代码改变世界。
+                {t("footer.description")}
               </p>
             </div>
 
             {/* 链接分组 */}
             {footerLinkGroups.map((group) => (
-              <div key={group.title}>
+              <div key={group.titleKey}>
                 <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-                  {group.title}
+                  {t(group.titleKey)}
                 </h3>
                 <ul className="mt-4 space-y-3">
                   {group.links.map((link) => (
-                    <li key={link.label}>
+                    <li key={link.labelKey}>
                       <Link
                         to={link.href}
                         className="text-sm text-neutral-500 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                       >
-                        {link.label}
+                        {t(link.labelKey)}
                       </Link>
                     </li>
                   ))}
@@ -99,7 +100,7 @@ export default function Footer() {
         {/* ===== 底部版权信息 ===== */}
         <div className="border-t border-neutral-200 dark:border-neutral-800 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-neutral-500 dark:text-neutral-400">
-            &copy; {currentYear} MyBlog. All rights reserved.
+            &copy; {currentYear} MyBlog. {t("footer.copyright")}
           </p>
           <p className="text-sm text-neutral-400 dark:text-neutral-500">
             Built with React & Tailwind CSS

@@ -52,6 +52,7 @@ export async function getPosts(): Promise<{ items: PostListItem[] }> {
       coverUrl: (frontmatter.cover as string) || undefined,
       category: (frontmatter.category as string) || "未分类",
       tags: (frontmatter.tags as string[]) || [],
+      lang: (frontmatter.lang as string) || "zh",
       author: { name: "MyBlog" },
       createdAt: frontmatter.date as string,
       viewCount: 0,

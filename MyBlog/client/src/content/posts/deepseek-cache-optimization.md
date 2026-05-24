@@ -5,6 +5,7 @@ slug: deepseek-cache-optimization
 tags: [DeepSeek, LLM, 代理, 缓存, 优化, 性能, Codex]
 category: 技术
 excerpt: "给 Codex 写 DeepSeek 代理时发现缓存率不到 50%，远低于 Claude 的 96%。通过五轮搜索、分析和修复，最终把缓存率提升到 76%，session 内稳定期达到 95-99%。这篇文章记录了完整的技术调查过程。"
+lang: zh
 ---
 
 # LLM 缓存优化实战：把 DeepSeek 代理缓存率从 56% 提升到 76%

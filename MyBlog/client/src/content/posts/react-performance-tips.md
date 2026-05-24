@@ -5,6 +5,7 @@ slug: react-performance-tips
 tags: [React, 前端, 性能优化]
 category: 技术
 excerpt: 分享 React 应用性能优化的常用技巧，包括 memo、useMemo、useCallback 的正确使用方式。
+lang: zh
 ---
 
 ## 前言
