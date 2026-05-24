@@ -1,9 +1,7 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "builder": "DOCKERFILE",
-    "dockerfilePath": "Chatbot/Dockerfile",
-    "rootDirectory": "Chatbot"
+    "builder": "DOCKERFILE"
   },
   "deploy": {
     "numReplicas": 1,
