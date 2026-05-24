@@ -177,13 +177,17 @@ class CrewGenerateRequest(BaseModel):
 @app.post("/api/crew/generate")
 async def crew_generate(req: CrewGenerateRequest):
     """Generate article via 3-agent crew (synchronous)."""
+    import os
     import time
-    from app.agent.llm import create_llm
     from app.crew.crew_setup import generate_article
     try:
+        # litellm (used by crewai 0.80+) needs standard OpenAI env vars
+        os.environ.setdefault("OPENAI_API_KEY", settings.llm_api_key)
+        os.environ.setdefault("OPENAI_BASE_URL", settings.llm_base_url)
+        os.environ.setdefault("OPENAI_MODEL_NAME", settings.llm_model)
+
         start = time.time()
-        llm = create_llm(streaming=False)
-        result = generate_article(topic=req.topic, llm=llm)
+        result = generate_article(topic=req.topic)
         duration_ms = int((time.time() - start) * 1000)
         return {
             "topic": result["topic"],
@@ -200,17 +204,21 @@ async def crew_generate(req: CrewGenerateRequest):
 async def crew_generate_stream(req: CrewGenerateRequest, request: Request):
     """Generate article with real-time agent progress via SSE."""
     import asyncio
-    from app.agent.llm import create_llm
+    import os
     from app.crew.crew_setup import generate_article
     from app.crew.main_events import EventCollector
+
+    # litellm (used by crewai 0.80+) needs standard OpenAI env vars
+    os.environ.setdefault("OPENAI_API_KEY", settings.llm_api_key)
+    os.environ.setdefault("OPENAI_BASE_URL", settings.llm_base_url)
+    os.environ.setdefault("OPENAI_MODEL_NAME", settings.llm_model)
 
     collector = EventCollector()
 
     async def run_crew():
         try:
-            llm = create_llm(streaming=False)
             result = await asyncio.to_thread(
-                generate_article, req.topic, collector.emit, llm
+                generate_article, req.topic, collector.emit
             )
             collector.emit("result", {
                 "final_output": result["final_output"],
