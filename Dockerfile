@@ -1,5 +1,5 @@
 # ── Chatbot Backend + Frontend (Railway monorepo entry) ──
-# 所有路径加 Chatbot/ 前缀，因为 Railway build context = repo 根
+# FastAPI serves both API and static frontend files
 
 # Stage: 构建前端
 FROM node:22-alpine AS frontend-builder
@@ -9,25 +9,23 @@ RUN npm ci
 COPY Chatbot/ .
 RUN npm run build
 
-# Stage: 后端 + nginx
+# Stage: Python 后端
 FROM python:3.12-slim
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    nginx \
     sqlite3 \
-    && rm -rf /var/lib/apt/lists/* \
-    && ln -sf /dev/stdout /var/log/nginx/access.log \
-    && ln -sf /dev/stderr /var/log/nginx/error.log
+    && rm -rf /var/lib/apt/lists/*
 
 COPY Chatbot/backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY Chatbot/backend/ .
 RUN mkdir -p /app/data/vectors
 
-COPY --from=frontend-builder /app/dist /usr/share/nginx/html
-COPY Chatbot/nginx.conf /etc/nginx/conf.d/default.conf
+# 从前端构建阶段复制静态文件
+COPY --from=frontend-builder /app/dist /app/static
 
+# Railway 会自动设置 PORT 环境变量（默认 80）
 EXPOSE 80
 
-CMD nginx && uvicorn app.main:app --host 127.0.0.1 --port 8000
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-80}

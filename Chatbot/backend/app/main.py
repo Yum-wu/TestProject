@@ -5,6 +5,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from app.api.models import ChatRequest, SessionListResponse, StatusResponse
 from app.agent.llm import create_llm
 from app.agent.agent import create_chat_agent
@@ -166,4 +167,12 @@ async def health():
         "model": settings.llm_model,
         "tools": [t.name for t in ALL_TOOLS],
     }
+
+
+# ── SPA 静态文件（必须在 API 路由之后） ──
+static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
+if os.path.isdir(static_dir):
+    app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
+else:
+    logger.warning("Static directory not found: %s", os.path.abspath(static_dir))
 
