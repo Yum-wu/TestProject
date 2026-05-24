@@ -150,7 +150,8 @@ def run_incremental_index(filepath: str) -> dict:
     add_to_index(chunks)
 
     elapsed = time.time() - start
-    print(f"[RAG] Incremental index: {os.path.basename(filepath)} → {len(chunks)} chunks in {elapsed:.1f}s")
+    fname = os.path.basename(filepath).encode("ascii", errors="replace").decode("ascii")
+    print(f"[RAG] Incremental index: {fname} -> {len(chunks)} chunks in {elapsed:.1f}s")
 
     return {
         "status": "ok",

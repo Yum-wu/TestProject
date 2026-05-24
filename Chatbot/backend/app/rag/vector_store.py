@@ -131,7 +131,8 @@ def delete_from_index(source_filename: str, path: str = None):
     collection.delete(where={"source": source_filename})
     count_after = collection.count()
     deleted = count_before - count_after
-    print(f"[VectorStore] Deleted {deleted} chunks for '{source_filename}' from Chroma ({save_path})")
+    safe_name = source_filename.encode("ascii", errors="replace").decode("ascii")
+    print(f"[VectorStore] Deleted {deleted} chunks for '{safe_name}' from Chroma ({save_path})")
 
 
 def save_index(chunks: List[Dict[str, Any]], embeddings: np.ndarray = None, path: str = None):

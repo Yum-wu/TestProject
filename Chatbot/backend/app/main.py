@@ -16,7 +16,7 @@ from app.memory.db import init_db
 from app.memory.manager import manager as memory_manager
 from app.config import settings
 from app.rag.models import RAGQueryRequest, RAGQueryResponse, RAGIndexResponse, RAGUploadResponse
-from app.rag.qa_chain import rag_query, run_index_pipeline
+from app.rag.qa_chain import rag_query, run_index_pipeline, run_incremental_index
 from app.rag.evaluator import run_full_evaluation
 from app.rag.prompt_experiment import run_experiment, STRATEGIES
 from app.rag.test_data import TEST_QA_PAIRS
@@ -160,9 +160,12 @@ async def rag_list_uploads():
     if not os.path.isdir(upload_dir):
         return {"files": []}
     files = sorted(
-        {"filename": f, "size": os.path.getsize(os.path.join(upload_dir, f))}
-        for f in os.listdir(upload_dir)
-        if os.path.isfile(os.path.join(upload_dir, f))
+        (
+            {"filename": f, "size": os.path.getsize(os.path.join(upload_dir, f))}
+            for f in os.listdir(upload_dir)
+            if os.path.isfile(os.path.join(upload_dir, f))
+        ),
+        key=lambda x: x["filename"],
     )
     return {"files": files}
 
