@@ -7,6 +7,7 @@ from typing import Callable
 from crewai import Crew, Process
 from app.crew.agents import create_researcher, create_writer, create_editor
 from app.crew.tasks import create_research_task, create_write_task, create_review_task
+from app.utils.lang_detect import detect_language
 
 logger = logging.getLogger(__name__)
 
@@ -46,19 +47,22 @@ def _make_task_callback(event_callback: Callable | None, agent_role: str):
     return callback
 
 
-def generate_article(topic: str, event_callback: Callable | None = None) -> dict:
+def generate_article(topic: str, event_callback: Callable | None = None, lang: str | None = None) -> dict:
     """Run the full crew pipeline for a given topic.
 
     crewai 0.80+ supports kickoff(inputs=...) and context parameter
     for passing task outputs between dependent tasks.
     """
+    if lang is None:
+        lang = detect_language(topic)
+
     researcher = create_researcher()
     writer = create_writer()
     editor = create_editor()
 
-    research_task = create_research_task(researcher)
-    write_task = create_write_task(writer, research_task)
-    review_task = create_review_task(editor, write_task)
+    research_task = create_research_task(researcher, lang=lang)
+    write_task = create_write_task(writer, research_task, lang=lang)
+    review_task = create_review_task(editor, write_task, lang=lang)
 
     # Attach per-task callbacks so we know the agent role
     research_task.callback = _make_task_callback(event_callback, researcher.role)
