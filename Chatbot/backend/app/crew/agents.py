@@ -1,6 +1,7 @@
-"""Multi-Agent Article Generator — Agent Definitions"""
+"""Multi-Agent Article Generator — Agent Definitions (crewai 0.80+)"""
 
 import os
+from typing import Any
 from crewai import Agent
 from crewai.tools import tool
 
@@ -24,7 +25,7 @@ def web_search(query: str) -> str:
     )
 
 
-def create_researcher() -> Agent:
+def create_researcher(llm: Any = None) -> Agent:
     return Agent(
         role="资深研究员",
         goal=(
@@ -38,10 +39,11 @@ def create_researcher() -> Agent:
         tools=[web_search],
         verbose=True,
         allow_delegation=False,
+        llm=llm,
     )
 
 
-def create_writer() -> Agent:
+def create_writer(llm: Any = None) -> Agent:
     return Agent(
         role="专业写手",
         goal=(
@@ -55,10 +57,11 @@ def create_writer() -> Agent:
         ),
         verbose=True,
         allow_delegation=False,
+        llm=llm,
     )
 
 
-def create_editor() -> Agent:
+def create_editor(llm: Any = None) -> Agent:
     return Agent(
         role="高级编辑",
         goal=(
@@ -73,4 +76,5 @@ def create_editor() -> Agent:
         ),
         verbose=True,
         allow_delegation=False,
+        llm=llm,
     )

@@ -2,7 +2,7 @@
 
 import logging
 import time
-from typing import Callable
+from typing import Any, Callable
 from crewai import Crew, Process
 from app.crew.agents import create_researcher, create_writer, create_editor
 from app.crew.tasks import create_research_task, create_write_task, create_review_task
@@ -10,15 +10,15 @@ from app.crew.tasks import create_research_task, create_write_task, create_revie
 logger = logging.getLogger(__name__)
 
 
-def generate_article(topic: str, event_callback: Callable | None = None) -> dict:
+def generate_article(topic: str, event_callback: Callable | None = None, llm: Any = None) -> dict:
     """Run the full crew pipeline for a given topic.
 
     crewai 0.80+ supports kickoff(inputs=...) and context parameter
     for passing task outputs between dependent tasks.
     """
-    researcher = create_researcher()
-    writer = create_writer()
-    editor = create_editor()
+    researcher = create_researcher(llm=llm)
+    writer = create_writer(llm=llm)
+    editor = create_editor(llm=llm)
 
     research_task = create_research_task(researcher)
     write_task = create_write_task(writer, research_task)

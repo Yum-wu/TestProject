@@ -178,10 +178,12 @@ class CrewGenerateRequest(BaseModel):
 async def crew_generate(req: CrewGenerateRequest):
     """Generate article via 3-agent crew (synchronous)."""
     import time
+    from app.agent.llm import create_llm
     from app.crew.crew_setup import generate_article
     try:
         start = time.time()
-        result = generate_article(topic=req.topic)
+        llm = create_llm(streaming=False)
+        result = generate_article(topic=req.topic, llm=llm)
         duration_ms = int((time.time() - start) * 1000)
         return {
             "topic": result["topic"],
@@ -198,6 +200,7 @@ async def crew_generate(req: CrewGenerateRequest):
 async def crew_generate_stream(req: CrewGenerateRequest, request: Request):
     """Generate article with real-time agent progress via SSE."""
     import asyncio
+    from app.agent.llm import create_llm
     from app.crew.crew_setup import generate_article
     from app.crew.main_events import EventCollector
 
@@ -205,8 +208,9 @@ async def crew_generate_stream(req: CrewGenerateRequest, request: Request):
 
     async def run_crew():
         try:
+            llm = create_llm(streaming=False)
             result = await asyncio.to_thread(
-                generate_article, req.topic, collector.emit
+                generate_article, req.topic, collector.emit, llm
             )
             collector.emit("result", {
                 "final_output": result["final_output"],
