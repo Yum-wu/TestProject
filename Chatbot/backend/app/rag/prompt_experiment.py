@@ -6,6 +6,7 @@ Compares Direct / CoT / Few-shot strategies on same questions.
 import time
 import statistics
 import logging
+from typing import List, Dict, Any, Callable
 from app.utils.lang_detect import lang_instruction
 
 logger = logging.getLogger(__name__)
