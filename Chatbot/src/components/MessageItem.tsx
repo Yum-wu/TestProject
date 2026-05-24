@@ -2,11 +2,24 @@ import { useState, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Message } from "../types/message";
-import { CodeBlock } from "./CodeBlock";
 
 interface MessageItemProps {
   /** 单条聊天消息 */
   message: Message;
+}
+
+/** 代码块简易渲染（避免 react-syntax-highlighter 懒加载导致的 DOM 冲突） */
+function SimpleCode({ language, code }: { language: string; code: string }) {
+  return (
+    <div className="relative group rounded-lg overflow-hidden my-2">
+      <div className="flex items-center justify-between bg-gray-800 px-4 py-2 text-xs text-gray-400">
+        <span>{language || "code"}</span>
+      </div>
+      <pre className="bg-gray-900 text-gray-300 p-4 text-sm overflow-x-auto m-0">
+        <code>{code}</code>
+      </pre>
+    </div>
+  );
 }
 
 /** 消息项组件，用户消息纯文本显示，AI 消息支持 Markdown 渲染和复制 */
@@ -27,7 +40,7 @@ export function MessageItem({ message }: MessageItemProps) {
   /** 缓存 remarkPlugins 避免每次渲染创建新数组 */
   const remarkPlugins = useMemo(() => [remarkGfm], []);
 
-  /** 缓存自定义 components 避免每次渲染重建 */
+  /** 自定义 components：代码块用简易渲染，避免 react-syntax-highlighter DOM 冲突 */
   const components = useMemo(
     () => ({
       code({
@@ -43,7 +56,7 @@ export function MessageItem({ message }: MessageItemProps) {
         const codeString = String(children).replace(/\n$/, "");
 
         if (match) {
-          return <CodeBlock language={match[1]} code={codeString} />;
+          return <SimpleCode language={match[1]} code={codeString} />;
         }
 
         return (
@@ -56,6 +69,10 @@ export function MessageItem({ message }: MessageItemProps) {
             {children}
           </code>
         );
+      },
+      // 用 div 包裹预格式化文本，避免片段节点导致的 removeChild 错误
+      pre({ children }: { children?: React.ReactNode }) {
+        return <div className="my-2">{children}</div>;
       },
     }),
     [isUser],
@@ -73,7 +90,7 @@ export function MessageItem({ message }: MessageItemProps) {
         {isUser ? (
           <p className="whitespace-pre-wrap break-words">{message.content}</p>
         ) : (
-          <div className="prose prose-sm max-w-none break-words">
+          <div className="prose prose-sm max-w-none break-words" translate="no">
             <ReactMarkdown
               remarkPlugins={remarkPlugins}
               components={components}
