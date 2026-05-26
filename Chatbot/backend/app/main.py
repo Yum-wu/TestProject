@@ -415,7 +415,8 @@ async def rag_health():
         "streaming_retrieval": "BM25 keyword (in-memory)",
         "bm25_docs": bm25["docs"],
         "bm25_terms": bm25["terms"],
-        "sync_retrieval": "Chroma dense (Zhipu embedding-2)",
+        "sync_retrieval": "Chroma dense (BGE local embedding)",
+        "hybrid_search_enabled": True,
         "guardrails_enabled": True,
         "langsmith_enabled": bool(settings.langchain_api_key or os.getenv("LANGCHAIN_API_KEY")),
     }
