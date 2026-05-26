@@ -113,7 +113,7 @@ export function SystemStatus({ health, loading, error }: SystemStatusProps) {
                   const res = await fetch("/api/rag/health");
                   const data = await res.json();
                   alert(JSON.stringify(data, null, 2));
-                } catch (e) {
+                } catch {
                   alert("Backend unreachable");
                 }
               }}

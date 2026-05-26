@@ -47,7 +47,7 @@ export function RagQuery() {
     }
   }, []);
 
-  useEffect(() => { fetchUploadedFiles(); }, [fetchUploadedFiles]);
+  useEffect(() => { fetchUploadedFiles(); }, [fetchUploadedFiles]); // eslint-disable-line react-hooks/set-state-in-effect
 
   const handleDeleteFile = useCallback(async (filename: string) => {
     try {
