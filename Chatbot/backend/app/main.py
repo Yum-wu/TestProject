@@ -403,7 +403,8 @@ async def rag_experiment_endpoint():
 @app.get("/api/rag/health")
 async def rag_health():
     """RAG system health + live service status."""
-    from app.rag.vector_store import _kw_docs
+    from app.rag.vector_store import get_bm25_stats
+    bm25 = get_bm25_stats()
     return {
         "status": "ok",
         "llm_configured": bool(settings.llm_api_key),
@@ -412,7 +413,8 @@ async def rag_health():
         "index_status": "ok" if os.path.isdir(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "vectors"))) else "not_initialized",
         "test_qa_pairs": len(TEST_QA_PAIRS),
         "streaming_retrieval": "BM25 keyword (in-memory)",
-        "bm25_docs": len(_kw_docs),
+        "bm25_docs": bm25["docs"],
+        "bm25_terms": bm25["terms"],
         "sync_retrieval": "Chroma dense (Zhipu embedding-2)",
         "guardrails_enabled": True,
         "langsmith_enabled": bool(settings.langchain_api_key or os.getenv("LANGCHAIN_API_KEY")),

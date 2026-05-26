@@ -491,3 +491,12 @@ def format_context(chunks: List[Dict[str, Any]]) -> str:
         source = chunk["metadata"].get("title", chunk["metadata"].get("source", "Unknown"))
         parts.append(f"[Source {i+1}: {source}]\n{chunk['text']}")
     return "\n\n".join(parts)
+
+
+def get_bm25_stats() -> dict:
+    """Return BM25 index statistics for health endpoint."""
+    return {
+        "docs": len(_kw_docs),
+        "terms": len(_kw_idf),
+        "avgdl": round(_kw_avgdl, 1) if _kw_avgdl else 0,
+    }
