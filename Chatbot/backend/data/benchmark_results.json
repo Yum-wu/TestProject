@@ -1,25 +1,70 @@
 {
-  "timestamp": "2026-05-26T19:05:03",
+  "timestamp": "2026-05-26T23:10:00",
   "metrics": [
     {
       "label": "Recall@3 (Hybrid)",
       "value": "96.08%",
-      "detail": "49/51"
+      "detail": "49/51 (unchanged)"
     },
     {
       "label": "Recall@3 (Dense)",
       "value": "90.2%",
-      "detail": "46/51"
+      "detail": "46/51 (unchanged)"
     },
     {
       "label": "Retrieval Latency",
       "value": "~11ms",
-      "detail": "BM25 + Dense fusion"
+      "detail": "BM25 + Dense fusion (unchanged)"
     },
     {
-      "label": "Full RAG Latency",
-      "value": "~12-14s",
-      "detail": "包括 LLM 生成"
+      "label": "TTFT (Cached Query)",
+      "value": "~263ms",
+      "detail": "内存缓存命中, 3 events (sources+text+cache_hit)"
+    },
+    {
+      "label": "TTFT (Uncached Streaming)",
+      "value": "~5.7s",
+      "detail": "瓶颈在 Zhipu embedding API, 非 LLM"
+    },
+    {
+      "label": "Total Streaming Latency",
+      "value": "~6.7-8.2s",
+      "detail": "取决于 LLM 输出长度 (GLM-4-Flash)"
+    },
+    {
+      "label": "Total Cached Latency",
+      "value": "~263ms",
+      "detail": "内存缓存直接返回, 无 LLM 调用"
+    },
+    {
+      "label": "Full RAG Latency (Sync)",
+      "value": "~7s",
+      "detail": "非流式 single LLM call baseline"
+    },
+    {
+      "label": "LLM Calls per Query",
+      "value": "1",
+      "detail": "优化前3次(intent+rag+generate), 优化后1次"
+    },
+    {
+      "label": "SSE Events per Response",
+      "value": "~26",
+      "detail": "优化前 ~153, 150ms buffer 减少 83%"
+    },
+    {
+      "label": "Cache Layer",
+      "value": "In-memory dict + Redis (graceful degrade)",
+      "detail": "内存 TTL=3600s, max 500 entries, LRU evict"
+    },
+    {
+      "label": "Intent Classification",
+      "value": "<1ms",
+      "detail": "优化前 LLM ~1s, 优化后关键词规则"
+    },
+    {
+      "label": "MMR Optimization",
+      "value": "0 API calls",
+      "detail": "优化前 2次embedding API, 优化后 source diversity"
     },
     {
       "label": "Test QA Pairs",
@@ -32,6 +77,10 @@
     "hybrid_search": "BM25 + Dense (Chroma)",
     "guardrails": "Hallucination + Citation Verification",
     "langsmith": "Tracing + Metrics",
-    "index": "Chroma + BM25"
+    "index": "Chroma + BM25",
+    "streaming": "SSE /api/rag/query/stream",
+    "cache": "In-memory dict + Redis (fire-and-forget on stream complete)",
+    "buffer": "150ms / 400 chars, is_first eager flush",
+    "embedding_api": "Zhipu embedding-2 (bottleneck ~5.7s)"
   }
 }

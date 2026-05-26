@@ -110,6 +110,66 @@ def rag_query(
     return RAGQueryResponse(answer=answer, sources=sources)
 
 
+async def rag_query_astream(
+    query: str,
+    llm,
+    top_k: int = 3,
+    use_mmr: bool = True,
+    lang: str | None = None,
+):
+    """Async streaming RAG: retrieve → format → stream LLM tokens.
+
+    Yields SSE-formatted strings: metadata event first, then text tokens.
+
+    *llm* must support ``.astream()`` (e.g. ``ChatOpenAI``).
+    """
+    if lang is None:
+        lang = detect_language(query)
+
+    # 1. Retrieve
+    chunks = retrieve(query, top_k=top_k, use_mmr=use_mmr)
+
+    if not chunks:
+        no_result_msg = (
+            "No relevant content found in the knowledge base. Please try a different question."
+            if lang == "en"
+            else "知识库中暂无相关内容，请尝试其他问题。"
+        )
+        yield {"type": "sources", "sources": []}
+        yield {"type": "text", "content": no_result_msg}
+        return
+
+    # 2. Format context
+    context = format_context(chunks)
+
+    # 3. Build message
+    system_prompt = QA_SYSTEM_PROMPT_EN if lang == "en" else QA_SYSTEM_PROMPT
+    lang_instr = lang_instruction(lang).strip()
+    prompt = system_prompt.format(context=context, lang_instruction=lang_instr)
+
+    messages = [
+        {"role": "system", "content": prompt},
+        {"role": "user", "content": query},
+    ]
+
+    # 4. Yield sources event first
+    sources_data = [
+        {
+            "title": c["metadata"].get("title", c["metadata"].get("source", "Unknown")),
+            "slug": c["metadata"].get("slug", ""),
+            "score": c.get("score"),
+        }
+        for c in chunks
+    ]
+    yield {"type": "sources", "sources": sources_data, "model": llm.model if hasattr(llm, "model") else ""}
+
+    # 5. Stream LLM tokens
+    async for chunk in llm.astream(messages):
+        content = chunk.content if hasattr(chunk, "content") else ""
+        if content:
+            yield {"type": "text", "content": content}
+
+
 async def rag_query_with_cache(
     query: str,
     llm_call_fn,

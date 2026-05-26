@@ -1,45 +1,75 @@
 """
-意图理解节点。
-用 LLM 判断用户输入属于：知识问答（rag）、工具调用（agent）、闲聊（chat）、混合（mixed）。
+意图理解节点 — 轻量规则版。
+用关键词匹配替代 LLM 调用，节省 ~1s。
 """
 
-import time
+import re
 from typing import Tuple
 
-INTENT_PROMPT = """分析用户输入，判断意图类型。只返回 JSON。
+# ── RAG 关键词（知识问答） ──
+_RAG_PATTERNS = [
+    r"什么是", r"如何", r"怎么", r"怎样", r"介绍",
+    r"解释", r"说明", r"比较", r"区别", r"原理",
+    r"概念", r"定义", r"特点", r"好处", r"作用",
+    r"why\s", r"what\s", r"how\s", r"explain", r"difference",
+    r"compare", r"define", r"meaning", r"purpose", r"reason",
+]
 
-意图类型：
-- "rag": 知识问答类（询问概念、技术细节、比较、原理）
-- "agent": 工具调用类（计算、搜索、数据处理）
-- "chat": 通用对话（问候、闲聊、观点询问）
-- "mixed": 混合型（既需要知识又需要工具）
+_RAG_KEYWORDS = [
+    "是什么", "意思是", "指的是", "有什么用", "什么用",
+    "是什么", "啥是", "哪", "种", "类",
+]
 
-示例：
-Q: "Hermes Agent 有几层记忆？" → {{"intent": "rag", "confidence": 0.95}}
-Q: "25 * 37 等于多少？" → {{"intent": "agent", "confidence": 0.98}}
-Q: "你好" → {{"intent": "chat", "confidence": 1.0}}
-Q: "查一下最近 AI 新闻，然后分析它们的影响" → {{"intent": "mixed", "confidence": 0.85}}
-
-用户输入: {query}
-"""
+# ── Agent 关键词（工具调用） ──
+_AGENT_PATTERNS = [
+    r"计算", r"搜索", r"查找", r"查询.*数据",
+    r"create", r"generate", r"calculate", r"search",
+    r"compute", r"find.*file", r"run.*code",
+]
 
 
-def run_intent_node(query: str, llm_call_fn) -> Tuple[str, float]:
-    """Classify intent using LLM. Return (intent, confidence)."""
-    import json
+def _match_patterns(text: str, patterns: list) -> bool:
+    """Return True if any pattern matches *text*."""
+    for p in patterns:
+        if re.search(p, text, re.IGNORECASE):
+            return True
+    return False
 
-    prompt = INTENT_PROMPT.format(query=query)
-    response = llm_call_fn([
-        {"role": "system", "content": "你是一个意图分类器。只输出 JSON，不要解释。"},
-        {"role": "user", "content": prompt},
-    ])
 
-    try:
-        result = json.loads(response.strip())
-        intent = result.get("intent", "chat")
-        confidence = result.get("confidence", 0.5)
-    except (json.JSONDecodeError, AttributeError):
-        intent = "chat"
-        confidence = 0.0
+def _has_rag_keywords(text: str) -> bool:
+    """Check for RAG-specific keywords."""
+    for kw in _RAG_KEYWORDS:
+        if kw in text:
+            return True
+    return False
 
-    return intent, confidence
+
+def classify_intent(query: str) -> Tuple[str, float]:
+    """Classify intent using keyword rules. No LLM call.
+
+    Returns (intent, confidence).
+    """
+    q = query.strip()
+
+    # 1. Short / greeting → chat
+    if len(q) <= 4 or q.lower() in ("hi", "hello", "hey", "你好", "嗨", "哈喽"):
+        return "chat", 0.95
+
+    # 2. Check agent patterns first (specific tool requests)
+    if _match_patterns(q, _AGENT_PATTERNS):
+        # If also has RAG patterns → mixed
+        if _match_patterns(q, _RAG_PATTERNS) or _has_rag_keywords(q):
+            return "mixed", 0.7
+        return "agent", 0.85
+
+    # 3. Check RAG patterns
+    if _match_patterns(q, _RAG_PATTERNS) or _has_rag_keywords(q):
+        return "rag", 0.8
+
+    # 4. Default → chat
+    return "chat", 0.6
+
+
+def run_intent_node(query: str, llm_call_fn=None) -> Tuple[str, float]:
+    """Classify intent. *llm_call_fn* kept for API compat, but NOT used."""
+    return classify_intent(query)

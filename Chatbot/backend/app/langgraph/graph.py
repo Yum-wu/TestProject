@@ -102,19 +102,36 @@ async def run_workflow(query: str, session_id: str = "") -> dict:
                 "node": "agent", "output": result[:100] + "..." if len(result) > 100 else result
             })
 
-        # ── Node 3: Generate ──
-        t0 = time.time()
-        final = await asyncio.to_thread(
-            run_generate_node,
-            query=query,
-            intent=intent,
-            rag_context=state.get("rag_context", ""),
-            rag_sources=state.get("rag_sources", []),
-            agent_result=state.get("agent_result", ""),
-            llm_call_fn=llm_call_fn,
-        )
-        state["final_answer"] = final
-        state["node_times"]["generate"] = int((time.time() - t0) * 1000)
+        # ── Node 3: Generate (only when needed) ──
+        # For "rag" intent: RAG node already produced the final answer
+        # For "chat" intent: use direct LLM response, no RAG/agent context
+        if next_node == "rag":
+            state["final_answer"] = state.get("rag_context", "")
+        elif next_node == "chat":
+            t0 = time.time()
+            state["final_answer"] = await asyncio.to_thread(
+                run_generate_node,
+                query=query,
+                intent=intent,
+                rag_context="",
+                rag_sources=[],
+                agent_result="",
+                llm_call_fn=llm_call_fn,
+            )
+            state["node_times"]["generate"] = int((time.time() - t0) * 1000)
+        elif next_node in ("agent", "mixed"):
+            t0 = time.time()
+            final = await asyncio.to_thread(
+                run_generate_node,
+                query=query,
+                intent=intent,
+                rag_context=state.get("rag_context", ""),
+                rag_sources=state.get("rag_sources", []),
+                agent_result=state.get("agent_result", ""),
+                llm_call_fn=llm_call_fn,
+            )
+            state["final_answer"] = final
+            state["node_times"]["generate"] = int((time.time() - t0) * 1000)
         state["intermediate_results"].append({
             "node": "generate", "output": "回答已生成"
         })
