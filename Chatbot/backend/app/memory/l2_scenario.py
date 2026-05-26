@@ -1,4 +1,5 @@
 import logging
+import time
 from pathlib import Path
 from datetime import datetime
 from app.memory import l1_atom
@@ -7,6 +8,28 @@ logger = logging.getLogger(__name__)
 
 SCENARIOS_DIR = Path("offloads/scenarios").resolve()
 MAX_SCENARIOS = 50
+
+# ── Cache for scenario file listing (invalidated after 60s) ──
+_scenario_cache: list[tuple[Path, float]] | None = None
+_scenario_cache_ts: float = 0
+_SCENARIO_CACHE_TTL = 60
+
+
+def _list_scenarios():
+    """List scenario files sorted by mtime desc, with caching."""
+    global _scenario_cache, _scenario_cache_ts
+    now = time.time()
+    if _scenario_cache is not None and now - _scenario_cache_ts < _SCENARIO_CACHE_TTL:
+        return _scenario_cache
+    if not SCENARIOS_DIR.exists():
+        _scenario_cache = []
+        _scenario_cache_ts = now
+        return _scenario_cache
+    files = [(p, p.stat().st_mtime) for p in SCENARIOS_DIR.glob("*.md")]
+    files.sort(key=lambda x: x[1], reverse=True)
+    _scenario_cache = files
+    _scenario_cache_ts = now
+    return _scenario_cache
 
 
 def finalize_scenario(session_id: str, summary: str = ""):
@@ -44,11 +67,9 @@ def finalize_scenario(session_id: str, summary: str = ""):
 
 def get_recent_scenarios(session_id: str = "", n: int = 3):
     """Return content of recent N scenario files."""
-    if not SCENARIOS_DIR.exists():
-        return []
-    files = sorted(SCENARIOS_DIR.glob("*.md"), key=lambda p: p.stat().st_mtime, reverse=True)
+    files = _list_scenarios()
     results = []
-    for fp in files[:n]:
+    for fp, _ in files[:n]:
         try:
             results.append(fp.read_text(encoding="utf-8"))
         except Exception:
@@ -58,13 +79,15 @@ def get_recent_scenarios(session_id: str = "", n: int = 3):
 
 def _cleanup_old_scenarios():
     """Keep only the most recent MAX_SCENARIOS files."""
-    if not SCENARIOS_DIR.exists():
-        return
-    files = sorted(SCENARIOS_DIR.glob("*.md"), key=lambda p: p.stat().st_mtime)
+    files = _list_scenarios()
     excess = len(files) - MAX_SCENARIOS
-    for fp in files[:excess]:
+    for fp, _ in files[:excess]:
         try:
             fp.unlink()
             logger.debug(f"Removed old scenario: {fp.name}")
         except Exception:
             pass
+    # Invalidate cache after cleanup
+    global _scenario_cache, _scenario_cache_ts
+    _scenario_cache = None
+    _scenario_cache_ts = 0

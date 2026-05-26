@@ -200,8 +200,14 @@ export function CrewGenerator() {
 
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
-            {error}
+          <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700 flex items-start justify-between gap-3">
+            <span>{error}</span>
+            <button
+              onClick={handleGenerate}
+              className="shrink-0 text-xs font-medium text-red-600 hover:text-red-800 bg-red-100 hover:bg-red-200 px-3 py-1 rounded-lg transition-colors"
+            >
+              {t("crew.retry")}
+            </button>
           </div>
         )}
 

@@ -110,6 +110,30 @@ def rag_query(
     return RAGQueryResponse(answer=answer, sources=sources)
 
 
+async def rag_query_with_cache(
+    query: str,
+    llm_call_fn,
+    top_k: int = 3,
+    use_mmr: bool = True,
+    lang: str | None = None,
+) -> RAGQueryResponse:
+    """RAG query with Redis semantic cache.
+
+    On a cache hit returns the cached answer immediately (no sources).
+    On a miss, delegates to :func:`rag_query` and caches the result.
+    Degrades gracefully when Redis is unavailable.
+    """
+    from app.cache.redis_client import get_cached, set_cached
+
+    cached = await get_cached(query)
+    if cached is not None:
+        return RAGQueryResponse(answer=cached, sources=[])
+
+    result = rag_query(query, llm_call_fn, top_k, use_mmr, lang)
+    await set_cached(query, result.answer)
+    return result
+
+
 def run_incremental_index(filepath: str) -> dict:
     """Incremental index for a single uploaded file.
 

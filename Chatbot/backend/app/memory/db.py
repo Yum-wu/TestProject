@@ -1,17 +1,27 @@
 import sqlite3
+import threading
 from pathlib import Path
 
 DB_DIR = Path("offloads")
 DB_PATH = DB_DIR / "memory.db"
 
+# ── Global connection pool (singleton, WAL mode, thread-safe) ──
+_conn: sqlite3.Connection | None = None
+_conn_lock = threading.Lock()
+
 
 def get_db():
-    """Get a new SQLite connection with row factory."""
-    DB_DIR.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(DB_PATH))
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA journal_mode=WAL")
-    return conn
+    """Get shared SQLite connection (created once, reused)."""
+    global _conn
+    if _conn is None:
+        with _conn_lock:
+            if _conn is None:  # double-check
+                DB_DIR.mkdir(parents=True, exist_ok=True)
+                _conn = sqlite3.connect(str(DB_PATH), check_same_thread=False)
+                _conn.row_factory = sqlite3.Row
+                _conn.execute("PRAGMA journal_mode=WAL")
+                _conn.execute("PRAGMA busy_timeout=5000")
+    return _conn
 
 
 def init_db():
@@ -42,4 +52,3 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_atom_session ON atoms(session_id);
     """)
     conn.commit()
-    conn.close()

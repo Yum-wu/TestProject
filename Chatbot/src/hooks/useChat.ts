@@ -82,10 +82,16 @@ export function useChat() {
     messagesRef.current = messages;
   }, [messages]);
 
+  // 仅在消息稳定后（非加载中）保存到 LocalStorage
+  const prevLoadingRef = useRef(isLoading);
   useEffect(() => {
-    const timer = setTimeout(() => saveMessages(messages), 300);
-    return () => clearTimeout(timer);
-  }, [messages]);
+    const wasLoading = prevLoadingRef.current;
+    prevLoadingRef.current = isLoading;
+    if (wasLoading && !isLoading) {
+      // 流结束：保存一次
+      saveMessages(messages);
+    }
+  }, [isLoading, messages]);
 
   const handleEvent = useCallback((
     event: SSEEvent,

@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     llm_base_url: str = "https://open.bigmodel.cn/api/paas/v4/"
     tavily_api_key: str = ""
 
+    redis_url: str = ""
+
     offload_max_chars: int = 1000
     session_max_messages: int = 500
 
