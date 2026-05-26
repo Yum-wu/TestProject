@@ -1,20 +1,25 @@
 {
-  "timestamp": "2026-05-26T23:40:00",
+  "timestamp": "2026-05-27T00:30:00",
   "metrics": [
     {
       "label": "Recall@3 (Hybrid)",
       "value": "96.08%",
-      "detail": "49/51 (unchanged)"
+      "detail": "49/51 (unchanged, dense path)"
     },
     {
       "label": "Recall@3 (Dense)",
       "value": "90.2%",
-      "detail": "46/51 (unchanged)"
+      "detail": "46/51 (unchanged, dense path)"
     },
     {
-      "label": "Retrieval Latency",
-      "value": "~11ms",
-      "detail": "BM25 + Dense fusion (unchanged)"
+      "label": "Retrieval Latency (BM25)",
+      "value": "~10ms",
+      "detail": "In-memory BM25 keyword index, 239 docs, 9401 terms (streaming path)"
+    },
+    {
+      "label": "Retrieval Latency (Dense)",
+      "value": "~5.4s",
+      "detail": "Zhipu embedding-2 API + Chroma search (sync path only)"
     },
     {
       "label": "TTFT (Cached Query)",
@@ -23,13 +28,13 @@
     },
     {
       "label": "TTFT (Uncached Streaming)",
-      "value": "~5.7s",
-      "detail": "DeepSeek v4-flash 首次 token, Zhipu embedding-2 检索"
+      "value": "~310ms",
+      "detail": "BM25 retrieval ~10ms + DeepSeek v4-flash 首次 token ~300ms"
     },
     {
       "label": "Total Streaming Latency",
-      "value": "~5.7-7.3s",
-      "detail": "DeepSeek v4-flash, 比 GLM-4-Flash 快 ~1s"
+      "value": "~1-3s",
+      "detail": "BM25 retrieval + DeepSeek v4-flash streaming, 50ms SSE buffer"
     },
     {
       "label": "Total Cached Latency",
@@ -39,7 +44,7 @@
     {
       "label": "Full RAG Latency (Sync)",
       "value": "~7s",
-      "detail": "非流式 single LLM call baseline"
+      "detail": "非流式, Zhipu embedding + single LLM call baseline (dense path)"
     },
     {
       "label": "LLM Calls per Query",
@@ -49,7 +54,7 @@
     {
       "label": "SSE Events per Response",
       "value": "~26",
-      "detail": "优化前 ~153, 150ms buffer 减少 83%"
+      "detail": "50ms buffer, is_first eager flush"
     },
     {
       "label": "Cache Layer",
@@ -59,12 +64,12 @@
     {
       "label": "Intent Classification",
       "value": "<1ms",
-      "detail": "优化前 LLM ~1s, 优化后关键词规则"
+      "detail": "关键词规则, 0 API calls"
     },
     {
       "label": "MMR Optimization",
       "value": "0 API calls",
-      "detail": "优化前 2次embedding API, 优化后 source diversity"
+      "detail": "Source diversity via simple dedup"
     },
     {
       "label": "Test QA Pairs",
@@ -74,13 +79,14 @@
   ],
   "services": {
     "llm": "deepseek-v4-flash (primary) + GLM-4-Flash-250414 (fallback)",
-    "hybrid_search": "BM25 + Dense (Chroma)",
-    "guardrails": "Hallucination + Citation Verification",
+    "streaming_retrieval": "BM25 keyword index (in-memory, ~10ms, no API)",
+    "sync_retrieval": "Chroma + Zhipu embedding-2 (dense, for quality)",
+    "guardrails": "Hallucination + Citation Verification (sync path only)",
     "langsmith": "Tracing + Metrics",
-    "index": "Chroma + BM25",
+    "index": "Chroma (768-dim) + BM25 (239 docs, 9401 terms)",
     "streaming": "SSE /api/rag/query/stream",
-    "cache": "In-memory dict + Redis (fire-and-forget on stream complete)",
-    "buffer": "150ms / 400 chars, is_first eager flush",
-    "embedding_api": "Zhipu embedding-2 (bottleneck ~5.7s)"
+    "cache": "In-memory dict + Redis + BM25 query embedding cache",
+    "buffer": "50ms / 200 chars, is_first eager flush",
+    "embedding_api": "Zhipu embedding-2 (sync path only, streaming path uses BM25)"
   }
 }

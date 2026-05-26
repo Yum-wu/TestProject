@@ -7,7 +7,7 @@ import time
 import os
 from typing import List, Dict, Any, Optional
 
-from app.rag.vector_store import retrieve, format_context, save_index, embed_texts_llm, load_index
+from app.rag.vector_store import retrieve, retrieve_keyword, format_context, save_index, embed_texts_llm, load_index
 from app.rag.models import RAGQueryResponse, SourceItem
 from app.utils.lang_detect import detect_language, lang_instruction
 
@@ -117,17 +117,18 @@ async def rag_query_astream(
     use_mmr: bool = True,
     lang: str | None = None,
 ):
-    """Async streaming RAG: retrieve → format → stream LLM tokens.
+    """Async streaming RAG: BM25 keyword retrieve → stream LLM tokens.
 
-    Yields SSE-formatted strings: metadata event first, then text tokens.
+    Uses fast BM25 keyword retrieval (<10ms, no embedding API) for instant
+    first-token latency. Yields SSE dicts: sources first, then text tokens.
 
     *llm* must support ``.astream()`` (e.g. ``ChatOpenAI``).
     """
     if lang is None:
         lang = detect_language(query)
 
-    # 1. Retrieve
-    chunks = retrieve(query, top_k=top_k, use_mmr=use_mmr)
+    # 1. Fast keyword retrieval (no embedding API, <10ms)
+    chunks = retrieve_keyword(query, top_k=top_k)
 
     if not chunks:
         no_result_msg = (
