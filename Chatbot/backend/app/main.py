@@ -188,11 +188,11 @@ async def rag_query_stream_endpoint(req: RAGQueryRequest, request: Request):
 
     llm = create_llm()
 
-    async def _buffer_events(generator, flush_interval=0.15, max_chars=400):
+    async def _buffer_events(generator, flush_interval=0.05, max_chars=200):
         """Buffer text events, flush at interval or max_chars.
 
         - First text event: flush immediately (zero TTFT impact)
-        - Subsequent: buffer at 150ms / 400 chars
+        - Subsequent: buffer at 50ms / 200 chars for smooth streaming
         - Non-text events: flush pending text first, pass through
         """
         buf = ""
@@ -403,6 +403,7 @@ async def rag_experiment_endpoint():
 @app.get("/api/rag/health")
 async def rag_health():
     """RAG system health + live service status."""
+    from app.rag.vector_store import _kw_docs
     return {
         "status": "ok",
         "llm_configured": bool(settings.llm_api_key),
@@ -410,7 +411,9 @@ async def rag_health():
         "fallback_configured": bool(settings.fallback_api_key),
         "index_status": "ok" if os.path.isdir(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "vectors"))) else "not_initialized",
         "test_qa_pairs": len(TEST_QA_PAIRS),
-        "hybrid_search_enabled": True,
+        "streaming_retrieval": "BM25 keyword (in-memory)",
+        "bm25_docs": len(_kw_docs),
+        "sync_retrieval": "Chroma dense (Zhipu embedding-2)",
         "guardrails_enabled": True,
         "langsmith_enabled": bool(settings.langchain_api_key or os.getenv("LANGCHAIN_API_KEY")),
     }
