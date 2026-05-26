@@ -112,6 +112,10 @@ async def _get_agent(lang: str = "zh"):
 async def startup():
     if not settings.llm_api_key:
         logger.warning("LLM_API_KEY 未配置，Agent 调用将失败")
+    if settings.langchain_api_key:
+        os.environ.setdefault("LANGCHAIN_API_KEY", settings.langchain_api_key)
+        os.environ.setdefault("LANGCHAIN_PROJECT", settings.langchain_project)
+        os.environ.setdefault("LANGCHAIN_ENDPOINT", "https://api.smith.langchain.com")
     init_db()
     memory_manager.init_background_tasks()
 
@@ -323,7 +327,7 @@ async def rag_health():
         "test_qa_pairs": len(TEST_QA_PAIRS),
         "hybrid_search_enabled": True,
         "guardrails_enabled": True,
-        "langsmith_enabled": bool(os.getenv("LANGCHAIN_API_KEY")),
+        "langsmith_enabled": bool(settings.langchain_api_key or os.getenv("LANGCHAIN_API_KEY")),
     }
 
 

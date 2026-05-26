@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     offload_max_chars: int = 1000
     session_max_messages: int = 500
 
+    langchain_api_key: str = ""
+    langchain_project: str = "chatbot-rag"
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
 
