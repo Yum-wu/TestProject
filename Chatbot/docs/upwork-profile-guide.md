@@ -26,12 +26,10 @@ Upwork 只显示前 2 行（~200 字符），必须**秒抓注意力**。
 ```
 I build production-ready RAG systems and AI agents with measurable accuracy — not just "I know RAG."
 
-Measured performance from my deployed system (try it live):
+Measured performance from my deployed system:
 • RAG Recall@3: 94% (verified over 16 annotated test cases)
 • Agent response time: 1.5s median (494ms fastest)
 • Tool calling: Calculator 100% accurate, 80% overall
-
-Live Demo: https://testproject-production-17b9.up.railway.app
 
 What I deliver:
 • Document Q&A systems (upload PDFs/Markdown → ask questions → get cited answers)
@@ -44,6 +42,9 @@ Tech stack: Python, FastAPI, LangChain, LangGraph, CrewAI, ChromaDB, Docker
 
 I provide free scope assessment — send me your requirements and I'll give you an honest estimate.
 ```
+
+> ⚠️ Upwork Overview 不支持外部链接。Demo URL 只放 Portfolio 作品集部分。
+
 
 ---
 
@@ -176,9 +177,9 @@ Tech: React 19, FastAPI, LangChain, SQLite, Docker
 
 Profile section:
 - [ ] Headline 更新为推荐版本
-- [ ] Overview 更新（含 Demo URL + 94% Recall 数据）
+- [ ] Overview 更新（含 94% Recall 数据，**不放链接**）
 - [ ] 技能标签按优先级填满
-- [ ] 添加至少 2 个 Portfolio 项目
+- [ ] 添加至少 2 个 Portfolio 项目（**这里放 Demo 链接**）
 - [ ] 头像更新
 - [ ] 时薪设 $25/hr
 - [ ] Profile 公开可见

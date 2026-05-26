@@ -85,6 +85,56 @@ cd Chatbot/crew && pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8001
 ```
 
+## 插件技能（claude-code-setup v2）
+
+已安装 16 个插件到 `~/.claude/plugins/`，分三类使用：
+
+### 自动触发（Hooks，无需手动调用）
+- `security-essentials` — 文件保护、命令校验、变更限速
+- `blog-context-detector` — 自动检测当前任务注入上下文
+- `tailwind-expert` — 自动校验 Tailwind 配置/构建前检查
+- `testing-toolkit` — 提交时自动触发测试
+- `project-management` — 任务状态持久化
+- `shadcn-style-expert` — CSS 风格守护
+- `mdx-blog` — Frontmatter 校验
+
+### 手动调用（Slash Commands）
+```
+前端          /frontend-expert  /component-architecture  /state-management
+             /react-optimization  /performance-audit  /css-architecture
+             /vue-composition-api  /optimization
+
+Tailwind     /tailwind-expert  /setup-tailwind  /validate-tailwind-config
+             /fix-custom-utilities  /check-tailwind-utilities  /fix-styling
+             /tailwind-v4-migration
+
+shadcn/ui    /shadcn-component  /css-architecture
+
+Node.js      /node-developer
+
+Python       /python-developer
+
+测试         /testing-best-practices
+
+代码质量     /code-quality  /fix-issue  /fix-zh  /review-zh  /explain-zh  /test-zh
+
+项目管理     /project-management  /create-tasks  /update-tasks  /from-prd
+             /generate-docs  /security-best-practices
+
+博客         /new-blog-post
+
+AWS CDK      /cdk-*（12 条命令：/cdk-build-deploy、/cdk-stack-pattern 等）
+             /static-site-cdk  /s3-static-site  /cloudfront-setup
+ECS          /ecs-health-check-setup  /ecs-health-check-commands  /ecs-bitnami-wordpress
+RDS          /rds-optimization  /rds-troubleshooting  /database-backup-strategy
+```
+
+### Agent（对话中自动识别场景调用）
+- `Frontend Expert` / `Tailwind CSS Expert` / `shadcn/ui Style Expert`
+- `Testing Toolkit` / `Project Management`
+- `Blog Context Detector` / `MDX Blog Manager`
+- `AWS CDK Development` / `AWS ECS Expert` / `AWS RDS Expert` / `Static Site CDK`
+
 ## 语言与沟通
 
 - 所有对话和思考应使用中文（或中英双语）。
