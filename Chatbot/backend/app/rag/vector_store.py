@@ -23,7 +23,7 @@ def _cache_key(text: str) -> str:
 
 
 # ── ChromaDB singleton ──
-_chroma_client: chromadb.PersistentClient | None = None
+_chroma_client: Optional[chromadb.PersistentClient] = None
 _chroma_collection = None
 
 
