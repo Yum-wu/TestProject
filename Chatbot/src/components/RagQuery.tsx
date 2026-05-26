@@ -14,7 +14,7 @@ const RAG_UPLOAD_URL =
 interface Source {
   title: string;
   slug: string;
-  chunk: string;
+  chunk?: string;
   score?: number;
 }
 
@@ -406,7 +406,7 @@ export function RagQuery() {
                         )}
                       </div>
                       <p className="text-xs text-gray-500 line-clamp-2">
-                        {src.chunk.slice(0, 200)}
+                        {src.chunk?.slice(0, 200)}
                       </p>
                     </div>
                   ))}
