@@ -41,7 +41,10 @@ COPY --from=frontend-builder /app/dist /usr/share/nginx/html
 # nginx 配置（含 /api/ 反向代理）
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# 启动脚本（JSON 数组 CMD 确保信号正确传递）
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 EXPOSE 80
 
-# 后台启动 nginx，然后运行 uvicorn
-CMD nginx && uvicorn app.main:app --host 127.0.0.1 --port 8000
+CMD ["/docker-entrypoint.sh"]
