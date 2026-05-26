@@ -1,0 +1,64 @@
+{
+  "timestamp": "2026-05-26T22:55:00",
+  "metrics": [
+    {
+      "label": "Recall@3 (Hybrid)",
+      "value": "96.08%",
+      "detail": "49/51 (unchanged)"
+    },
+    {
+      "label": "Recall@3 (Dense)",
+      "value": "90.2%",
+      "detail": "46/51 (unchanged)"
+    },
+    {
+      "label": "Retrieval Latency",
+      "value": "~11ms",
+      "detail": "BM25 + Dense fusion (unchanged)"
+    },
+    {
+      "label": "TTFT (Streaming)",
+      "value": "~2.2s",
+      "detail": "优化后: 关键词intent + 单次流式LLM生成"
+    },
+    {
+      "label": "Total Streaming Latency",
+      "value": "~3-4s",
+      "detail": "优化后: 无双重生成, SSE 逐token"
+    },
+    {
+      "label": "Full RAG Latency (Sync)",
+      "value": "~7s",
+      "detail": "非流式 single LLM call baseline"
+    },
+    {
+      "label": "LLM Calls per Query",
+      "value": "1",
+      "detail": "优化前3次(intent+rag+generate), 优化后1次"
+    },
+    {
+      "label": "Intent Classification",
+      "value": "<1ms",
+      "detail": "优化前 LLM ~1s, 优化后关键词规则"
+    },
+    {
+      "label": "MMR Optimization",
+      "value": "0 API calls",
+      "detail": "优化前 2次embedding API, 优化后 source diversity"
+    },
+    {
+      "label": "Test QA Pairs",
+      "value": 51,
+      "detail": "中文文档问答"
+    }
+  ],
+  "services": {
+    "llm": "GLM-4-Flash-250414",
+    "hybrid_search": "BM25 + Dense (Chroma)",
+    "guardrails": "Hallucination + Citation Verification",
+    "langsmith": "Tracing + Metrics",
+    "index": "Chroma + BM25",
+    "streaming": "SSE /api/rag/query/stream",
+    "ttft": "< 3s"
+  }
+}

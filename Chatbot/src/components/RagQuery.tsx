@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -6,37 +6,45 @@ import remarkGfm from "remark-gfm";
 const RAG_API_URL =
   (import.meta.env.VITE_API_RAG_URL as string) || "/api/rag/query";
 
+const RAG_STREAM_URL = `${RAG_API_URL}/stream`;
+
 const RAG_UPLOAD_URL =
   (import.meta.env.VITE_API_RAG_URL as string)?.replace(/\/query$/, "") || "/api/rag/upload";
 
 interface Source {
   title: string;
   slug: string;
-  chunk: string;
+  chunk?: string;
   score?: number;
 }
 
-interface RagResult {
-  answer: string;
-  sources: Source[];
+interface SSEEvent {
+  type: "sources" | "text" | "done" | "error";
+  sources?: Source[];
+  content?: string;
+  model?: string;
 }
 
 export function RagQuery() {
   const { t } = useTranslation();
   const [query, setQuery] = useState("");
-  const [result, setResult] = useState<RagResult | null>(null);
+  const [answer, setAnswer] = useState("");
+  const [sources, setSources] = useState<Source[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   // Upload state
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadMessage, setUploadMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [dragOver, setDragOver] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Uploaded files list
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => abortRef.current?.abort();
+  }, []);
 
   const fetchUploadedFiles = useCallback(async () => {
     try {
@@ -123,19 +131,26 @@ export function RagQuery() {
     setDragOver(false);
   }, []);
 
-  const handleSubmit = async () => {
+  const handleStreamSubmit = async () => {
     const trimmed = query.trim();
     if (!trimmed || loading) return;
 
+    // Cancel previous request
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     setError(null);
-    setResult(null);
+    setAnswer("");
+    setSources([]);
 
     try {
-      const res = await fetch(RAG_API_URL, {
+      const res = await fetch(RAG_STREAM_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: trimmed, top_k: 3, use_mmr: true }),
+        signal: controller.signal,
       });
 
       if (!res.ok) {
@@ -143,12 +158,42 @@ export function RagQuery() {
         throw new Error(body || `HTTP ${res.status}`);
       }
 
-      const data: RagResult = await res.json();
-      setResult(data);
-    } catch (err) {
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error("No response body");
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || !trimmed.startsWith("data:")) continue;
+
+          try {
+            const event: SSEEvent = JSON.parse(trimmed.slice(5).trim());
+            if (event.type === "sources" && event.sources) {
+              setSources(event.sources);
+            } else if (event.type === "text" && event.content) {
+              setAnswer((prev) => prev + event.content);
+            }
+          } catch {
+            // skip malformed events
+          }
+        }
+      }
+    } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
+      abortRef.current = null;
     }
   };
 
@@ -180,18 +225,18 @@ export function RagQuery() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !loading) handleSubmit();
+              if (e.key === "Enter" && !loading) handleStreamSubmit();
             }}
             placeholder={t("rag.inputPlaceholder")}
             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             disabled={loading}
           />
           <button
-            onClick={handleSubmit}
+            onClick={handleStreamSubmit}
             disabled={loading || !query.trim()}
             className="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
           >
-            {loading ? t("rag.asking") : t("rag.ask")}
+            {loading ? "...stream" : t("rag.ask")}
           </button>
         </div>
         {/* Example queries */}
@@ -200,9 +245,7 @@ export function RagQuery() {
             (ex: string) => (
               <button
                 key={ex}
-                onClick={() => {
-                  setQuery(ex);
-                }}
+                onClick={() => setQuery(ex)}
                 className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors"
               >
                 {ex}
@@ -268,7 +311,6 @@ export function RagQuery() {
             </div>
           )}
 
-          {/* Uploaded files list */}
           {uploadedFiles.length > 0 && (
             <div className="mt-4">
               <p className="text-xs font-medium text-gray-500 mb-2">{t("rag.upload.files")}</p>
@@ -295,7 +337,7 @@ export function RagQuery() {
 
       {/* Content area */}
       <div className="flex-1 overflow-y-auto px-6 py-4">
-        {!result && !loading && !error && (
+        {!answer && !loading && !error && (
           <div className="flex items-center justify-center h-full text-gray-400">
             <div className="text-center">
               <div className="text-5xl mb-4">📖</div>
@@ -304,7 +346,7 @@ export function RagQuery() {
           </div>
         )}
 
-        {loading && (
+        {loading && !answer && (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
               <div className="flex justify-center space-x-1.5 mb-4">
@@ -324,7 +366,7 @@ export function RagQuery() {
           </div>
         )}
 
-        {result && (
+        {(answer || (loading && answer)) && (
           <div className="space-y-6 max-w-3xl">
             {/* Answer */}
             <div className="bg-white border border-gray-200 rounded-xl px-5 py-4">
@@ -333,19 +375,22 @@ export function RagQuery() {
               </h2>
               <div className="prose prose-sm max-w-none text-gray-800">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {result.answer}
+                  {answer}
                 </ReactMarkdown>
               </div>
+              {loading && (
+                <span className="inline-block w-2 h-4 bg-blue-500 ml-1 animate-pulse" />
+              )}
             </div>
 
             {/* Sources */}
-            {result.sources.length > 0 && (
+            {sources.length > 0 && (
               <div>
                 <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">
                   {t("rag.sources")}
                 </h2>
                 <div className="space-y-2">
-                  {result.sources.map((src, i) => (
+                  {sources.map((src, i) => (
                     <div
                       key={i}
                       className="bg-white border border-gray-200 rounded-lg px-4 py-3"
@@ -361,7 +406,7 @@ export function RagQuery() {
                         )}
                       </div>
                       <p className="text-xs text-gray-500 line-clamp-2">
-                        {src.chunk.slice(0, 200)}
+                        {src.chunk?.slice(0, 200)}
                       </p>
                     </div>
                   ))}

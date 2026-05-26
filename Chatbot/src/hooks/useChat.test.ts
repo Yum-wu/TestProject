@@ -4,6 +4,7 @@ import { useChat } from "./useChat";
 import { streamChat } from "../services/api";
 import { loadMessages, saveMessages, clearMessages } from "../services/storage";
 import type { Message } from "../types/message";
+import type { SSEEvent } from "../services/api";
 
 // Mock modules
 vi.mock("../services/api");
@@ -85,7 +86,7 @@ describe("useChat", () => {
 
   it("should stop generation and mark last assistant message", async () => {
     // Capture the onEvent callback so we can simulate text arrival
-    let capturedOnEvent: ((event: { type: string; content: unknown }) => void) | undefined;
+    let capturedOnEvent: ((event: SSEEvent) => void) | undefined;
     vi.mocked(streamChat).mockImplementation(async ({ onEvent }) => {
       capturedOnEvent = onEvent;
       // Never resolve — we'll stop mid-stream
