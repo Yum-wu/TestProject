@@ -313,6 +313,32 @@ async def rag_experiment_endpoint():
     return result
 
 
+@app.get("/api/rag/health")
+async def rag_health():
+    """RAG system health + live service status."""
+    return {
+        "status": "ok",
+        "llm_configured": bool(os.getenv("LLM_API_KEY")),
+        "index_status": "ok" if os.path.isdir(os.path.join(os.path.dirname(__file__), "..", "data", "chroma_db")) else "not_initialized",
+        "test_qa_pairs": len(TEST_QA_PAIRS),
+        "hybrid_search_enabled": True,
+        "guardrails_enabled": True,
+        "langsmith_enabled": bool(os.getenv("LANGCHAIN_API_KEY")),
+    }
+
+
+@app.get("/api/rag/benchmark")
+async def rag_benchmark():
+    """Latest RAG evaluation benchmark results."""
+    import json
+
+    benchmark_path = os.path.join(os.path.dirname(__file__), "..", "data", "benchmark_results.json")
+    if not os.path.isfile(benchmark_path):
+        return {"metrics": [], "services": {}, "timestamp": None}
+    with open(benchmark_path, encoding="utf-8") as f:
+        return json.load(f)
+
+
 @app.post("/api/langgraph/run")
 async def langgraph_run(req: dict):
     """Run LangGraph workflow for complex tasks."""

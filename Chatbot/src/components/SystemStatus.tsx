@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import type { SystemHealth } from "../hooks/useSystemHealth";
+import { useBenchmark } from "../hooks/useBenchmark";
 
 interface SystemStatusProps {
   health: SystemHealth | null;
@@ -7,25 +8,25 @@ interface SystemStatusProps {
   error: string | null;
 }
 
+function metricBadge(value: string | number): string {
+  const v = String(value);
+  if (v.includes("%")) return v.startsWith("9") || v.startsWith("96") ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700";
+  if (v.includes("ms")) return "bg-blue-100 text-blue-700";
+  if (v.includes("s")) return "bg-yellow-100 text-yellow-700";
+  return "bg-gray-100 text-gray-600";
+}
+
 export function SystemStatus({ health, loading, error }: SystemStatusProps) {
   const { t } = useTranslation();
-
-  // Known metrics (from evaluation runs)
-  const metrics = [
-    { label: "Recall@3 (Hybrid)", value: "96.08%", badge: "bg-green-100 text-green-700" },
-    { label: "Recall@3 (Dense)", value: "90.2%", badge: "bg-green-100 text-green-700" },
-    { label: "Retrieval Latency", value: "~11ms", badge: "bg-blue-100 text-blue-700" },
-    { label: "Full RAG Latency", value: "~12-14s", badge: "bg-yellow-100 text-yellow-700" },
-    { label: "Test QA Pairs", value: health?.test_qa_pairs ?? "—", badge: "bg-gray-100 text-gray-600" },
-  ];
+  const { data: benchmark, loading: bmLoading, error: bmError } = useBenchmark();
 
   // Live system indicators
   const indicators = [
-    { label: "LLM", ok: health?.llm_configured ?? false, detail: "GLM-4-Flash" },
-    { label: "Hybrid Search", ok: health?.hybrid_search_enabled ?? false, detail: "BM25 + Dense" },
-    { label: "Guardrails", ok: health?.guardrails_enabled ?? false, detail: "Hallucination + Citation" },
-    { label: "LangSmith", ok: health?.langsmith_enabled ?? false, detail: "Tracing + Metrics" },
-    { label: "Index", ok: health?.index_status === "ok", detail: "Chroma + BM25" },
+    { label: "LLM", ok: health?.llm_configured ?? false, detail: benchmark?.services?.llm ?? "GLM-4-Flash" },
+    { label: "Hybrid Search", ok: health?.hybrid_search_enabled ?? false, detail: benchmark?.services?.hybrid_search ?? "BM25 + Dense" },
+    { label: "Guardrails", ok: health?.guardrails_enabled ?? false, detail: benchmark?.services?.guardrails ?? "Hallucination + Citation" },
+    { label: "LangSmith", ok: health?.langsmith_enabled ?? false, detail: benchmark?.services?.langsmith ?? "Tracing + Metrics" },
+    { label: "Index", ok: health?.index_status === "ok", detail: benchmark?.services?.index ?? "Chroma + BM25" },
   ];
 
   return (
@@ -40,16 +41,33 @@ export function SystemStatus({ health, loading, error }: SystemStatusProps) {
           <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">
             {t("systemStatus.metrics", "Metrics")}
           </h3>
-          <div className="space-y-3">
-            {metrics.map((m) => (
-              <div key={m.label} className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">{m.label}</span>
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${m.badge}`}>
-                  {m.value}
-                </span>
-              </div>
-            ))}
-          </div>
+          {bmLoading && (
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <span className="w-3 h-3 rounded-full bg-gray-300 animate-pulse" />
+              Loading...
+            </div>
+          )}
+          {bmError && (
+            <div className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
+              {t("systemStatus.unreachable", "Backend unreachable")}: {bmError}
+            </div>
+          )}
+          {benchmark?.metrics ? (
+            <div className="space-y-3">
+              {benchmark.metrics.map((m) => (
+                <div key={m.label} className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">{m.label}</span>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${metricBadge(m.value)}`}>
+                    {m.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : !bmLoading && !bmError ? (
+            <div className="text-sm text-gray-400">
+              {t("systemStatus.noBenchmark", "No benchmark data. Run eval first.")}
+            </div>
+          ) : null}
         </div>
 
         {/* ── Service Health ── */}
