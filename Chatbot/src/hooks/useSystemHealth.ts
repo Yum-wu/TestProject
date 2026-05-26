@@ -11,8 +11,9 @@ export interface SystemHealth {
 }
 
 const HEALTH_URL =
-  (import.meta.env.VITE_API_RAG_URL as string)?.replace(/\/query$/, "") + "/health" ||
-  "/api/rag/health";
+  import.meta.env.VITE_API_RAG_URL
+    ? (import.meta.env.VITE_API_RAG_URL as string).replace(/\/query$/, "") + "/health"
+    : "/api/rag/health";
 
 export function useSystemHealth() {
   const [health, setHealth] = useState<SystemHealth | null>(null);
