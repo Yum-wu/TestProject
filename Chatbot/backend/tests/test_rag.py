@@ -24,14 +24,15 @@ class TestEmbeddings:
             assert result is None
 
     def test_embed_texts_api_error(self):
-        """On API error, embed_texts_llm returns None."""
+        """On API error, embed_texts_llm falls back to zero embeddings."""
         with patch("app.config.settings") as mock_settings:
             mock_settings.llm_api_key = "fake_key"
             mock_settings.llm_base_url = "http://invalid/"
             with patch("requests.post") as mock_post:
                 mock_post.side_effect = Exception("API unreachable")
                 result = embed_texts_llm(["hello"])
-                assert result is None
+                assert result is not None
+                assert result.shape == (1, 768)  # zero fallback
 
 
 class TestMMRRerank:
@@ -108,7 +109,7 @@ class TestRAGQuery:
         mock_llm = MagicMock()
         with patch("app.rag.qa_chain.retrieve", return_value=[]):
             result = rag_query("unknown topic", mock_llm)
-            assert "暂无相关内容" in result.answer
+            assert "No relevant content" in result.answer
             assert result.sources == []
 
     def test_full_pipeline(self):

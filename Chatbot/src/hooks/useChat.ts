@@ -119,7 +119,7 @@ export function useChat() {
           const updated = [...prev];
           const last = updated[updated.length - 1];
           if (last && last.role === "assistant" && last.id === assistantId) {
-            let suffix = "";
+            let suffix: string;
             if (event.type === "tool_start") {
               suffix = `\n\n> ${i18n.t("chat.calling")} ${toolName}...`;
             } else {

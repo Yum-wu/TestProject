@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     offload_max_chars: int = 1000
     session_max_messages: int = 500
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
 
 settings = Settings()

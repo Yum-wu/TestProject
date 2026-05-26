@@ -1,4 +1,6 @@
 import { useTranslation } from "react-i18next";
+import { SystemStatus } from "./SystemStatus";
+import type { SystemHealth } from "../hooks/useSystemHealth";
 
 interface BadgeItem {
   value: string;
@@ -19,9 +21,12 @@ interface DiffItem {
 
 interface DemoIntroProps {
   onNavigate: (page: "chat" | "rag" | "crew") => void;
+  health: SystemHealth | null;
+  loading: boolean;
+  error: string | null;
 }
 
-export function DemoIntro({ onNavigate }: DemoIntroProps) {
+export function DemoIntro({ onNavigate, health, loading, error }: DemoIntroProps) {
   const { t } = useTranslation();
 
   const badges = t("demoIntro.badges", { returnObjects: true }) as BadgeItem[];
@@ -94,6 +99,9 @@ export function DemoIntro({ onNavigate }: DemoIntroProps) {
           ))}
         </div>
       </section>
+
+      {/* ── RAG Quality & Observability Dashboard ── */}
+      <SystemStatus health={health} loading={loading} error={error} />
 
       {/* ── Differentiators ── */}
       <section className="bg-gray-900 text-white px-6 py-10">
