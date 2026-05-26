@@ -1,4 +1,7 @@
 import { useTranslation } from "react-i18next";
+import { SystemStatus } from "./SystemStatus";
+import type { SystemHealth } from "../hooks/useSystemHealth";
+import type { BenchmarkData } from "../hooks/useBenchmark";
 
 interface BadgeItem {
   value: string;
@@ -19,14 +22,36 @@ interface DiffItem {
 
 interface DemoIntroProps {
   onNavigate: (page: "chat" | "rag" | "crew") => void;
+  health: SystemHealth | null;
+  loading: boolean;
+  error: string | null;
+  benchmark?: BenchmarkData | null;
 }
 
-export function DemoIntro({ onNavigate }: DemoIntroProps) {
+export function DemoIntro({ onNavigate, health, loading, error, benchmark }: DemoIntroProps) {
   const { t } = useTranslation();
 
   const badges = t("demoIntro.badges", { returnObjects: true }) as BadgeItem[];
   const capabilities = t("demoIntro.capabilities", { returnObjects: true }) as CapabilityItem[];
   const diffItems = t("demoIntro.differentiators", { returnObjects: true }) as DiffItem[];
+
+  // Override badge values with real benchmark data when available
+  if (benchmark?.metrics) {
+    const findMetric = (pat: string) =>
+      benchmark.metrics!.find(m => m.label.includes(pat))?.value;
+    const recall = findMetric("Recall@3 (Hybrid)");
+    const latency = findMetric("Retrieval Latency");
+    const qaPairs = findMetric("Test QA Pairs");
+    if (recall) badges[0].value = String(recall);
+    if (latency) badges[1].value = String(latency);
+    if (qaPairs) badges[2].value = String(qaPairs);
+
+    // Override capability metrics with real data
+    const denseRecall = findMetric("Recall@3 (Dense)");
+    if (recall && capabilities[0]?.metric) {
+      capabilities[0].metric = `Hybrid: ${recall} | Dense: ${denseRecall ?? "—"}`;
+    }
+  }
 
   return (
     <div className="h-full overflow-y-auto">
@@ -94,6 +119,9 @@ export function DemoIntro({ onNavigate }: DemoIntroProps) {
           ))}
         </div>
       </section>
+
+      {/* ── RAG Quality & Observability Dashboard ── */}
+      <SystemStatus health={health} loading={loading} error={error} />
 
       {/* ── Differentiators ── */}
       <section className="bg-gray-900 text-white px-6 py-10">
