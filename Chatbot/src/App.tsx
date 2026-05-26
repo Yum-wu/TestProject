@@ -8,7 +8,6 @@ import { DemoIntro } from "./components/DemoIntro";
 import { LanguageSwitcher } from "./i18n/LanguageSwitcher";
 import { useSystemHealth } from "./hooks/useSystemHealth";
 import { useBenchmark } from "./hooks/useBenchmark";
-import type { BenchmarkData } from "./hooks/useBenchmark";
 
 type Page = "home" | "chat" | "rag" | "crew";
 
