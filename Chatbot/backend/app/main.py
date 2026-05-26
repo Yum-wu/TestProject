@@ -318,8 +318,8 @@ async def rag_health():
     """RAG system health + live service status."""
     return {
         "status": "ok",
-        "llm_configured": bool(os.getenv("LLM_API_KEY")),
-        "index_status": "ok" if os.path.isdir(os.path.join(os.path.dirname(__file__), "..", "data", "chroma_db")) else "not_initialized",
+        "llm_configured": bool(settings.llm_api_key),
+        "index_status": "ok" if os.path.isdir(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "vectors"))) else "not_initialized",
         "test_qa_pairs": len(TEST_QA_PAIRS),
         "hybrid_search_enabled": True,
         "guardrails_enabled": True,
@@ -447,7 +447,7 @@ async def crew_health():
     return {
         "status": "ok",
         "service": "crew-generator",
-        "llm_configured": bool(os.getenv("LLM_API_KEY")),
+        "llm_configured": bool(settings.llm_api_key),
     }
 
 
