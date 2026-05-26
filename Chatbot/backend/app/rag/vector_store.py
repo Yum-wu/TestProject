@@ -197,11 +197,16 @@ def retrieve_keyword(query: str, top_k: int = 3) -> List[Dict[str, Any]]:
             scored.append((s, doc))
 
     scored.sort(key=lambda x: x[0], reverse=True)
+
+    if not scored:
+        return []
+
+    max_score = scored[0][0] if scored else 1.0
     return [
         {
             "text": d["text"],
             "metadata": d["metadata"],
-            "score": s,
+            "score": s / max_score,  # normalize to 0-1
         }
         for s, d in scored[:top_k]
     ]
