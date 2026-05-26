@@ -1,12 +1,21 @@
 import asyncio
 import logging
 import os
+import sys
+import time
+import uuid
 from typing import Any
 
 from fastapi import FastAPI, Request, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
+from prometheus_fastapi_instrumentator import Instrumentator
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
+import structlog
+
 from app.api.models import ChatRequest, SessionListResponse, StatusResponse
 from app.agent.llm import create_llm
 from app.agent.agent import create_chat_agent
@@ -16,19 +25,42 @@ from app.memory.db import init_db
 from app.memory.manager import manager as memory_manager
 from app.config import settings
 from app.rag.models import RAGQueryRequest, RAGQueryResponse, RAGIndexResponse, RAGUploadResponse
-from app.rag.qa_chain import rag_query, run_index_pipeline, run_incremental_index
+from app.rag.qa_chain import rag_query, rag_query_with_cache, run_index_pipeline, run_incremental_index
 from app.rag.evaluator import run_full_evaluation
 from app.rag.prompt_experiment import run_experiment, STRATEGIES
 from app.rag.test_data import TEST_QA_PAIRS
 from app.rag.vector_store import retrieve
 from app.utils.lang_detect import detect_language
+from app.cache.redis_client import close_redis
 
 # ── CrewAI (merged, lazy-imported in route handlers) ──
 from pydantic import BaseModel, Field
 
-logger = logging.getLogger(__name__)
+# ── Structured logging (replaces stdlib logging) ──
+structlog.configure(
+    processors=[
+        structlog.contextvars.merge_contextvars,
+        structlog.processors.add_log_level,
+        structlog.processors.StackInfoRenderer(),
+        structlog.dev.ConsoleRenderer()
+        if sys.stdout.isatty()
+        else structlog.processors.JSONRenderer(),
+    ],
+    wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
+    context_class=dict,
+    logger_factory=structlog.PrintLoggerFactory(),
+    cache_logger_on_first_use=True,
+)
+
+logger = structlog.get_logger()
+
+# ── Rate limiter ──
+limiter = Limiter(key_func=get_remote_address)
 
 app = FastAPI(title="Chatbot Agent API", version="0.1.0")
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -37,8 +69,32 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ── Prometheus metrics ──
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
+
 _agents: dict[str, Any] = {}
 _agent_lock = asyncio.Lock()
+
+
+@app.middleware("http")
+async def logging_middleware(request: Request, call_next):
+    """Inject request_id / session_id into structlog context per request."""
+    request_id = str(uuid.uuid4())[:8]
+    structlog.contextvars.clear_contextvars()
+    structlog.contextvars.bind_contextvars(request_id=request_id)
+
+    start = time.time()
+    response = await call_next(request)
+    elapsed = int((time.time() - start) * 1000)
+
+    logger.info(
+        "request_completed",
+        method=request.method,
+        path=request.url.path,
+        status_code=response.status_code,
+        elapsed_ms=elapsed,
+    )
+    return response
 
 
 async def _get_agent(lang: str = "zh"):
@@ -63,15 +119,19 @@ async def startup():
 @app.on_event("shutdown")
 async def shutdown():
     memory_manager.flush_all_scenarios()
+    await close_redis()
 
 
 @app.post("/api/chat/stream")
-async def chat_stream(req: ChatRequest):
+@limiter.limit("5/second")
+async def chat_stream(req: ChatRequest, request: Request):
     lang = detect_language(req.message)
     agent = await _get_agent(lang)
     return StreamingResponse(
         stream_agent_with_memory(
-            agent, req.message, req.session_id or "",
+            agent,
+            req.message,
+            req.session_id or "",
             memory_manager=memory_manager,
         ),
         media_type="text/event-stream",
@@ -97,23 +157,30 @@ async def delete_session(session_id: str):
 
 
 @app.post("/api/rag/query", response_model=RAGQueryResponse)
-async def rag_query_endpoint(req: RAGQueryRequest):
-    """RAG query: retrieve context + generate answer."""
+@limiter.limit("2/second")
+async def rag_query_endpoint(req: RAGQueryRequest, request: Request):
+    """RAG query: retrieve context + generate answer (with Redis cache)."""
     from app.agent.llm import create_llm
+
     llm = create_llm()
 
     def _llm_call(messages):
         response = llm.invoke(messages)
         return response.content
 
-    result = rag_query(req.query, _llm_call, top_k=req.top_k, use_mmr=req.use_mmr)
+    result = await rag_query_with_cache(
+        req.query, _llm_call, top_k=req.top_k, use_mmr=req.use_mmr
+    )
     return result
 
 
 @app.post("/api/rag/index", response_model=RAGIndexResponse)
-async def rag_index_endpoint():
+@limiter.limit("1/second")
+async def rag_index_endpoint(request: Request):
     """Re-index all articles into Chroma."""
-    articles_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "articles")
+    articles_dir = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), "data", "articles"
+    )
     result = run_index_pipeline(articles_dir)
     return result
 
@@ -121,7 +188,6 @@ async def rag_index_endpoint():
 @app.post("/api/rag/upload", response_model=RAGUploadResponse)
 async def rag_upload_endpoint(file: UploadFile = File(...)):
     """Upload a .md or .txt file and incrementally index it."""
-    import time
     import shutil
 
     # Validate extension
@@ -134,7 +200,9 @@ async def rag_upload_endpoint(file: UploadFile = File(...)):
         )
 
     # Save to uploads directory
-    upload_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "articles", "uploads")
+    upload_dir = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), "data", "articles", "uploads"
+    )
     os.makedirs(upload_dir, exist_ok=True)
     dest = os.path.join(upload_dir, file.filename)
 
@@ -148,7 +216,9 @@ async def rag_upload_endpoint(file: UploadFile = File(...)):
     # Incremental index
     result = run_incremental_index(dest)
     if result["status"] == "error":
-        raise HTTPException(status_code=500, detail=result.get("message", "索引失败"))
+        raise HTTPException(
+            status_code=500, detail=result.get("message", "索引失败")
+        )
 
     return result
 
@@ -156,12 +226,17 @@ async def rag_upload_endpoint(file: UploadFile = File(...)):
 @app.get("/api/rag/uploads")
 async def rag_list_uploads():
     """List all uploaded files in the uploads directory."""
-    upload_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "articles", "uploads")
+    upload_dir = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), "data", "articles", "uploads"
+    )
     if not os.path.isdir(upload_dir):
         return {"files": []}
     files = sorted(
         (
-            {"filename": f, "size": os.path.getsize(os.path.join(upload_dir, f))}
+            {
+                "filename": f,
+                "size": os.path.getsize(os.path.join(upload_dir, f)),
+            }
             for f in os.listdir(upload_dir)
             if os.path.isfile(os.path.join(upload_dir, f))
         ),
@@ -173,25 +248,26 @@ async def rag_list_uploads():
 @app.delete("/api/rag/upload/{filename}", response_model=StatusResponse)
 async def rag_delete_upload(filename: str):
     """Delete an uploaded file and its chunks from the index."""
-    import os
-
     # Security: prevent path traversal
     if ".." in filename or "/" in filename:
         raise HTTPException(status_code=400, detail="Invalid filename")
 
-    upload_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "articles", "uploads")
+    upload_dir = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), "data", "articles", "uploads"
+    )
     filepath = os.path.join(upload_dir, filename)
 
     # 1. Remove from Chroma index
     from app.rag.vector_store import delete_from_index
+
     delete_from_index(filename)
 
     # 2. Delete physical file
     if os.path.isfile(filepath):
         os.remove(filepath)
-        logger.info("Deleted uploaded file: %s", filepath)
+        logger.info("Deleted uploaded file", path=filepath)
     else:
-        logger.warning("File not found on disk (already deleted): %s", filepath)
+        logger.warning("File not found on disk (already deleted)", path=filepath)
 
     return StatusResponse(status="deleted", session_id=filename)
 
@@ -208,8 +284,10 @@ async def rag_evaluate_endpoint():
 
     def _rag_query(q: str):
         from app.rag.qa_chain import rag_query as rq
+
         def llm_call(messages):
             return llm.invoke(messages).content
+
         return rq(q, llm_call)
 
     result = run_full_evaluation(_retrieve, _rag_query, llm)
@@ -225,8 +303,10 @@ async def rag_experiment_endpoint():
 
     def _rag_query(q: str):
         from app.rag.qa_chain import rag_query as rq
+
         def llm_call(messages):
             return llm.invoke(messages).content
+
         return rq(q, llm_call)
 
     result = run_experiment(TEST_QA_PAIRS, _rag_query, llm)
@@ -237,11 +317,12 @@ async def rag_experiment_endpoint():
 async def langgraph_run(req: dict):
     """Run LangGraph workflow for complex tasks."""
     from app.langgraph.graph import run_workflow
+
     query = req.get("query", "")
     session_id = req.get("session_id", "")
     if not query:
         return {"error": "query required"}
-    result = run_workflow(query, session_id=session_id)
+    result = await run_workflow(query, session_id=session_id)
     return result
 
 
@@ -255,9 +336,9 @@ class CrewGenerateRequest(BaseModel):
 @app.post("/api/crew/generate")
 async def crew_generate(req: CrewGenerateRequest):
     """Generate article via 3-agent crew (synchronous)."""
-    import os
     import time
     from app.crew.crew_setup import generate_article
+
     try:
         # litellm (used by crewai 0.80+) needs standard OpenAI env vars
         os.environ.setdefault("OPENAI_API_KEY", settings.llm_api_key)
@@ -265,6 +346,7 @@ async def crew_generate(req: CrewGenerateRequest):
         os.environ.setdefault("OPENAI_MODEL_NAME", f"openai/{settings.llm_model}")
 
         from app.utils.lang_detect import detect_language
+
         lang = detect_language(req.topic)
 
         start = time.time()
@@ -277,15 +359,12 @@ async def crew_generate(req: CrewGenerateRequest):
             "agents": result["agents"],
         }
     except Exception as e:
-        from fastapi import HTTPException
         raise HTTPException(status_code=500, detail=f"Generation failed: {str(e)}")
 
 
 @app.post("/api/crew/generate/stream")
 async def crew_generate_stream(req: CrewGenerateRequest, request: Request):
     """Generate article with real-time agent progress via SSE."""
-    import asyncio
-    import os
     from app.crew.crew_setup import generate_article
     from app.crew.main_events import EventCollector
 
@@ -295,6 +374,7 @@ async def crew_generate_stream(req: CrewGenerateRequest, request: Request):
     os.environ.setdefault("OPENAI_MODEL_NAME", f"openai/{settings.llm_model}")
 
     from app.utils.lang_detect import detect_language
+
     lang = detect_language(req.topic)
 
     collector = EventCollector()
@@ -359,5 +439,4 @@ static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
 if os.path.isdir(static_dir):
     app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
 else:
-    logger.warning("Static directory not found: %s", os.path.abspath(static_dir))
-
+    logger.warning("Static directory not found", path=os.path.abspath(static_dir))

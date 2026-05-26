@@ -1,0 +1,262 @@
+II. English Version
+1. Product Overview
+DeepSeek is a new generation of open-source large language model series developed by DeepSeek Company. The company adheres to the strategy of "open source technology, collaborative ecosystem", aiming to democratize high-performance AI capabilities and make cutting-edge LLM technologies accessible to global developers and users.
+
+On April 24, 2026, DeepSeek officially released the preview version of the DeepSeek-V4 series models and simultaneously open-sourced them globally. This series breakthrough supports a 1 million token (approximately 750,000 Chinese characters) ultra-long context, achieving comprehensive leadership in both domestic and open-source domains in agent collaboration capabilities, world knowledge, and complex logical reasoning. DeepSeek remains committed to open source and accessibility. Ordinary users can use it completely free of charge via the official website or official App, with no usage limits. API access is pay-as-you-go for developers with highly competitive pricing. The Pro version was permanently reduced to 25% of its original price on May 22, 2026, further lowering the barrier for enterprise AI applications.
+
+2. Key Features
+2.1 Million-Token Ultra-Long Context
+All DeepSeek-V4 models come standard with a 1 million token (≈750,000 characters) context window, with no additional charges or special configuration required. This means the model can read the equivalent of the "Three-Body Problem" trilogy in one go while maintaining accurate understanding and memory.
+
+In comparison, traditional open-source models have context windows typically limited to tens of thousands to a few hundred thousand tokens, leading to information truncation and logical breaks when handling entire books, complete code repositories, large contracts, and enterprise knowledge bases. DeepSeek-V4, through its proprietary DSA sparse attention mechanism and a new hybrid attention architecture, compresses computational load across token dimensions, dramatically reducing memory and compute overhead in million-context scenarios, making global understanding and precise Q&A over extremely long texts a reality.
+
+2.2 Leading Agent Capabilities
+V4-Pro achieves the best open-source model performance in agent capabilities, ranking first among open-source models in Agentic Coding benchmarks. It has become the primary coding model for DeepSeek internal employees, with actual experience outperforming Claude Sonnet 4.5 and delivery quality approaching Claude Opus 4.6 (non-thinking mode).
+
+The model has been specially adapted and optimized for mainstream agent frameworks including Claude Code, OpenClaw, OpenCode, and CodeBuddy, showing significant improvement in tasks such as automated code generation and structured document output (e.g., PPT/report generation). The model supports complex task decomposition, multi-step reasoning, and tool calling, efficiently handling agent tasks like code generation, document processing, data analysis, and automated workflow construction.
+
+2.3 World Knowledge and Reasoning Performance
+In specialized evaluations such as world knowledge, mathematics, STEM competitions, and code generation, V4-Pro sets new records for open-source models, with some metrics approaching or even surpassing certain top-tier closed-source models. The model strengthens domain-specific knowledge reserves while balancing generality and specialization, suitable for daily conversation and copywriting as well as professional scenarios such as legal, finance, engineering, and scientific research.
+
+2.4 Dual Version Design
+DeepSeek-V4 is available in Pro and Flash versions, precisely tailored to different application scenarios:
+
+V4-Pro (High-Performance Flagship) : Total parameters ≈ 1.6 trillion, activated parameters ≈ 49 billion. Focuses on complex scenarios such as Agentic Coding, mathematical reasoning, and world knowledge. Ideal for demanding agent tasks, long document analysis, and professional code generation.
+
+V4-Flash (Efficient Economy) : Total parameters ≈ 284 billion, activated parameters ≈ 13 billion. Reasoning capability close to Pro, but with slightly reduced world knowledge. Lower cost, faster response. Suitable for daily conversation, lightweight knowledge base, and large-scale API calls.
+
+2.5 Thinking Mode and Dual-Mode Reasoning
+Both V4-Pro and V4-Flash support non-thinking mode and thinking mode. Thinking mode supports the reasoning_effort parameter to control thinking intensity (high / max). For complex agent scenarios, thinking mode with max setting is recommended.
+
+Non-Think Mode : Fastest response, suitable for routing, classification, and other lightweight tasks.
+
+Think High / Think Max Mode : Deep reasoning, suitable for code generation, complex analysis, and agent tasks. For scenarios with the highest accuracy requirements, Think Max is recommended.
+
+2.6 Open Source and Ecosystem Compatibility
+DeepSeek-V4 continues the strategy of "open source technology, collaborative ecosystem". The preview version weights have been released on the Hugging Face open-source community, supporting local deployment, private deployment, fine-tuning, and customized development. The model weights are released under the MIT license, allowing anyone to freely download and modify.
+
+The API is compatible with both OpenAI Chat Completions and Anthropic Messages mainstream interface formats. Developers need only change one line of configuration code to quickly migrate and integrate, greatly reducing technology switching costs.
+
+2.7 Web Search
+DeepSeek supports web search. On the official website or App, users can manually enable the web search toggle (earth or signal wave icon) near the conversation input box. This feature is off by default and independently controlled per conversation. Once enabled, the model can retrieve real-time information, expanding knowledge scope and answer accuracy.
+
+2.8 File Upload Support
+On the official website or App conversation interface, users can upload multiple file formats including PDF, Word (.docx), Excel (.xlsx), PowerPoint, TXT, and images (PNG/JPG). After uploading, users can ask questions directly, and the model will automatically perform OCR (for images) or content extraction and understanding.
+
+3. Technical Specifications
+3.1 Model Parameter Details
+Specification	DeepSeek-V4-Pro	DeepSeek-V4-Flash
+Model Version	DeepSeek-V4-Pro	DeepSeek-V4-Flash
+Total Parameters	1.6 trillion (1600B)	284 billion (284B)
+Activated Parameters	49 billion (49B)	13 billion (13B)
+Architecture	MoE (Mixture of Experts)	MoE (Mixture of Experts)
+Pre-training Data	33 trillion tokens	Not separately disclosed
+Context Length	1 million tokens (1M)	1 million tokens (1M)
+Max Output Length	384 K tokens	384 K tokens
+Thinking Mode	Supported (non-think / high / max)	Supported (non-think / high / max)
+Function Calling	✓	✓
+JSON Output	✓	✓
+FIM Completion	Non-think only	Non-think only
+License	MIT	MIT
+3.2 Architectural Innovation: Hybrid Attention
+DeepSeek-V4 implements significant architectural innovations, adopting a new hybrid attention architecture combining Compressed Sparse Attention (CSA) and Heavily Compressed Attention (HCA), and replacing traditional residual connections with Manifold-Constrained Hyperconnections (mHC).
+
+Compared to DeepSeek-V3.2, these innovations reduce the FLOPs required per token inference by 73% and reduce the memory load of KV cache by 90%. KV cache is the main bottleneck for long-context reasoning – agents can carry system instructions, tool outputs, retrieved context, code, logs, memory, and multi-step reasoning traces. As the context window grows, the pressure on attention mechanisms and KV cache increases dramatically. DeepSeek-V4's architectural innovations fundamentally change the dynamics of inference economics, making long-context agent workflows feasible in practical deployments.
+
+3.3 Performance Benchmark Data
+Benchmark	V4-Pro	Claude Opus 4.6	GPT-5.4	Gemini 3.1 Pro
+SWE-bench Verified	80.6	80.8	—	80.6
+LiveCodeBench	93.5	88.8	91.7	91.7
+Codeforces Rating	3206	—	3168	3052
+MMLU-Pro	87.5	89.1	87.5	—
+IMOAnswerBench	89.8	—	—	—
+3.4 Third-Party Evaluation
+According to an evaluation report released in May 2026 by the Center for AI Standards and Innovation (CAISI) under the U.S. National Institute of Standards and Technology, DeepSeek V4 Pro is the most powerful Chinese AI model evaluated by the institution, excelling in five domains: cybersecurity, software engineering, natural sciences, abstract reasoning, and mathematics. The CAISI evaluation indicates that DeepSeek V4's capability level lags behind US frontier models by approximately 8 months (roughly equivalent to the level of GPT-5), but has significant cost efficiency advantages: compared to the most cost-effective US reference model GPT-5.4 mini, DeepSeek V4 is more cost-effective in 5 out of 7 benchmark tests, with cost advantages ranging from 53% lower to 41% higher.
+
+4. Usage Methods and Guide
+DeepSeek-V4 offers multiple usage pathways:
+
+4.1 Web Chat
+URL : https://chat.deepseek.com
+
+Features : Ready to use with zero barriers, suitable for daily Q&A, document writing, or quick testing of model capabilities. Supports file upload, web search, and full 1M context.
+
+Instructions : Visit the above URL, register/login, then type your question in the conversation input box to get responses.
+
+Model Selection : After login, you can select the V4 version from the model list, switching between "Expert Mode" (V4-Pro) and "Fast Mode" (V4-Flash). V4-Pro is the default.
+
+Registration Methods : Mobile phone verification code, WeChat quick login, or email registration.
+
+Web chat is completely free with no usage limits.
+
+4.2 Official App
+How to get : Search "DeepSeek" in your mobile app store (iOS App Store / Android app market) and look for developer "DeepSeek".
+
+Features : Fully synchronized with the web version, suitable for mobile scenarios such as commuting or travel.
+
+Usage Notes : Users in the grayscale test group need to update the App to version 1.7.4 or higher to experience the million-context features of V4.
+
+The App is also completely free with no usage limits.
+
+4.3 API Access
+For developers who need to integrate DeepSeek-V4 into their own applications, services, or workflows.
+
+API Base URL (OpenAI format) : https://api.deepseek.com
+
+API Base URL (Anthropic format) : https://api.deepseek.com/anthropic
+
+Model name parameters :
+
+deepseek-v4-pro (Pro flagship, stronger performance for complex tasks)
+
+deepseek-v4-flash (Flash efficient, faster response, lower cost for routine calls)
+
+API Compatibility : Compatible with both OpenAI Chat Completions and Anthropic Messages mainstream interface standards.
+
+4.4 First API Call (Python Example)
+python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key=os.environ.get('DEEPSEEK_API_KEY'),
+    base_url="https://api.deepseek.com"
+)
+
+response = client.chat.completions.create(
+    model="deepseek-v4-pro",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant"},
+        {"role": "user", "content": "Hello"}
+    ],
+    stream=False,
+    reasoning_effort="high",
+    extra_body={"thinking": {"type": "enabled"}}
+)
+
+print(response.choices[0].message.content)
+4.5 Getting an API Key
+Visit https://platform.deepseek.com and register an account.
+
+After login, go to the API Keys page and click "Create new API key".
+
+Enter a name and immediately copy the key (it cannot be viewed again after closing the dialog).
+
+New accounts typically receive 5 million free token credits, sufficient for thorough testing.
+
+Store the key as an environment variable: export DEEPSEEK_API_KEY='sk-your-key-here'
+
+4.6 Local Deployment (Self-Hosted)
+For users who require data privacy, offline operation, or custom fine-tuning, DeepSeek-V4 provides local deployment options:
+
+Weights : Download from Hugging Face (https://huggingface.co/deepseek-ai) or ModelScope.
+
+License : MIT, allowing commercial use and secondary development.
+
+Use cases : Enterprise internal compliance deployment, research institution fine-tuning, offline AI applications.
+
+Hardware requirements : V4-Flash can run on a single high-performance server; V4-Pro requires a distributed GPU cluster.
+
+4.7 Agent Ecosystem Integration
+DeepSeek-V4 has been adapted for mainstream Agent frameworks and can be directly integrated with the following tools:
+
+Claude Code
+
+OpenClaw
+
+OpenCode
+
+CodeBuddy
+
+Developers need no extra code to use DeepSeek as the backend model in these tools, enabling domestic top-tier model capabilities for agent applications that previously relied on foreign large models.
+
+4.8 Prompt Optimization Suggestions
+Official recommendations:
+
+Temperature setting : For code generation and formal writing, use 0.2; for creative tasks and phrasing exploration, use 0.5; for creative writing and brainstorming, use 0.7+.
+
+Prompt style : Use direct, clear prompts and skip polite small talk. For example, directly ask "Write a Python function to sort a list of dictionaries by a key" instead of "Can you help me with...".
+
+Long conversation notes : If the model's replies start to go off-topic or become vague, start a new conversation thread instead of continuing corrections. V4 performs better in new conversations than in long accumulated contexts.
+
+5. API Pricing
+5.1 Current Pricing
+API is billed per token usage (1 token ≈ 0.75 Chinese characters), with input and output billed separately. Data updated as of May 24, 2026.
+
+Flash version (deepseek-v4-flash) pricing:
+
+Billing Type	Price (RMB)	Price (USD)
+1M input tokens (cache hit)	0.20 RMB	$0.0028
+1M input tokens (cache miss)	1.00 RMB	$0.14
+1M output tokens	2.00 RMB	$0.28
+Concurrency limit	2500	2500
+Pro version (deepseek-v4-pro) pricing:
+
+Billing Type	Promotional 25% price (RMB)	Permanent adjusted price after May 31, 2026 (RMB)
+1M input tokens (cache hit)	1.00 RMB	0.025 RMB
+1M input tokens (cache miss)	3.00 RMB	3.00 RMB
+1M output tokens	6.00 RMB	6.00 RMB
+Concurrency limit	500	500
+Pricing notes:
+
+Input cache hit prices for all models have been reduced to 1/10 of the launch price, effective from April 26, 2026, 20:15.
+
+The deepseek-v4-pro model API price will be permanently adjusted to 1/4 of the original price (i.e., the above price) after the 2.5-fold discount promotion ends on May 31, 2026.
+
+Cost = token count × unit price, automatically deducted from account balance. If both prepaid credits and free credits exist, free credits are used first.
+
+Free credits : Newly registered API accounts receive 5 million free token credits, sufficient for testing and initial development.
+
+5.2 Cost Advantage
+V4-Flash output price is 2 RMB / 1M tokens, which is approximately 1% of GPT-5.5 output pricing (≈30 USD, i.e., ≈210 RMB).
+
+Pro version post-discount input (cache hit) is 0.025 RMB / 1M tokens, setting a new global low for large model pricing.
+
+6. API Changelog and Migration Guide
+6.1 Current Version Update (2026-04-24)
+DeepSeek API officially supports V4-Pro and V4-Flash models, with support for both OpenAI ChatCompletions and Anthropic Messages interfaces.
+
+Access : base_url unchanged, model parameter changed to deepseek-v4-pro or deepseek-v4-flash
+
+Thinking mode : Supported via reasoning_effort parameter (high / max)
+
+Features : JSON Output, Tool Calls, Chat Prefix Completion (Beta), FIM Completion (Beta)
+
+6.2 Legacy Interface Deprecation Notice (⚠️ Important)
+The two legacy model names deepseek-chat and deepseek-reasoner will be discontinued on July 24, 2026.
+
+Transition period : From now until July 24, 2026, existing endpoints will continue to work but will be automatically routed to the corresponding V4 models (deepseek-chat → deepseek-v4-pro, deepseek-reasoner → deepseek-v4-pro with thinking enabled).
+
+Action required : Update your API calls to use the new model names and adjust any code depending on specific behavior of legacy models.
+
+No action needed for URLs : The base URLs remain unchanged.
+
+6.3 Migration Example
+Before (legacy):
+
+python
+response = client.chat.completions.create(
+    model="deepseek-reasoner",
+    messages=[...]
+)
+After (V4):
+
+python
+response = client.chat.completions.create(
+    model="deepseek-v4-pro",
+    messages=[...],
+    reasoning_effort="high"
+)
+7. Important Notes
+Free access : Both web chat and official App are completely free with no usage limits. API has a separate pay-as-you-go pricing but new accounts receive 5M free tokens.
+
+Web search : Must be manually enabled per conversation; it does not automatically activate.
+
+File upload : Supports most common document formats and images (OCR applied).
+
+Long context usage : For best performance, start new conversations when topics change significantly; avoid extremely long accumulated histories.
+
+Rate limits : API has concurrency limits as noted in pricing section. Free tier may have additional rate limits.
+
+Data privacy : For production use with sensitive data, consider local deployment or paid API with appropriate data handling agreements.
+
+Document version: 1.0 (as of May 24, 2026). For the latest updates, please refer to official DeepSeek channels.

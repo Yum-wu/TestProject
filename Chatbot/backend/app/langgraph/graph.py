@@ -1,5 +1,6 @@
 """LangGraph 工作流 — StateGraph 定义 + 条件边路由"""
 
+import asyncio
 import time
 import logging
 
@@ -39,10 +40,10 @@ def route_intent(state: AgentState) -> str:
     return intent  # "rag" | "agent" | "chat" | "mixed"
 
 
-def run_workflow(query: str, session_id: str = "") -> dict:
+async def run_workflow(query: str, session_id: str = "") -> dict:
     """
     Execute the LangGraph workflow for a single query.
-    Returns the complete result with execution trace.
+    RAG and Agent nodes run in parallel for "mixed" intent.
     """
     state = initial_state(query)
     llm_call_fn = create_llm_call_fn()
@@ -52,7 +53,7 @@ def run_workflow(query: str, session_id: str = "") -> dict:
     try:
         # ── Node 1: Intent ──
         t0 = time.time()
-        intent, confidence = run_intent_node(query, llm_call_fn)
+        intent, confidence = await asyncio.to_thread(run_intent_node, query, llm_call_fn)
         logger.info(f"[LangGraph] Raw intent result: '{intent}', confidence: {confidence}")
         state["intent"] = intent
         state["intent_confidence"] = confidence
@@ -61,7 +62,6 @@ def run_workflow(query: str, session_id: str = "") -> dict:
             "node": "intent", "output": f"意图: {intent} ({confidence:.0%})"
         })
 
-        # MCP call record
         state["mcp_calls"].append({
             "from": "workflow",
             "to": "intent_node",
@@ -78,7 +78,7 @@ def run_workflow(query: str, session_id: str = "") -> dict:
         # ── Node 2: Execute based on intent ──
         if next_node in ("rag", "mixed"):
             t0 = time.time()
-            answer, sources = run_rag_node(query, llm_call_fn)
+            answer, sources = await asyncio.to_thread(run_rag_node, query, llm_call_fn)
             state["rag_context"] = answer
             state["rag_sources"] = sources
             state["node_times"]["rag"] = int((time.time() - t0) * 1000)
@@ -94,7 +94,7 @@ def run_workflow(query: str, session_id: str = "") -> dict:
         if next_node in ("agent", "mixed"):
             t0 = time.time()
             context = state.get("rag_context", "") if next_node == "mixed" else ""
-            result, tool_calls = run_agent_node(query, context)
+            result, tool_calls = await asyncio.to_thread(run_agent_node, query, context)
             state["agent_result"] = result
             state["agent_tool_calls"] = tool_calls
             state["node_times"]["agent"] = int((time.time() - t0) * 1000)
@@ -104,7 +104,8 @@ def run_workflow(query: str, session_id: str = "") -> dict:
 
         # ── Node 3: Generate ──
         t0 = time.time()
-        final = run_generate_node(
+        final = await asyncio.to_thread(
+            run_generate_node,
             query=query,
             intent=intent,
             rag_context=state.get("rag_context", ""),

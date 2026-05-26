@@ -1,5 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const RAG_API_URL =
   (import.meta.env.VITE_API_RAG_URL as string) || "/api/rag/query";
@@ -165,7 +167,7 @@ export function RagQuery() {
             onClick={() => setUploadOpen(!uploadOpen)}
             className="text-xs px-3 py-1.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 transition-colors shrink-0 ml-4"
           >
-            {uploadOpen ? "▼" : "▲"} {t("rag.upload.toggle")}
+            {uploadOpen ? "▲" : "▼"} {t("rag.upload.toggle")}
           </button>
         </div>
       </header>
@@ -214,15 +216,14 @@ export function RagQuery() {
       {uploadOpen && (
         <div className="bg-white border-b border-gray-200 px-6 py-4">
           <div
-            ref={fileInputRef}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onClick={() => document.getElementById("rag-upload-input")?.click()}
-            className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
+            className={`relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-200 ${
               dragOver
-                ? "border-blue-400 bg-blue-50"
-                : "border-gray-300 hover:border-gray-400 bg-gray-50"
+                ? "border-blue-500 bg-blue-50 scale-[1.02] shadow-lg"
+                : "border-gray-300 hover:border-gray-400 bg-gray-50 hover:bg-gray-100"
             }`}
           >
             <input
@@ -246,6 +247,11 @@ export function RagQuery() {
                 <div className="text-2xl mb-2">📄</div>
                 <p className="text-sm text-gray-600">{t("rag.upload.hint")}</p>
                 <p className="text-xs text-gray-400 mt-1">{t("rag.upload.formats")}</p>
+                {dragOver && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-blue-500/10 rounded-xl">
+                    <span className="text-blue-600 font-semibold text-sm">📥 释放以上传</span>
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -325,9 +331,11 @@ export function RagQuery() {
               <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">
                 Answer
               </h2>
-              <p className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">
-                {result.answer}
-              </p>
+              <div className="prose prose-sm max-w-none text-gray-800">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {result.answer}
+                </ReactMarkdown>
+              </div>
             </div>
 
             {/* Sources */}

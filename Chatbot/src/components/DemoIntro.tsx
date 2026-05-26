@@ -53,7 +53,7 @@ export function DemoIntro({ onNavigate }: DemoIntroProps) {
         </div>
 
         {/* CTA buttons */}
-        <div className="flex justify-center gap-4 mt-8 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
+        <div className="flex justify-center gap-4 mt-8 flex-wrap animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
           <button
             onClick={() => onNavigate("chat")}
             className="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm"
@@ -65,6 +65,12 @@ export function DemoIntro({ onNavigate }: DemoIntroProps) {
             className="bg-white text-blue-600 border border-blue-200 px-6 py-2.5 rounded-lg font-medium hover:bg-blue-50 transition-colors shadow-sm"
           >
             {t("demoIntro.cta.rag")}
+          </button>
+          <button
+            onClick={() => onNavigate("crew")}
+            className="bg-white text-blue-600 border border-blue-200 px-6 py-2.5 rounded-lg font-medium hover:bg-blue-50 transition-colors shadow-sm"
+          >
+            {t("demoIntro.cta.crew")}
           </button>
         </div>
       </section>

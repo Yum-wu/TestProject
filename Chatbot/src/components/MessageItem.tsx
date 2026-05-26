@@ -1,23 +1,42 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Message } from "../types/message";
 
+/** Lazy-loaded syntax highlighter wrapper — 760KB chunk only loaded when code block appears */
+const Highlighter = lazy(() => import("./SyntaxHighlighterWrapper"));
+
 interface MessageItemProps {
   message: Message;
 }
 
-/** Simple code block renderer (avoids react-syntax-highlighter DOM issues) */
+/** Code block rendered with syntax highlighting (lazy loaded) */
 function SimpleCode({ language, code }: { language?: string; code: string }) {
   return (
     <div className="relative group rounded-lg overflow-hidden my-2">
-      <div className="flex items-center justify-between bg-gray-800 px-4 py-2 text-xs text-gray-400">
+      <div className="flex items-center justify-between bg-[#2d323b] px-4 py-1.5 text-xs text-gray-400">
         <span>{language || "code"}</span>
+        <button
+          onClick={() => navigator.clipboard.writeText(code)}
+          className="text-gray-500 hover:text-gray-300 transition-colors"
+        >
+          📋
+        </button>
       </div>
-      <pre className="bg-gray-900 text-gray-300 p-4 text-sm overflow-x-auto m-0">
-        <code>{code}</code>
-      </pre>
+      <Suspense
+        fallback={
+          <pre className="bg-[#1e1e1e] text-gray-300 p-4 text-sm overflow-x-auto m-0">
+            <code>{code}</code>
+          </pre>
+        }
+      >
+        <Highlighter
+          language={language || "text"}
+          code={code}
+          showLineNumbers={code.split("\n").length > 3}
+        />
+      </Suspense>
     </div>
   );
 }
@@ -83,7 +102,11 @@ export function MessageItem({ message }: MessageItemProps) {
         }`}
       >
         {isUser ? (
-          <p className="whitespace-pre-wrap break-words">{message.content}</p>
+          <div className="prose prose-sm max-w-none prose-invert break-words">
+            <ReactMarkdown remarkPlugins={remarkPlugins}>
+              {message.content}
+            </ReactMarkdown>
+          </div>
         ) : (
           <div className="prose prose-sm max-w-none break-words" translate="no">
             <ReactMarkdown

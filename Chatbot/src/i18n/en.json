@@ -39,7 +39,8 @@
     ],
     "cta": {
       "chat": "Try AI Chat",
-      "rag": "Query Knowledge Base"
+      "rag": "Query Knowledge Base",
+      "crew": "Generate Article"
     },
     "differentiators": [
       { "icon": "⚡", "text": "Token ↓61% vs baseline" },
@@ -101,6 +102,7 @@
     "starting": "Starting AI team...",
     "completedIn": "Completed in",
     "seconds": "seconds",
-    "errorShort": "Topic needs at least 2 characters"
+    "errorShort": "Topic needs at least 2 characters",
+    "retry": "Retry"
   }
 }

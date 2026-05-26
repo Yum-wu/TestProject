@@ -24,4 +24,18 @@ chromadb>=0.5,<0.6
 langgraph
 
 # CrewAI (merged into main app)
-crewai>=0.80,<1.0
+# ⚠️ crewai 与 langchain>=1.0 不兼容，安装见 crew/requirements.txt
+# crewai>=0.11.0,<1.0
+
+# Resilience & rate limiting
+tenacity>=8.0,<9.0
+slowapi>=0.1.9,<1.0
+
+# Structured logging
+structlog>=24.0,<25.0
+
+# Prometheus metrics
+prometheus-fastapi-instrumentator>=6.0,<7.0
+
+# Redis semantic cache
+redis>=5.0,<6.0

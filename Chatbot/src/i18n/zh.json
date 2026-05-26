@@ -39,7 +39,8 @@
     ],
     "cta": {
       "chat": "试用 AI 聊天",
-      "rag": "查询知识库"
+      "rag": "查询知识库",
+      "crew": "生成文章"
     },
     "differentiators": [
       { "icon": "⚡", "text": "Token 降低 61%" },
@@ -101,6 +102,7 @@
     "starting": "正在启动 AI 团队...",
     "completedIn": "完成耗时",
     "seconds": "秒",
-    "errorShort": "主题至少需要 2 个字符"
+    "errorShort": "主题至少需要 2 个字符",
+    "retry": "重试"
   }
 }

@@ -16,8 +16,10 @@ export interface StreamChatParams {
   signal?: AbortSignal;
 }
 
+const BACKPRESSURE_HIGH_WATER = 50; // 未处理事件超过此数则暂停读取
+
 /**
- * 以 SSE 流式方式调用后端 Chat API
+ * 以 SSE 流式方式调用后端 Chat API，带背压控制
  */
 export async function streamChat(params: StreamChatParams): Promise<void> {
   const { message, sessionId, onEvent, onError, signal } = params;
@@ -46,8 +48,15 @@ export async function streamChat(params: StreamChatParams): Promise<void> {
 
     const decoder = new TextDecoder();
     let buffer = "";
+    let pendingEvents = 0;
 
     while (true) {
+      // 背压：如果 React 处理速度跟不上，暂停读取
+      if (pendingEvents > BACKPRESSURE_HIGH_WATER) {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        continue;
+      }
+
       const { done, value } = await reader.read();
       if (done) break;
 
@@ -62,7 +71,11 @@ export async function streamChat(params: StreamChatParams): Promise<void> {
         const data = trimmed.slice(5).trim();
         try {
           const event: SSEEvent = JSON.parse(data);
+          pendingEvents++;
           onEvent(event);
+          // Defer decrement to next macrotask so pendingEvents reflects
+          // events dispatched but not yet rendered by React
+          setTimeout(() => pendingEvents--, 0);
         } catch {
           continue;
         }
