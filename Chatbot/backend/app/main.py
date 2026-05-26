@@ -110,7 +110,7 @@ async def _get_agent(lang: str = "zh"):
 
 @app.on_event("startup")
 async def startup():
-    if not settings.llm_api_key:
+    if not settings.llm_api_key and not settings.fallback_api_key:
         logger.warning("LLM_API_KEY 未配置，Agent 调用将失败")
     if settings.langchain_api_key:
         os.environ.setdefault("LANGCHAIN_API_KEY", settings.langchain_api_key)
@@ -406,6 +406,8 @@ async def rag_health():
     return {
         "status": "ok",
         "llm_configured": bool(settings.llm_api_key),
+        "model": settings.llm_model,
+        "fallback_configured": bool(settings.fallback_api_key),
         "index_status": "ok" if os.path.isdir(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "vectors"))) else "not_initialized",
         "test_qa_pairs": len(TEST_QA_PAIRS),
         "hybrid_search_enabled": True,

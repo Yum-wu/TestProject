@@ -60,14 +60,17 @@ def embed_texts_llm(texts: List[str], batch_size: int = 20) -> Optional[np.ndarr
     """Generate embeddings via Zhipu AI API, with caching + batching."""
     from app.config import settings
 
-    if not settings.llm_api_key:
+    api_key = settings.embedding_api_key or settings.llm_api_key
+    base_url = settings.embedding_base_url or settings.llm_base_url
+
+    if not api_key:
         print("[VectorStore] LLM_API_KEY not configured, cannot embed")
         return None
 
     import requests
 
     headers = {
-        "Authorization": f"Bearer {settings.llm_api_key}",
+        "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
     }
 
@@ -97,7 +100,7 @@ def embed_texts_llm(texts: List[str], batch_size: int = 20) -> Optional[np.ndarr
         }
         try:
             resp = requests.post(
-                f"{settings.llm_base_url}/embeddings",
+                f"{base_url}/embeddings",
                 headers=headers,
                 json=payload,
                 timeout=60,

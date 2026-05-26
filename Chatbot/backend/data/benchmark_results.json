@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-26T23:10:00",
+  "timestamp": "2026-05-26T23:40:00",
   "metrics": [
     {
       "label": "Recall@3 (Hybrid)",
@@ -24,12 +24,12 @@
     {
       "label": "TTFT (Uncached Streaming)",
       "value": "~5.7s",
-      "detail": "瓶颈在 Zhipu embedding API, 非 LLM"
+      "detail": "DeepSeek v4-flash 首次 token, Zhipu embedding-2 检索"
     },
     {
       "label": "Total Streaming Latency",
-      "value": "~6.7-8.2s",
-      "detail": "取决于 LLM 输出长度 (GLM-4-Flash)"
+      "value": "~5.7-7.3s",
+      "detail": "DeepSeek v4-flash, 比 GLM-4-Flash 快 ~1s"
     },
     {
       "label": "Total Cached Latency",
@@ -73,7 +73,7 @@
     }
   ],
   "services": {
-    "llm": "GLM-4-Flash-250414",
+    "llm": "deepseek-v4-flash (primary) + GLM-4-Flash-250414 (fallback)",
     "hybrid_search": "BM25 + Dense (Chroma)",
     "guardrails": "Hallucination + Citation Verification",
     "langsmith": "Tracing + Metrics",
