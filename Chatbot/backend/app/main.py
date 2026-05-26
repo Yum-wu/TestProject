@@ -25,7 +25,7 @@ from app.memory.db import init_db
 from app.memory.manager import manager as memory_manager
 from app.config import settings
 from app.rag.models import RAGQueryRequest, RAGQueryResponse, RAGIndexResponse, RAGUploadResponse
-from app.rag.qa_chain import rag_query, rag_query_with_cache, run_index_pipeline, run_incremental_index
+from app.rag.qa_chain import rag_query, rag_query_with_cache, rag_query_astream, run_index_pipeline, run_incremental_index
 from app.rag.evaluator import run_full_evaluation
 from app.rag.prompt_experiment import run_experiment, STRATEGIES
 from app.rag.test_data import TEST_QA_PAIRS
@@ -176,6 +176,89 @@ async def rag_query_endpoint(req: RAGQueryRequest, request: Request):
         req.query, _llm_call, top_k=req.top_k, use_mmr=req.use_mmr
     )
     return result
+
+
+@app.post("/api/rag/query/stream")
+@limiter.limit("2/second")
+async def rag_query_stream_endpoint(req: RAGQueryRequest, request: Request):
+    """Streaming RAG: buffered SSE + Redis cache layer."""
+    from app.agent.llm import create_llm
+    from app.cache.redis_client import get_cached, set_cached
+    import json
+
+    llm = create_llm()
+
+    async def _buffer_events(generator, flush_interval=0.15, max_chars=400):
+        """Buffer text events, flush at interval or max_chars.
+
+        - First text event: flush immediately (zero TTFT impact)
+        - Subsequent: buffer at 150ms / 400 chars
+        - Non-text events: flush pending text first, pass through
+        """
+        buf = ""
+        last_flush = 0.0
+        is_first = True
+        async for event in generator:
+            if event.get("type") == "text":
+                buf += event["content"]
+                now = time.monotonic()
+                if not last_flush:
+                    last_flush = now
+                # Flush first event immediately to keep TTFT low
+                if is_first:
+                    is_first = False
+                    yield {"type": "text", "content": buf}
+                    buf = ""
+                    last_flush = now
+                elif (now - last_flush) >= flush_interval or len(buf) >= max_chars:
+                    yield {"type": "text", "content": buf}
+                    buf = ""
+                    last_flush = now
+            else:
+                if buf:
+                    yield {"type": "text", "content": buf}
+                    buf = ""
+                    last_flush = 0.0
+                yield event
+        if buf:
+            yield {"type": "text", "content": buf}
+
+    async def event_stream():
+        # 1. Try Redis cache hit
+        cached = await get_cached(req.query)
+        if cached is not None:
+            yield f"data: {json.dumps({'type': 'sources', 'sources': []}, ensure_ascii=False)}\n\n"
+            yield f"data: {json.dumps({'type': 'text', 'content': cached}, ensure_ascii=False)}\n\n"
+            yield "data: {\"type\": \"cache_hit\"}\n\n"
+            return
+
+        # 2. Stream with buffering, auto-cache full answer on completion
+        full_text = ""
+        try:
+            raw_gen = rag_query_astream(
+                req.query, llm, top_k=req.top_k, use_mmr=req.use_mmr
+            )
+            async for event in _buffer_events(raw_gen):
+                if event.get("type") == "text":
+                    full_text += event["content"]
+                yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'type': 'error', 'content': str(e)}, ensure_ascii=False)}\n\n"
+        finally:
+            # 3. Cache full answer (fire-and-forget, non-blocking)
+            if full_text:
+                asyncio.create_task(set_cached(req.query, full_text))
+            yield "data: {\"type\": \"done\"}\n\n"
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @app.post("/api/rag/index", response_model=RAGIndexResponse)

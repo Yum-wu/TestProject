@@ -287,56 +287,30 @@ def retrieve(query: str, top_k: int = 3, use_mmr: bool = True) -> List[Dict[str,
         })
 
     if use_mmr and len(items) > top_k:
-        return _mmr_rerank(query, items, top_k, lambda_mult=0.5)
+        return _simple_diversity(items, top_k)
 
     return items[:top_k]
 
 
-def _mmr_rerank(query: str, items: List[Dict], top_k: int, lambda_mult: float = 0.5) -> List[Dict]:
-    """MMR reranking for result diversity using query embedding."""
-    query_emb = embed_texts_llm([query])
-    if query_emb is None:
-        return items[:top_k]
+def _simple_diversity(items: list, top_k: int) -> list:
+    """Lightweight diversity: prefer unique sources, fill with best scores.
 
-    query_emb = query_emb[0]
-    texts = [it["text"] for it in items]
-    item_embs = embed_texts_llm(texts)
-    if item_embs is None:
-        return items[:top_k]
-
-    selected_indices = []
-    remaining = list(range(len(items)))
-    scores = np.array([it["score"] for it in items])
-
-    while len(selected_indices) < top_k and remaining:
-        best_score = -float("inf")
-        best_idx = None
-
-        for idx in remaining:
-            sim_to_query = scores[idx]
-            sim_to_selected = 0.0
-            if selected_indices:
-                sim_to_selected = max(
-                    float(np.dot(item_embs[idx], item_embs[s]))
-                    for s in selected_indices
-                )
-            mmr = lambda_mult * sim_to_query - (1 - lambda_mult) * sim_to_selected
-            if mmr > best_score:
-                best_score = mmr
-                best_idx = idx
-
-        if best_idx is not None:
-            selected_indices.append(best_idx)
-            remaining.remove(best_idx)
-
-    return [items[idx] for idx in selected_indices]
-
-
-def cosine_similarity(query_emb: np.ndarray, corpus_emb: np.ndarray) -> np.ndarray:
-    """Compute cosine similarity (kept for backward compatibility)."""
-    query_norm = query_emb / (np.linalg.norm(query_emb) + 1e-10)
-    corpus_norm = corpus_emb / (np.linalg.norm(corpus_emb, axis=1, keepdims=True) + 1e-10)
-    return np.dot(corpus_norm, query_norm)
+    No embedding API calls.
+    """
+    seen_sources = set()
+    diverse = []
+    # Pass 1: best item per unique source
+    for item in sorted(items, key=lambda x: x["score"], reverse=True):
+        src = item["metadata"].get("source", item["metadata"].get("title", ""))
+        if src not in seen_sources:
+            diverse.append(item)
+            seen_sources.add(src)
+            if len(diverse) >= top_k:
+                return diverse
+    # Pass 2: fill remaining from unused items by score
+    remaining = [it for it in items if it not in diverse]
+    diverse.extend(remaining[:top_k - len(diverse)])
+    return diverse
 
 
 def format_context(chunks: List[Dict[str, Any]]) -> str:
