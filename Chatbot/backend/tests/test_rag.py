@@ -4,13 +4,11 @@ Uses mocked LLM + embeddings to run without API keys.
 """
 import pytest
 from unittest.mock import patch, MagicMock
-import numpy as np
 
 from app.rag.vector_store import (
     embed_texts_llm,
-    _mmr_rerank,
+    _simple_diversity,
     format_context,
-    cosine_similarity,
 )
 from app.rag.qa_chain import rag_query, generate_answer
 
@@ -35,41 +33,25 @@ class TestEmbeddings:
                 assert result.shape == (1, 768)  # zero fallback
 
 
-class TestMMRRerank:
+class TestDiversityRerank:
     def test_no_rerank_needed(self):
         """When len(items) <= top_k, no reranking happens."""
         items = [
             {"id": "0", "text": "a", "metadata": {}, "score": 0.9},
             {"id": "1", "text": "b", "metadata": {}, "score": 0.8},
         ]
-        result = _mmr_rerank("query", items, top_k=5)
+        result = _simple_diversity(items, top_k=5)
         assert len(result) == 2
         assert result[0]["id"] == "0"
 
     def test_basic_rerank_shape(self):
-        """MMR returns exactly top_k items."""
+        """Diversity returns exactly top_k items."""
         items = [
             {"id": str(i), "text": f"doc_{i}", "metadata": {}, "score": 0.9 - i * 0.05}
             for i in range(6)
         ]
-        with patch("app.rag.vector_store.embed_texts_llm") as mock_embed:
-            mock_embed.side_effect = lambda texts: np.random.rand(len(texts), 768).astype(np.float32)
-            result = _mmr_rerank("query", items, top_k=3)
-            assert len(result) == 3
-
-
-class TestCosineSimilarity:
-    def test_identical_vectors(self):
-        q = np.array([1.0, 0.0])
-        c = np.array([[1.0, 0.0]])
-        sim = cosine_similarity(q, c)
-        assert abs(sim[0] - 1.0) < 1e-6
-
-    def test_orthogonal_vectors(self):
-        q = np.array([1.0, 0.0])
-        c = np.array([[0.0, 1.0]])
-        sim = cosine_similarity(q, c)
-        assert abs(sim[0]) < 1e-6
+        result = _simple_diversity(items, top_k=3)
+        assert len(result) == 3
 
 
 class TestFormatContext:
