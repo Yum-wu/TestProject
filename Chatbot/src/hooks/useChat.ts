@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import i18n from "i18next";
 import type { Message } from "../types/message";
-import { streamChat, streamEnhancedChat, type SSEEvent } from "../services/api";
+import { streamEnhancedChat, type SSEEvent } from "../services/api";
 import {
   loadMessages,
   saveMessages,
