@@ -18,7 +18,7 @@ class TestLLMFactoryMocked:
             llm = create_llm()
             mock.assert_called_once()
             _, kwargs = mock.call_args
-            assert kwargs["model"] == "GLM-4-Flash-250414"
+            assert kwargs["model"] == "deepseek-v4-flash"
             assert kwargs["streaming"] is True
             assert kwargs["temperature"] == 0.7
 
