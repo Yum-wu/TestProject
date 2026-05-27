@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Read(//mnt/c/Users/Yum/Desktop/**)",
-      "Bash(sed -n '711p' 目标.md)"
-    ]
-  }
-}
