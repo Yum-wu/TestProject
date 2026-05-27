@@ -1,6 +1,7 @@
 {
   "app": {
     "nav": {
+      "home": "Home",
       "chat": "AI Chat",
       "rag": "Knowledge Base",
       "crew": "Article Generator"
