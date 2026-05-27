@@ -147,6 +147,38 @@ async def chat_stream(req: ChatRequest, request: Request):
     )
 
 
+@app.post("/api/chat/enhanced/stream")
+@limiter.limit("5/second")
+async def chat_enhanced_stream(req: ChatRequest, request: Request):
+    """Enhanced chat with automatic RAG integration via LangGraph intent routing."""
+    import json
+    from app.langgraph.streaming import stream_workflow
+    from app.agent.llm import create_llm
+
+    llm = create_llm()
+
+    async def event_stream():
+        try:
+            async for event in stream_workflow(
+                query=req.message,
+                llm=llm,
+                session_id=req.session_id or "",
+            ):
+                yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'type': 'error', 'content': str(e)}, ensure_ascii=False)}\n\n"
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
 @app.get("/api/sessions", response_model=SessionListResponse)
 async def list_sessions():
     sessions = memory_manager.get_active_sessions()

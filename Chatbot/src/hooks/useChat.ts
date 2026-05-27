@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import i18n from "i18next";
 import type { Message } from "../types/message";
-import { streamChat, type SSEEvent } from "../services/api";
+import { streamChat, streamEnhancedChat, type SSEEvent } from "../services/api";
 import {
   loadMessages,
   saveMessages,
@@ -138,6 +138,34 @@ export function useChat() {
         });
         break;
       }
+      case "sources": {
+        const srcList = (event as SSEEvent).sources ?? (event.content as Array<{ title: string; slug: string; score?: number }>);
+        if (srcList) {
+          flushNow();
+          setMessages((prev) => {
+            const updated = [...prev];
+            const last = updated[updated.length - 1];
+            if (last && last.role === "assistant" && last.id === assistantId) {
+              updated[updated.length - 1] = { ...last, sources: srcList };
+            }
+            return updated;
+          });
+        }
+        break;
+      }
+      case "intent": {
+        const intentData = event.content as { intent: string; confidence: number };
+        flushNow();
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[updated.length - 1];
+          if (last && last.role === "assistant" && last.id === assistantId) {
+            updated[updated.length - 1] = { ...last, intent: intentData.intent };
+          }
+          return updated;
+        });
+        break;
+      }
       case "error": {
         flushNow();
         const err = event.content as { message: string };
@@ -174,7 +202,7 @@ export function useChat() {
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
 
-    await streamChat({
+    await streamEnhancedChat({
       message: userMessage.content,
       sessionId: sessionIdRef.current,
       onEvent: (event) => handleEvent(event, assistantMessage.id),

@@ -115,6 +115,34 @@ export function MessageItem({ message }: MessageItemProps) {
             >
               {message.content}
             </ReactMarkdown>
+
+            {/* RAG Sources */}
+            {message.sources && message.sources.length > 0 && (
+              <div className="mt-3 pt-2 border-t border-gray-100">
+                <p className="text-xs text-gray-400 mb-1.5">📚 参考来源</p>
+                <div className="space-y-1">
+                  {message.sources.map((src, i) => (
+                    <div key={i} className="flex items-center gap-2 text-xs">
+                      <span className="text-blue-600 truncate">{src.title}</span>
+                      {src.score !== undefined && (
+                        <span className="text-gray-300 shrink-0">
+                          {(src.score * 100).toFixed(0)}%
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Intent badge */}
+            {message.intent && message.intent !== "chat" && (
+              <div className="mt-2">
+                <span className="inline-block text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">
+                  {message.intent === "rag" ? "📚 知识问答" : message.intent === "mixed" ? "🔗 混合" : "🤖 工具"}
+                </span>
+              </div>
+            )}
           </div>
         )}
 
