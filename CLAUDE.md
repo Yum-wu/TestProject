@@ -1,7 +1,6 @@
 # CLAUDE.md
 
 本文件为 Claude Code 在此仓库中工作时的指南。
-开始任何对话时调用/using-superpower
 
 ## 仓库概览
 
@@ -83,6 +82,13 @@ cd Chatbot && npm install && npm run dev
 # 文章生成服务（CrewAI，端口 8001）
 cd Chatbot/crew && pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8001
+```
+
+**API 端点（2026-05-27 新增）：**
+- `POST /api/chat/enhanced/stream` — Chat + RAG 自动集成，LangGraph 流式工作流
+- `POST /api/chat/stream` — 基础 Chat Agent
+- `POST /api/rag/query` — RAG 查询
+- `POST /api/rag/index` — 重新索引文章
 ```
 
 ## 插件技能（claude-code-setup v2）

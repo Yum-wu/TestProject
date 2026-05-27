@@ -32,7 +32,7 @@
 ChromaDB 初始化、文档索引、持久化管理。
 
 ### `app/rag/retriever.py`
-相似度检索 + MMR 重排序，支持 top_k 配置。
+相似度检索 + 轻量 MMR 重排序（`_simple_diversity`），支持 top_k 配置。
 
 ### `app/rag/qa_chain.py`
 RAG pipeline 主流程：检索 → 拼接上下文 → 调用 LLM 生成 → 返回带来源的答案。
@@ -80,9 +80,11 @@ Direct 策略因 System Prompt 规则"如果问题与文档无关，礼貌说明
 
 - **ChromaDB**：本地轻量，无需单独部署，适合入门学习
 - **RecursiveCharacterTextSplitter**：chunk_size=500, overlap=50，适合中文 Markdown
-- **MMR**：默认开启，提高来源多样性
+- **轻量 MMR**：默认开启（`_simple_diversity`），提高来源多样性，无需 query embedding
+- **BM25 关键词检索**：快速第一跳（<10ms），减少 Embedding API 调用
 - **sentence-transformers**：本地 Embedding fallback，避免 API 依赖
 - **Agent Tool 集成**：`knowledge_retrieval` Tool 注册到 ALL_TOOLS，Agent 自动可调用
+- **Chat + RAG 自动集成**：LangGraph 流式工作流，意图分类关键词匹配 → RAG/Chat 路由 → LLM 流式生成（2026-05-27）
 
 ## 评估方法
 
