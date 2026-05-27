@@ -21,9 +21,13 @@ export function SystemStatus({ health, loading, error }: SystemStatusProps) {
   const { data: benchmark, loading: bmLoading, error: bmError } = useBenchmark();
 
   // Live system indicators
+  // Derive hybrid search from available fields (backend may not return hybrid_search_enabled)
+  const hasHybrid = (health?.streaming_retrieval?.includes("BM25") && health?.sync_retrieval?.includes("Chroma"))
+    || health?.hybrid_search_enabled === true;
+
   const indicators = [
-    { label: "LLM", ok: health?.llm_configured ?? false, detail: benchmark?.services?.llm ?? "GLM-4-Flash" },
-    { label: "Hybrid Search", ok: health?.hybrid_search_enabled ?? false, detail: benchmark?.services?.hybrid_search ?? "BM25 + Dense" },
+    { label: "LLM", ok: health?.llm_configured ?? false, detail: benchmark?.services?.llm ?? health?.model ?? "GLM-4-Flash" },
+    { label: "Hybrid Search", ok: hasHybrid, detail: benchmark?.services?.hybrid_search ?? `${health?.streaming_retrieval ?? "—"} + ${health?.sync_retrieval ?? "—"}` },
     { label: "Guardrails", ok: health?.guardrails_enabled ?? false, detail: benchmark?.services?.guardrails ?? "Hallucination + Citation" },
     { label: "LangSmith", ok: health?.langsmith_enabled ?? false, detail: benchmark?.services?.langsmith ?? "Tracing + Metrics" },
     { label: "Index", ok: health?.index_status === "ok", detail: benchmark?.services?.index ?? "Chroma + BM25" },

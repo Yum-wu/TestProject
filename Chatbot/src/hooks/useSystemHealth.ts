@@ -3,9 +3,12 @@ import { useState, useEffect } from "react";
 export interface SystemHealth {
   status: string;
   llm_configured: boolean;
+  model?: string;
   index_status: string;
   test_qa_pairs: number;
-  hybrid_search_enabled: boolean;
+  hybrid_search_enabled?: boolean;
+  streaming_retrieval?: string;
+  sync_retrieval?: string;
   guardrails_enabled: boolean;
   langsmith_enabled: boolean;
 }
