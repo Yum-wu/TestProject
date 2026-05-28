@@ -17,6 +17,7 @@ from slowapi.util import get_remote_address
 import structlog
 
 from app.api.models import ChatRequest, SessionListResponse, StatusResponse
+from app.api.rag_stats import router as stats_router
 from app.agent.llm import create_llm
 from app.agent.agent import create_chat_agent
 from app.agent.executor import stream_agent_with_memory
@@ -586,6 +587,8 @@ async def health():
         "tools": [t.name for t in ALL_TOOLS],
     }
 
+
+app.include_router(stats_router)
 
 # ── SPA 静态文件（必须在 API 路由之后） ──
 static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
