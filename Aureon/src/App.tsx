@@ -10,6 +10,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { Search } from "./pages/Search";
 import { Documents } from "./pages/Documents";
 import { CrewGenerator } from "./components/CrewGenerator";
+import Login from "./pages/Login";
 
 /* ── StatusPill ── */
 function StatusPill({ color, label }: { color: string; label: string }) {
@@ -47,10 +48,11 @@ function AppLayout() {
   ];
 
   const isLanding = location.pathname === "/";
+  const isLogin = location.pathname === "/login";
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
-      {!isLanding && (
+      {!isLanding && !isLogin && (
         <nav className="flex items-center bg-white border-b border-gray-200 px-6 py-0" role="navigation">
           {/* Logo */}
           <button
@@ -95,6 +97,7 @@ function AppLayout() {
       <div className="flex-1 overflow-hidden">
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/search" element={<Search />} />
           <Route path="/crew" element={<CrewGenerator />} />
