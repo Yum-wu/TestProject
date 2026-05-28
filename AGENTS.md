@@ -12,7 +12,7 @@ Monorepo containing multiple independent frontend and full-stack projects for le
 |---------|------|------------|
 | `OnlineStore/` | Full-stack | Next.js 14, Prisma, PostgreSQL, Tailwind, TypeScript |
 | `MyBlog/` | Static blog | React 19 + Vite 8, Tailwind, local Markdown |
-| `Chatbot/` | AI Agent | React 19 + FastAPI + LangChain + Python + Tailwind |
+| `Aureon/` | AI Agent | React 19 + FastAPI + LangChain + Python + Tailwind |
 | `MarkdownNotes/` | Frontend | React + Vite, TypeScript, Tailwind, Markdown editor |
 | `AIImageGenerator/` | Frontend | React + Vite, JavaScript, Tailwind, OpenAI API |
 | `AIWritingAssistant/` | Frontend | React + Vite, JavaScript, Tailwind, OpenAI API |
@@ -69,15 +69,15 @@ cd MyBlog/client && npm install && npm run dev
 **部署：** 推送到 `main` 分支后 GitHub Actions 自动构建并部署到 Pages。
 URL：`https://yum-wu.github.io/TestProject/`
 
-### Chatbot (Agent: FastAPI + React)
+### Aureon (Agent: FastAPI + React)
 ```bash
 # Backend
-cd Chatbot/backend && pip install -r requirements.txt
+cd Aureon/backend && pip install -r requirements.txt
 # 先配置 backend/.env（复制 .env.example 填入 API Key）
 uvicorn app.main:app --reload --port 8000
 
 # Frontend (另一个终端)
-cd Chatbot && npm install && npm run dev
+cd Aureon && npm install && npm run dev
 ```
 
 ## Language & Communication
@@ -86,9 +86,9 @@ cd Chatbot && npm install && npm run dev
 
 ## Code Conventions
 
-- **TypeScript** is used in: `OnlineStore/`, `MyBlog/client`, `Chatbot/`, `MarkdownNotes/`
+- **TypeScript** is used in: `OnlineStore/`, `MyBlog/client`, `Aureon/`, `MarkdownNotes/`
 - **JavaScript** is used in: `AIImageGenerator/`, `AIWritingAssistant/`, `PomodoroTimer/`, `WeatherInquiry/`, `todo-app/`
-- **Python** is used in: `Chatbot/backend/` (FastAPI + LangChain)
+- **Python** is used in: `Aureon/backend/` (FastAPI + LangChain)
 - All Vite projects use `npm run dev` / `npm run build`
 - OnlineStore uses Next.js App Router (`app/` directory)
 - MyBlog has a client/server split with separate `package.json` files

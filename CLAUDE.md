@@ -12,7 +12,7 @@
 |------|------|--------|
 | `OnlineStore/` | 全栈 | Next.js 14, Prisma, PostgreSQL, Tailwind, TypeScript |
 | `MyBlog/` | 静态博客 | React 19 + Vite 8, Tailwind, 本地 Markdown |
-| `Chatbot/` | AI Agent + 文章生成 | React 19 + FastAPI + LangChain + CrewAI + Python + Tailwind |
+| `Aureon/` | AI Agent + 文章生成 | React 19 + FastAPI + LangChain + CrewAI + Python + Tailwind |
 | `MarkdownNotes/` | 前端 | React + Vite, TypeScript, Tailwind, Markdown 编辑器 |
 | `AIImageGenerator/` | 前端 | React + Vite, JavaScript, Tailwind, OpenAI API |
 | `AIWritingAssistant/` | 前端 | React + Vite, JavaScript, Tailwind, OpenAI API |
@@ -69,18 +69,18 @@ cd MyBlog/client && npm install && npm run dev
 **部署：** 推送到 `main` 分支后 GitHub Actions 自动构建并部署到 Pages。
 URL：`https://yum-wu.github.io/TestProject/`
 
-### Chatbot（主 Agent + 文章生成）
+### Aureon（主 Agent + 文章生成）
 ```bash
 # 后端（主 Agent）
-cd Chatbot/backend && pip install -r requirements.txt
+cd Aureon/backend && pip install -r requirements.txt
 # 先配置 backend/.env（复制 .env.example 填入 API Key）
 uvicorn app.main:app --reload --port 8000
 
 # 前端
-cd Chatbot && npm install && npm run dev
+cd Aureon && npm install && npm run dev
 
 # 文章生成服务（CrewAI，端口 8001）
-cd Chatbot/crew && pip install -r requirements.txt
+cd Aureon/crew && pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8001
 ```
 
@@ -147,9 +147,9 @@ RDS          /rds-optimization  /rds-troubleshooting  /database-backup-strategy
 
 ## 代码规范
 
-- **TypeScript** 用于：`OnlineStore/`、`MyBlog/client`、`Chatbot/`、`MarkdownNotes/`、`PomodoroTimer/`、`WeatherInquiry/`
+- **TypeScript** 用于：`OnlineStore/`、`MyBlog/client`、`Aureon/`、`MarkdownNotes/`、`PomodoroTimer/`、`WeatherInquiry/`
 - **JavaScript** 用于：`AIImageGenerator/`、`AIWritingAssistant/`、`todo-app/`
-- **Python** 用于：`Chatbot/backend/`（FastAPI + LangChain）
+- **Python** 用于：`Aureon/backend/`（FastAPI + LangChain）
 - 所有 Vite 项目使用 `npm run dev` / `npm run build`
 - OnlineStore 使用 Next.js App Router（`app/` 目录）
 - MyBlog 是纯静态博客，Markdown 文件在 `client/src/content/posts/`

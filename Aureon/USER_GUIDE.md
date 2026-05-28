@@ -21,7 +21,7 @@
 **终端 1 — 后端：**
 
 ```bash
-cd Chatbot/backend
+cd Aureon/backend
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
@@ -36,7 +36,7 @@ INFO:     Application startup complete.
 **终端 2 — 前端：**
 
 ```bash
-cd Chatbot
+cd Aureon
 npm install   # 首次需要，之后可跳过
 npm run dev
 ```

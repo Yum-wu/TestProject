@@ -9,7 +9,7 @@ AI 聊天助手，**Python FastAPI 后端 + React 前端的 Agent 架构**：
 ## 项目结构约定
 
 ```
-Chatbot/
+Aureon/
 ├── backend/
 │   ├── app/
 │   │   ├── agent/       # LLM 工厂、Agent 工厂、流式执行器
@@ -63,14 +63,14 @@ Chatbot/
 
 ```bash
 # 后端
-cd Chatbot/backend && pip install -r requirements.txt
+cd Aureon/backend && pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 
 # 前端
-cd Chatbot && npm install && npm run dev
+cd Aureon && npm install && npm run dev
 
 # 测试（需要先启动 venv）
-cd Chatbot/backend && source .venv/bin/activate 2>/dev/null && python -m pytest tests/ -v
+cd Aureon/backend && source .venv/bin/activate 2>/dev/null && python -m pytest tests/ -v
 ```
 
 ## 记忆系统概要
