@@ -1,12 +1,12 @@
-# ── Chatbot Backend + Frontend (Railway monorepo entry) ──
+# ── Aureon Backend + Frontend (Railway monorepo entry) ──
 # FastAPI serves both API and static frontend files
 
 # Stage: 构建前端
 FROM node:22-alpine AS frontend-builder
 WORKDIR /app
-COPY Chatbot/package.json Chatbot/package-lock.json ./
+COPY Aureon/package.json Aureon/package-lock.json ./
 RUN npm ci
-COPY Chatbot/ .
+COPY Aureon/ .
 RUN npm run build
 
 # Stage: Python 后端
@@ -17,9 +17,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY Chatbot/backend/requirements.txt .
+COPY Aureon/backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY Chatbot/backend/ .
+COPY Aureon/backend/ .
 RUN mkdir -p /app/data/vectors
 
 # 从前端构建阶段复制静态文件

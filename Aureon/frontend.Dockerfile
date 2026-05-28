@@ -1,4 +1,4 @@
-# ── Chatbot Frontend: Vite + React (Production Build) ──
+# ── Aureon Frontend: Vite + React (Production Build) ──
 FROM node:22-alpine AS builder
 
 WORKDIR /app
