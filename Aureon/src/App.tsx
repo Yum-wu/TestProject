@@ -8,6 +8,7 @@ import { useBenchmark } from "./hooks/useBenchmark";
 import { Landing } from "./pages/Landing";
 import { Dashboard } from "./pages/Dashboard";
 import { Search } from "./pages/Search";
+import { Documents } from "./pages/Documents";
 import { CrewGenerator } from "./components/CrewGenerator";
 
 /* ── StatusPill ── */
@@ -54,9 +55,11 @@ function AppLayout() {
           {/* Logo */}
           <button
             onClick={() => navigate("/")}
-            className="text-base font-bold text-gray-900 mr-8 py-3 hover:text-blue-600 transition-colors shrink-0"
+            className="mr-8 py-3 shrink-0 group"
           >
-            Aureon
+            <span className="text-base font-extrabold bg-gradient-to-r from-blue-600 to-amber-500 bg-clip-text text-transparent group-hover:from-blue-700 group-hover:to-amber-600 transition-all">
+              Aureon
+            </span>
           </button>
 
           {/* Nav links */}
@@ -95,7 +98,7 @@ function AppLayout() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/search" element={<Search />} />
           <Route path="/crew" element={<CrewGenerator />} />
-          <Route path="/documents" element={<div className="flex items-center justify-center h-full text-gray-400">Documents — Coming Soon</div>} />
+          <Route path="/documents" element={<Documents />} />
           <Route path="/benchmark" element={<div className="flex items-center justify-center h-full text-gray-400">Architecture — Coming Soon</div>} />
         </Routes>
       </div>

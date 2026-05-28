@@ -78,5 +78,23 @@
     "inputPlaceholder": "输入文章主题...",
     "generate": "生成文章",
     "generating": "生成中..."
+  },
+  "documents": {
+    "title": "文档管理",
+    "subtitle": "已索引的知识库文档",
+    "table": {
+      "name": "文档名称",
+      "source": "来源",
+      "type": "格式",
+      "chunks": "片段数",
+      "status": "状态"
+    },
+    "status": {
+      "ready": "就绪"
+    },
+    "empty": "暂无索引文档",
+    "total_docs": "文档总数",
+    "total_chunks": "文档片段",
+    "search_placeholder": "搜索文档..."
   }
 }

@@ -125,10 +125,19 @@ export function Search() {
               setSources(event.sources);
             } else if (event.type === "citation" && event.source) {
               const citation: Citation = {
-                index: citations.length + 1,
-                source: event.source,
+                index: event.source.index ?? (citations.length + 1),
+                source: {
+                  title: event.source.title,
+                  slug: event.source.slug || "",
+                  chunk: event.source.chunk,
+                  score: event.source.score,
+                },
               };
-              setCitations(prev => [...prev, citation]);
+              setCitations(prev => {
+                // Deduplicate by title
+                if (prev.some(c => c.source.title === citation.source.title)) return prev;
+                return [...prev, citation];
+              });
             } else if (event.type === "text" && event.content) {
               answerText += event.content;
               setAnswer(answerText);
@@ -148,7 +157,7 @@ export function Search() {
       setLoading(false);
       abortRef.current = null;
     }
-  }, [query, loading, citations]);
+  }, [query, loading]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

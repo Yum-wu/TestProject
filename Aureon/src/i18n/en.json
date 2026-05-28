@@ -78,5 +78,23 @@
     "inputPlaceholder": "Enter article topic...",
     "generate": "Generate",
     "generating": "Generating..."
+  },
+  "documents": {
+    "title": "Documents",
+    "subtitle": "Indexed knowledge base documents",
+    "table": {
+      "name": "Document",
+      "source": "Source",
+      "type": "Format",
+      "chunks": "Chunks",
+      "status": "Status"
+    },
+    "status": {
+      "ready": "Ready"
+    },
+    "empty": "No indexed documents",
+    "total_docs": "Total Documents",
+    "total_chunks": "Total Chunks",
+    "search_placeholder": "Search documents..."
   }
 }

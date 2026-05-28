@@ -17,7 +17,7 @@ from slowapi.util import get_remote_address
 import structlog
 
 from app.api.models import ChatRequest, SessionListResponse, StatusResponse
-from app.api.rag_stats import router as stats_router
+from app.api.rag_stats import router as stats_router, record_query
 from app.agent.llm import create_llm
 from app.agent.agent import create_chat_agent
 from app.agent.executor import stream_agent_with_memory
@@ -205,9 +205,13 @@ async def rag_query_endpoint(req: RAGQueryRequest, request: Request):
         response = llm.invoke(messages)
         return response.content
 
+    start_time = time.time()
     result = await rag_query_with_cache(
         req.query, _llm_call, top_k=req.top_k, use_mmr=req.use_mmr
     )
+    latency_ms = int((time.time() - start_time) * 1000)
+    # Record query for Dashboard stats (fire-and-forget)
+    asyncio.create_task(record_query(req.query, len(result.sources), latency_ms))
     return result
 
 
@@ -257,12 +261,16 @@ async def rag_query_stream_endpoint(req: RAGQueryRequest, request: Request):
             yield {"type": "text", "content": buf}
 
     async def event_stream():
+        start_time = time.time()
+        sources_count = 0
         # 1. Try Redis cache hit
         cached = await get_cached(req.query)
         if cached is not None:
             yield f"data: {json.dumps({'type': 'sources', 'sources': []}, ensure_ascii=False)}\n\n"
             yield f"data: {json.dumps({'type': 'text', 'content': cached}, ensure_ascii=False)}\n\n"
             yield "data: {\"type\": \"cache_hit\"}\n\n"
+            latency_ms = int((time.time() - start_time) * 1000)
+            asyncio.create_task(record_query(req.query, 0, latency_ms))
             return
 
         # 2. Stream with buffering, auto-cache full answer on completion
@@ -274,6 +282,8 @@ async def rag_query_stream_endpoint(req: RAGQueryRequest, request: Request):
             async for event in _buffer_events(raw_gen):
                 if event.get("type") == "text":
                     full_text += event["content"]
+                elif event.get("type") == "sources":
+                    sources_count = len(event.get("sources", []))
                 yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
         except Exception as e:
             yield f"data: {json.dumps({'type': 'error', 'content': str(e)}, ensure_ascii=False)}\n\n"
@@ -281,6 +291,9 @@ async def rag_query_stream_endpoint(req: RAGQueryRequest, request: Request):
             # 3. Cache full answer (fire-and-forget, non-blocking)
             if full_text:
                 asyncio.create_task(set_cached(req.query, full_text))
+            # 4. Record query for Dashboard stats
+            latency_ms = int((time.time() - start_time) * 1000)
+            asyncio.create_task(record_query(req.query, sources_count, latency_ms))
             yield "data: {\"type\": \"done\"}\n\n"
 
     return StreamingResponse(

@@ -164,6 +164,19 @@ async def rag_query_astream(
     ]
     yield {"type": "sources", "sources": sources_data, "model": llm.model if hasattr(llm, "model") else ""}
 
+    # 4b. Yield individual citation events with chunk text (for progressive citation UX)
+    for i, c in enumerate(chunks, 1):
+        yield {
+            "type": "citation",
+            "source": {
+                "index": i,
+                "title": c["metadata"].get("title", c["metadata"].get("source", "Unknown")),
+                "slug": c["metadata"].get("slug", ""),
+                "chunk": c["text"][:300] + "..." if len(c["text"]) > 300 else c["text"],
+                "score": c.get("score"),
+            },
+        }
+
     # 5. Stream LLM tokens
     async for chunk in llm.astream(messages):
         content = chunk.content if hasattr(chunk, "content") else ""
