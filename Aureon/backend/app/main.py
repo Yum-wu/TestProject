@@ -264,6 +264,8 @@ async def rag_query_stream_endpoint(req: RAGQueryRequest, request: Request):
     async def event_stream():
         start_time = time.time()
         sources_count = 0
+        input_tokens = 0
+        output_tokens = 0
         # 1. Try Redis cache hit
         cached = await get_cached(req.query)
         if cached is not None:
@@ -283,6 +285,8 @@ async def rag_query_stream_endpoint(req: RAGQueryRequest, request: Request):
             async for event in _buffer_events(raw_gen):
                 if event.get("type") == "text":
                     full_text += event["content"]
+                    # 估算 token 数（粗略：1 中文字符 ≈ 2 token，1 英文单词 ≈ 1.3 token）
+                    output_tokens = len(full_text) // 2
                 elif event.get("type") == "sources":
                     sources_count = len(event.get("sources", []))
                 yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
@@ -292,9 +296,14 @@ async def rag_query_stream_endpoint(req: RAGQueryRequest, request: Request):
             # 3. Cache full answer (fire-and-forget, non-blocking)
             if full_text:
                 asyncio.create_task(set_cached(req.query, full_text))
-            # 4. Record query for Dashboard stats
+            # 4. Record query for Dashboard stats (包含 token 估算)
             latency_ms = int((time.time() - start_time) * 1000)
-            asyncio.create_task(record_query(req.query, sources_count, latency_ms))
+            # 粗略估算输入 token（查询 + 上下文）
+            input_tokens = len(req.query) + 500  # 500 token 用于上下文
+            asyncio.create_task(record_query(
+                req.query, sources_count, latency_ms,
+                input_tokens=input_tokens, output_tokens=output_tokens
+            ))
             yield "data: {\"type\": \"done\"}\n\n"
 
     return StreamingResponse(

@@ -48,25 +48,70 @@ def _get_collection_stats() -> tuple[int, int]:
 STATS_PREFIX = "aureon:stats"
 
 
-async def record_query(query: str, sources_count: int, latency_ms: int) -> None:
-    """记录一次查询（由 RAG API 调用）"""
+async def record_query(
+    query: str,
+    sources_count: int,
+    latency_ms: int,
+    input_tokens: int = 0,
+    output_tokens: int = 0,
+) -> None:
+    """记录一次查询（由 RAG API 调用）
+
+    Args:
+        query: 用户查询
+        sources_count: 引用源数量
+        latency_ms: 延迟（毫秒）
+        input_tokens: 输入 token 数
+        output_tokens: 输出 token 数
+    """
     redis = _get_redis()
     if not redis:
         return
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(timezone.utc)
+    timestamp = now.isoformat()
 
     # 查询计数（24h 过期）
     await redis.incr(f"{STATS_PREFIX}:count_24h")
     await redis.expire(f"{STATS_PREFIX}:count_24h", 86400)
 
     # 最近查询列表（保留最近 50 条）
-    entry = f"{now}|{query}|{sources_count}|{latency_ms}"
+    entry = f"{timestamp}|{query}|{sources_count}|{latency_ms}"
     await redis.lpush(f"{STATS_PREFIX}:recent", entry)
     await redis.ltrim(f"{STATS_PREFIX}:recent", 0, 49)
 
-    # 延迟聚合
-    await redis.lpush(f"{STATS_PREFIX}:latencies", latency_ms)
-    await redis.ltrim(f"{STATS_PREFIX}:latencies", 0, 999)
+    # 延迟聚合（用于计算 avg/p95/p99）
+    await redis.zadd(f"{STATS_PREFIX}:latencies:z", {timestamp: latency_ms})
+    # 保留最近 24h 的数据
+    cutoff = (now.timestamp() - 86400)
+    await redis.zremrangebyscore(f"{STATS_PREFIX}:latencies:z", 0, cutoff)
+
+    # Token 使用统计
+    if input_tokens > 0 or output_tokens > 0:
+        date_key = now.strftime("%Y-%m-%d")
+        await redis.hincrby(f"{STATS_PREFIX}:tokens:{date_key}", "input", input_tokens)
+        await redis.hincrby(f"{STATS_PREFIX}:tokens:{date_key}", "output", output_tokens)
+        await redis.hincrby(f"{STATS_PREFIX}:tokens:{date_key}", "queries", 1)
+        await redis.expire(f"{STATS_PREFIX}:tokens:{date_key}", 86400 * 7)  # 保留 7 天
+
+    # 按小时统计查询量
+    hour_key = now.strftime("%Y-%m-%d-%H")
+    await redis.incr(f"{STATS_PREFIX}:hourly:{hour_key}")
+    await redis.expire(f"{STATS_PREFIX}:hourly:{hour_key}", 86400 * 2)  # 保留 2 天
+
+    # 按意图分类统计（简化版：基于关键词）
+    intent = _classify_intent(query)
+    await redis.hincrby(f"{STATS_PREFIX}:intents", intent, 1)
+
+
+def _classify_intent(query: str) -> str:
+    """简单意图分类"""
+    query_lower = query.lower()
+    if any(kw in query_lower for kw in ["代码", "code", "函数", "function", "api", "实现"]):
+        return "code_search"
+    elif any(kw in query_lower for kw in ["文档", "document", "上传", "管理", "列表"]):
+        return "document_query"
+    else:
+        return "general_qa"
 
 
 @router.get("/api/rag/stats", response_model=StatsResponse)

@@ -201,10 +201,22 @@ async def rag_query_with_cache(
 
     cached = await get_cached(query)
     if cached is not None:
+        # 记录缓存命中
+        from app.api.rag_stats import _get_redis, STATS_PREFIX
+        redis = _get_redis()
+        if redis:
+            await redis.incr(f"{STATS_PREFIX}:cache_hits")
         return RAGQueryResponse(answer=cached, sources=[])
 
     result = rag_query(query, llm_call_fn, top_k, use_mmr, lang)
     await set_cached(query, result.answer)
+
+    # 记录缓存未命中
+    from app.api.rag_stats import _get_redis, STATS_PREFIX
+    redis = _get_redis()
+    if redis:
+        await redis.incr(f"{STATS_PREFIX}:cache_misses")
+
     return result
 
 
