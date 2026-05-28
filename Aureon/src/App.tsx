@@ -11,6 +11,8 @@ import { Search } from "./pages/Search";
 import { Documents } from "./pages/Documents";
 import { CrewGenerator } from "./components/CrewGenerator";
 import Login from "./pages/Login";
+import Analytics from "./pages/Analytics";
+import Benchmark from "./pages/Benchmark";
 
 /* ── StatusPill ── */
 function StatusPill({ color, label }: { color: string; label: string }) {
@@ -44,6 +46,8 @@ function AppLayout() {
     { path: "/dashboard", key: "app.nav.dashboard" },
     { path: "/search", key: "app.nav.search" },
     { path: "/documents", key: "app.nav.documents" },
+    { path: "/analytics", key: "app.nav.analytics" },
+    { path: "/benchmark", key: "app.nav.benchmark" },
     { path: "/crew", key: "app.nav.crew" },
   ];
 
@@ -100,9 +104,10 @@ function AppLayout() {
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/search" element={<Search />} />
-          <Route path="/crew" element={<CrewGenerator />} />
           <Route path="/documents" element={<Documents />} />
-          <Route path="/benchmark" element={<div className="flex items-center justify-center h-full text-gray-400">Architecture — Coming Soon</div>} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/benchmark" element={<Benchmark />} />
+          <Route path="/crew" element={<CrewGenerator />} />
         </Routes>
       </div>
     </div>

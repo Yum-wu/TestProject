@@ -4,8 +4,9 @@
       "dashboard": "Dashboard",
       "search": "AI Search",
       "documents": "Documents",
-      "crew": "Content Studio",
-      "benchmark": "Architecture"
+      "analytics": "Analytics",
+      "benchmark": "Architecture",
+      "crew": "Content Studio"
     },
     "badges": {
       "recall": "Recall",
@@ -96,5 +97,41 @@
     "total_docs": "Total Documents",
     "total_chunks": "Total Chunks",
     "search_placeholder": "Search documents..."
+  },
+  "analytics": {
+    "title": "Analytics",
+    "subtitle": "System performance and usage analytics",
+    "latency": {
+      "title": "Latency Distribution",
+      "avg": "Avg",
+      "p95": "P95",
+      "p99": "P99"
+    },
+    "tokens": {
+      "title": "Token Usage",
+      "input": "Input Tokens",
+      "output": "Output Tokens",
+      "cost": "Estimated Cost",
+      "per_query": "~$0.001/query"
+    },
+    "queries": {
+      "title": "Query Distribution",
+      "total": "Total Queries",
+      "per_hour": "avg/hour"
+    },
+    "cache": {
+      "title": "Cache Hit Rate",
+      "saves": "queries saved"
+    }
+  },
+  "benchmark": {
+    "title": "Architecture & Performance",
+    "subtitle": "Production RAG system architecture and metrics",
+    "architecture": "System Architecture",
+    "optimization": "Optimization Story",
+    "tech_stack": "Tech Stack",
+    "ttft_before": "Before",
+    "ttft_after": "After",
+    "improvement": "improvement"
   }
 }

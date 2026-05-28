@@ -4,8 +4,9 @@
       "dashboard": "仪表盘",
       "search": "AI 搜索",
       "documents": "文档管理",
-      "crew": "内容工作室",
-      "benchmark": "架构与性能"
+      "analytics": "分析",
+      "benchmark": "架构与性能",
+      "crew": "内容工作室"
     },
     "badges": {
       "recall": "召回率",
@@ -96,5 +97,41 @@
     "total_docs": "文档总数",
     "total_chunks": "文档片段",
     "search_placeholder": "搜索文档..."
+  },
+  "analytics": {
+    "title": "分析",
+    "subtitle": "系统性能与使用分析",
+    "latency": {
+      "title": "延迟分布",
+      "avg": "平均",
+      "p95": "P95",
+      "p99": "P99"
+    },
+    "tokens": {
+      "title": "Token 使用",
+      "input": "输入 Token",
+      "output": "输出 Token",
+      "cost": "预估成本",
+      "per_query": "~$0.001/查询"
+    },
+    "queries": {
+      "title": "查询分布",
+      "total": "查询总量",
+      "per_hour": "平均/小时"
+    },
+    "cache": {
+      "title": "缓存命中率",
+      "saves": "节省查询"
+    }
+  },
+  "benchmark": {
+    "title": "架构与性能",
+    "subtitle": "Production RAG 系统架构与性能指标",
+    "architecture": "系统架构",
+    "optimization": "优化历程",
+    "tech_stack": "技术栈",
+    "ttft_before": "优化前",
+    "ttft_after": "优化后",
+    "improvement": "提升"
   }
 }
