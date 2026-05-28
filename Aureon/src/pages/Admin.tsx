@@ -62,7 +62,7 @@ const Admin = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 max-w-7xl mx-auto">
+    <div className="h-full overflow-y-auto p-4 md:p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-6 md:mb-8">
         <h1 className="text-xl md:text-2xl font-bold text-gray-900">Enterprise Admin</h1>

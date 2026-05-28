@@ -6,7 +6,7 @@ const Benchmark = () => {
   if (loading) return <div className="flex items-center justify-center h-full text-gray-400">加载中...</div>;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="h-full overflow-y-auto p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Architecture & Performance</h1>
