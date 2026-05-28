@@ -38,3 +38,11 @@ Chatbot/backend/data/vectors/
 
 # Python 打包
 *.egg-info/
+
+# 个人文档/配置（不推送）
+.agents/
+.claude/
+.trae/
+skills-lock.json
+ENTERPRISE_RAG_PROPOSAL.md
+.gstack/
