@@ -6,6 +6,7 @@
       "documents": "文档管理",
       "analytics": "分析",
       "benchmark": "架构与性能",
+      "admin": "管理",
       "crew": "内容工作室"
     },
     "badges": {
@@ -133,5 +134,43 @@
     "ttft_before": "优化前",
     "ttft_after": "优化后",
     "improvement": "提升"
+  },
+  "admin": {
+    "title": "企业管理",
+    "subtitle": "企业管理控制台",
+    "tabs": {
+      "workspaces": "工作空间",
+      "users": "用户管理",
+      "audit": "审计日志"
+    },
+    "workspaces": {
+      "title": "工作空间",
+      "create": "新建工作空间",
+      "columns": {
+        "name": "名称",
+        "users": "用户数",
+        "docs": "文档数",
+        "created": "创建时间"
+      }
+    },
+    "users": {
+      "title": "用户管理",
+      "invite": "邀请用户",
+      "columns": {
+        "user": "用户",
+        "email": "邮箱",
+        "role": "角色",
+        "lastActive": "最后活跃"
+      }
+    },
+    "roles": {
+      "admin": "管理员",
+      "editor": "编辑者",
+      "viewer": "查看者"
+    },
+    "audit": {
+      "title": "审计日志",
+      "export": "导出日志"
+    }
   }
 }

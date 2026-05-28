@@ -13,6 +13,7 @@ import { CrewGenerator } from "./components/CrewGenerator";
 import Login from "./pages/Login";
 import Analytics from "./pages/Analytics";
 import Benchmark from "./pages/Benchmark";
+import Admin from "./pages/Admin";
 
 /* ── StatusPill ── */
 function StatusPill({ color, label }: { color: string; label: string }) {
@@ -48,6 +49,7 @@ function AppLayout() {
     { path: "/documents", key: "app.nav.documents" },
     { path: "/analytics", key: "app.nav.analytics" },
     { path: "/benchmark", key: "app.nav.benchmark" },
+    { path: "/admin", key: "app.nav.admin" },
     { path: "/crew", key: "app.nav.crew" },
   ];
 
@@ -107,6 +109,7 @@ function AppLayout() {
           <Route path="/documents" element={<Documents />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/benchmark" element={<Benchmark />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="/crew" element={<CrewGenerator />} />
         </Routes>
       </div>

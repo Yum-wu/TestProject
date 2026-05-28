@@ -6,6 +6,7 @@
       "documents": "Documents",
       "analytics": "Analytics",
       "benchmark": "Architecture",
+      "admin": "Admin",
       "crew": "Content Studio"
     },
     "badges": {
@@ -133,5 +134,43 @@
     "ttft_before": "Before",
     "ttft_after": "After",
     "improvement": "improvement"
+  },
+  "admin": {
+    "title": "Enterprise Admin",
+    "subtitle": "Enterprise management console",
+    "tabs": {
+      "workspaces": "Workspaces",
+      "users": "User Management",
+      "audit": "Audit Logs"
+    },
+    "workspaces": {
+      "title": "Workspaces",
+      "create": "New Workspace",
+      "columns": {
+        "name": "Name",
+        "users": "Users",
+        "docs": "Documents",
+        "created": "Created"
+      }
+    },
+    "users": {
+      "title": "User Management",
+      "invite": "Invite User",
+      "columns": {
+        "user": "User",
+        "email": "Email",
+        "role": "Role",
+        "lastActive": "Last Active"
+      }
+    },
+    "roles": {
+      "admin": "Admin",
+      "editor": "Editor",
+      "viewer": "Viewer"
+    },
+    "audit": {
+      "title": "Audit Logs",
+      "export": "Export Logs"
+    }
   }
 }
