@@ -1,109 +1,82 @@
 {
   "app": {
     "nav": {
-      "home": "Home",
-      "chat": "AI Chat",
-      "rag": "Knowledge Base",
-      "crew": "Article Generator"
+      "dashboard": "Dashboard",
+      "search": "AI Search",
+      "documents": "Documents",
+      "crew": "Content Studio",
+      "benchmark": "Architecture"
     },
-    "slogan": "AI Agent Demo — RAG, Tool Calling & Multi-Agent Collaboration"
-  },
-  "demoIntro": {
-    "hero": {
-      "title": "Production-Grade AI Agent Demo",
-      "subtitle": "Multi-turn Chat · RAG Knowledge Base · Multi-Agent Collaboration — all with measurable performance metrics."
-    },
-    "badges": [
-      { "value": "94%", "label": "Recall@3" },
-      { "value": "1.5s", "label": "P50 Latency" },
-      { "value": "3", "label": "Strategies" }
-    ],
-    "capabilities": [
-      {
-        "icon": "🧠",
-        "title": "RAG Knowledge Base",
-        "desc": "Vector search with MMR reranking over 18+ technical articles. Every answer cites its sources.",
-        "metric": "Recall@3 = 94%"
-      },
-      {
-        "icon": "🧪",
-        "title": "Prompt Experiments",
-        "desc": "Compare Direct, Chain-of-Thought, and Few-shot strategies side by side on the same test set.",
-        "metric": "3 Strategies"
-      },
-      {
-        "icon": "👥",
-        "title": "Multi-Agent Pipeline",
-        "desc": "Researcher → Writer → Editor: three AI agents collaborate in real-time with SSE streaming.",
-        "metric": "3 Agents"
-      }
-    ],
-    "cta": {
-      "chat": "Try AI Chat",
-      "rag": "Query Knowledge Base",
-      "crew": "Generate Article"
-    },
-    "differentiators": [
-      { "icon": "⚡", "text": "Token ↓61% vs baseline" },
-      { "icon": "🎯", "text": "Success rate ↑51%" },
-      { "icon": "🌐", "text": "Deployed on Railway" },
-      { "icon": "📡", "text": "SSE Real-time streaming" }
-    ]
-  },
-  "chat": {
-    "title": "AI Chat Assistant",
-    "inputPlaceholder": "Type a message... (Enter to send, Shift+Enter for new line)",
-    "send": "Send",
-    "stop": "Stop",
-    "clear": "Clear",
-    "emptyTitle": "💬",
-    "emptySubtitle": "Start a conversation",
-    "emptyHint": "Ask me anything — I can search the web, calculate, or look up my knowledge base.",
-    "copy": "Copy",
-    "copied": "✓ Copied",
-    "stopped": "*[Generation stopped]*",
-    "calling": "Calling",
-    "completed": "completed"
-  },
-  "rag": {
-    "title": "Knowledge Base Q&A",
-    "description": "Ask questions over 18+ technical articles about AI Agent development, LangChain, deployment and more.",
-    "inputPlaceholder": "Ask a question about the knowledge base...",
-    "ask": "Ask",
-    "asking": "Querying...",
-    "sources": "Sources",
-    "score": "Score",
-    "noQuery": "Enter a question to search the knowledge base",
-    "error": "Query failed. The server may be waking up (cold start). Please try again.",
-    "examples": [
-      "What is Hermes Agent?",
-      "How to deploy SPA to GitHub Pages?",
-      "Explain LangGraph workflow"
-    ],
-    "upload": {
-      "toggle": "Upload Document",
-      "hint": "Click or drag & drop a file here",
-      "formats": "Supports .md and .txt files",
-      "uploading": "Uploading and indexing...",
-      "success": "✅ {filename} indexed — {chunks} chunks created",
-      "badFormat": "Unsupported file format. Only .md and .txt are supported.",
-      "files": "Uploaded files:",
-      "delete": "Delete",
-      "deleted": "Deleted {filename}"
+    "badges": {
+      "recall": "Recall",
+      "latency": "Latency",
+      "ttft": "TTFT"
     }
   },
+  "landing": {
+    "hero": {
+      "title": "Enterprise AI Knowledge Base Platform",
+      "subtitle": "96% retrieval accuracy · Sub-second response · 24h deployment",
+      "cta_search": "Start Searching",
+      "cta_architecture": "View Architecture"
+    },
+    "metrics": {
+      "recall": { "value": "96.08%", "label": "Retrieval Accuracy", "detail": "Hybrid Recall@3" },
+      "ttft": { "value": "~310ms", "label": "Time to First Token", "detail": "Streaming TTFT" },
+      "cost": { "value": "~$0.001", "label": "Cost per Query", "detail": "GPT-4o-mini" }
+    },
+    "features": [
+      { "title": "Hybrid Search", "desc": "BM25 keyword + Dense semantic dual-channel fusion, 96% accuracy" },
+      { "title": "Streaming Response", "desc": "SSE real-time push, ~310ms TTFT, token-by-token rendering" },
+      { "title": "Multilingual", "desc": "Chinese + English bilingual knowledge base, auto language detection" },
+      { "title": "Enterprise Deploy", "desc": "Docker containerized, 24h standard deployment, RBAC + audit logs" }
+    ],
+    "credibility": {
+      "title": "Technical Credibility",
+      "desc": "All metrics measured in production",
+      "link": "View full benchmark →"
+    }
+  },
+  "dashboard": {
+    "title": "System Overview",
+    "metrics": {
+      "retrieval_latency": "Retrieval Latency",
+      "ttft": "TTFT",
+      "cache_hit": "Cache Hit Rate"
+    },
+    "health": {
+      "title": "System Health",
+      "llm": "LLM",
+      "vector_db": "Vector DB",
+      "embedding": "Embedding",
+      "cache": "Cache",
+      "tracing": "Tracing"
+    },
+    "recent_queries": {
+      "title": "Recent Queries",
+      "empty": "No queries yet"
+    },
+    "query_volume": "Queries Today",
+    "stats": {
+      "indexed_docs": "Indexed Docs",
+      "total_chunks": "Total Chunks",
+      "avg_latency": "Avg Latency"
+    }
+  },
+  "search": {
+    "title": "AI Search",
+    "placeholder": "Search your knowledge base...",
+    "suggested": "Suggested",
+    "sources": "Sources",
+    "score": "Score",
+    "history": "Search History",
+    "empty": "Ask a question to start searching",
+    "no_results": "No results found"
+  },
   "crew": {
-    "title": "Multi-Agent Article Generator",
-    "topic": "Topic",
-    "inputPlaceholder": "Enter a topic, AI team will write for you...",
+    "title": "AI Content Studio",
+    "inputPlaceholder": "Enter article topic...",
     "generate": "Generate",
-    "generating": "Generating...",
-    "agentProgress": "Agent Progress",
-    "pipeline": "Researcher → Writer → Editor",
-    "starting": "Starting AI team...",
-    "completedIn": "Completed in",
-    "seconds": "seconds",
-    "errorShort": "Topic needs at least 2 characters",
-    "retry": "Retry"
+    "generating": "Generating..."
   }
 }

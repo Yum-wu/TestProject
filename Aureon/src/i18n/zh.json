@@ -1,109 +1,82 @@
 {
   "app": {
     "nav": {
-      "home": "首页",
-      "chat": "AI 聊天",
-      "rag": "知识库",
-      "crew": "文章生成"
+      "dashboard": "仪表盘",
+      "search": "AI 搜索",
+      "documents": "文档管理",
+      "crew": "内容工作室",
+      "benchmark": "架构与性能"
     },
-    "slogan": "AI Agent 演示 — RAG、工具调用与多 Agent 协作"
-  },
-  "demoIntro": {
-    "hero": {
-      "title": "生产级 AI Agent 演示平台",
-      "subtitle": "多轮对话 · RAG 知识库 · 多 Agent 协作 — 所有功能均有可测量的性能指标。"
-    },
-    "badges": [
-      { "value": "94%", "label": "检索召回率" },
-      { "value": "1.5s", "label": "中位延迟" },
-      { "value": "3", "label": "实验策略" }
-    ],
-    "capabilities": [
-      {
-        "icon": "🧠",
-        "title": "RAG 知识库问答",
-        "desc": "向量检索 + MMR 重排序，覆盖 18+ 篇技术文章，每回答均附来源引用。",
-        "metric": "Recall@3 = 94%"
-      },
-      {
-        "icon": "🧪",
-        "title": "Prompt 策略实验",
-        "desc": "同数据集上对比 Direct、Chain-of-Thought、Few-shot 三种策略的效果差异。",
-        "metric": "3 种策略"
-      },
-      {
-        "icon": "👥",
-        "title": "多 Agent 文章生成",
-        "desc": "研究员 → 写手 → 编辑，三个 AI Agent 通过 SSE 实时协同写作。",
-        "metric": "3 个 Agent"
-      }
-    ],
-    "cta": {
-      "chat": "试用 AI 聊天",
-      "rag": "查询知识库",
-      "crew": "生成文章"
-    },
-    "differentiators": [
-      { "icon": "⚡", "text": "Token 降低 61%" },
-      { "icon": "🎯", "text": "成功率提升 51%" },
-      { "icon": "🌐", "text": "Railway 在线部署" },
-      { "icon": "📡", "text": "SSE 实时流式推送" }
-    ]
-  },
-  "chat": {
-    "title": "AI 聊天助手",
-    "inputPlaceholder": "输入消息... (Enter 发送，Shift+Enter 换行)",
-    "send": "发送",
-    "stop": "停止",
-    "clear": "清空",
-    "emptyTitle": "💬",
-    "emptySubtitle": "开始对话",
-    "emptyHint": "问我任何问题——我可以搜索网络、计算、或查询知识库。",
-    "copy": "复制",
-    "copied": "✓ 已复制",
-    "stopped": "*[已停止生成]*",
-    "calling": "正在调用",
-    "completed": "完成"
-  },
-  "rag": {
-    "title": "知识库问答",
-    "description": "对 18+ 篇 AI Agent 开发、LangChain、部署运维等技术文章提问。",
-    "inputPlaceholder": "输入知识库相关的问题...",
-    "ask": "提问",
-    "asking": "查询中...",
-    "sources": "来源",
-    "score": "相关度",
-    "noQuery": "输入问题开始检索知识库",
-    "error": "查询失败。服务器可能正在冷启动，请重试。",
-    "examples": [
-      "Hermes Agent 是什么？",
-      "如何将 SPA 部署到 GitHub Pages？",
-      "解释 LangGraph 工作流"
-    ],
-    "upload": {
-      "toggle": "上传文档",
-      "hint": "点击或拖拽文件到此处",
-      "formats": "支持 .md 和 .txt 文件",
-      "uploading": "上传并索引中...",
-      "success": "✅ {filename} 已索引 — 创建 {chunks} 个片段",
-      "badFormat": "不支持的文件格式，仅支持 .md 和 .txt。",
-      "files": "已上传文件：",
-      "delete": "删除",
-      "deleted": "已删除 {filename}"
+    "badges": {
+      "recall": "召回率",
+      "latency": "延迟",
+      "ttft": "首字延迟"
     }
   },
+  "landing": {
+    "hero": {
+      "title": "企业 AI 知识库平台",
+      "subtitle": "96% 检索准确率 · 亚秒级响应 · 24 小时部署",
+      "cta_search": "开始搜索",
+      "cta_architecture": "查看架构"
+    },
+    "metrics": {
+      "recall": { "value": "96.08%", "label": "检索准确率", "detail": "Hybrid Recall@3" },
+      "ttft": { "value": "~310ms", "label": "首字延迟", "detail": "Time to First Token" },
+      "cost": { "value": "~$0.001", "label": "每次查询成本", "detail": "使用 GPT-4o-mini" }
+    },
+    "features": [
+      { "title": "混合检索", "desc": "BM25 关键词 + Dense 语义双通道融合，96% 检索准确率" },
+      { "title": "流式响应", "desc": "SSE 实时流推送，首字延迟 ~310ms，逐 token 渲染" },
+      { "title": "多语言支持", "desc": "中英双语知识库，自动语言检测与路由" },
+      { "title": "企业级部署", "desc": "Docker 容器化，24 小时标准部署，RBAC + 审计日志" }
+    ],
+    "credibility": {
+      "title": "技术可信度",
+      "desc": "所有指标来自生产环境实测",
+      "link": "查看完整性能数据 →"
+    }
+  },
+  "dashboard": {
+    "title": "系统总览",
+    "metrics": {
+      "retrieval_latency": "检索延迟",
+      "ttft": "首字延迟",
+      "cache_hit": "缓存命中率"
+    },
+    "health": {
+      "title": "系统健康",
+      "llm": "LLM",
+      "vector_db": "向量数据库",
+      "embedding": "Embedding",
+      "cache": "缓存",
+      "tracing": "链路追踪"
+    },
+    "recent_queries": {
+      "title": "最近查询",
+      "empty": "暂无查询记录"
+    },
+    "query_volume": "今日查询量",
+    "stats": {
+      "indexed_docs": "已索引文档",
+      "total_chunks": "文档片段",
+      "avg_latency": "平均延迟"
+    }
+  },
+  "search": {
+    "title": "AI 搜索",
+    "placeholder": "搜索知识库...",
+    "suggested": "推荐问题",
+    "sources": "来源",
+    "score": "相关度",
+    "history": "搜索历史",
+    "empty": "输入问题开始搜索",
+    "no_results": "未找到相关结果"
+  },
   "crew": {
-    "title": "多 Agent 文章生成器",
-    "topic": "文章主题",
-    "inputPlaceholder": "输入主题，AI 团队将为你撰写文章...",
+    "title": "AI 内容工作室",
+    "inputPlaceholder": "输入文章主题...",
     "generate": "生成文章",
-    "generating": "生成中...",
-    "agentProgress": "Agent 进度",
-    "pipeline": "研究员 → 写手 → 编辑",
-    "starting": "正在启动 AI 团队...",
-    "completedIn": "完成耗时",
-    "seconds": "秒",
-    "errorShort": "主题至少需要 2 个字符",
-    "retry": "重试"
+    "generating": "生成中..."
   }
 }
