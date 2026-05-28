@@ -27,9 +27,10 @@ const Benchmark = () => {
       </div>
 
       {/* Architecture Diagram */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
-        <h3 className="font-semibold text-gray-900 mb-6">系统架构</h3>
-        <div className="flex items-center justify-center gap-4 flex-wrap text-sm">
+      <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6 mb-8">
+        <h3 className="font-semibold text-gray-900 mb-4 md:mb-6">系统架构</h3>
+        {/* Desktop: Horizontal */}
+        <div className="hidden md:flex items-center justify-center gap-3 lg:gap-4 flex-wrap text-sm">
           <div className="bg-blue-100 text-blue-700 px-4 py-3 rounded-lg border-2 border-blue-300">
             <div className="font-semibold">文档输入</div>
             <div className="text-xs opacity-75">PDF / MD / TXT</div>
@@ -69,6 +70,23 @@ const Benchmark = () => {
             <div className="font-semibold">SSE Streaming</div>
             <div className="text-xs opacity-75">实时输出</div>
           </div>
+        </div>
+
+        {/* Mobile: Vertical */}
+        <div className="md:hidden space-y-2">
+          {[
+            { name: '文档输入', detail: 'PDF / MD / TXT', color: 'blue' },
+            { name: 'BGE Embedding', detail: '512d 本地推理', color: 'purple' },
+            { name: 'Chroma DB', detail: '向量数据库', color: 'cyan' },
+            { name: 'Hybrid Search', detail: 'BM25 + Dense', color: 'green' },
+            { name: 'LLM', detail: 'GLM-4-Flash', color: 'amber' },
+            { name: 'SSE Streaming', detail: '实时输出', color: 'rose' },
+          ].map((item, i) => (
+            <div key={i} className={`bg-${item.color}-100 text-${item.color}-700 px-4 py-3 rounded-lg border-2 border-${item.color}-300`}>
+              <div className="font-semibold">{item.name}</div>
+              <div className="text-xs opacity-75">{item.detail}</div>
+            </div>
+          ))}
         </div>
       </div>
 
