@@ -35,6 +35,9 @@ async def test_rag_query_basic():
     with (
         patch("app.agent.llm.create_llm", return_value=MagicMock()),
         patch("app.rag.qa_chain.retrieve", return_value=[]),
+        patch("app.cache.redis_client.ping", return_value=True),
+        patch("app.cache.redis_client.get", return_value=None),
+        patch("app.cache.redis_client.set", return_value=True),
     ):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as ac:
