@@ -15,7 +15,7 @@ interface StreamingAnswerProps {
   isStreaming?: boolean;
 }
 
-export function StreamingAnswer({ content, citations = [], isStreaming }: StreamingAnswerProps) {
+export function StreamingAnswer({ content, isStreaming }: StreamingAnswerProps) {
   const processedContent = useMemo(() => {
     return content.replace(/\[(\d+)\]/g, (_, num) => `**[${num}]**`);
   }, [content]);

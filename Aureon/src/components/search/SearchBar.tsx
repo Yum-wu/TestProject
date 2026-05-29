@@ -1,4 +1,4 @@
-import { FormEvent, KeyboardEvent } from 'react';
+import type { FormEvent, KeyboardEvent } from 'react';
 
 interface SearchBarProps {
   value: string;
