@@ -21,22 +21,25 @@ Aureon/
 │   │   │   ├── qa_chain.py     # RAG pipeline（检索→生成→来源）
 │   │   │   ├── evaluator.py    # 评估（Recall + Faithfulness + 延迟）
 │   │   │   ├── prompt_experiment.py  # Prompt 策略对比实验
-│   │   │   ├── test_data.py    # 16 组 Q&A 评估数据集
+│   │   │   ├── test_data.py    # 51 组 Q&A 评估数据集
 │   │   │   └── models.py       # Pydantic 请求/响应
 │   │   ├── langgraph/   # LangGraph 工作流引擎 + MCP 注册中心
-│   │   ├── api/         # Pydantic 模型
+│   │   ├── api/         # Pydantic 模型 + Analytics API
 │   │   ├── config.py    # pydantic_settings 加载 .env
 │   │   └── main.py      # FastAPI 应用入口
 │   ├── offloads/        # 记忆外存文件（自动生成）
-│   ├── tests/           # pytest 测试（test_agent, test_tools, test_memory, test_rag, test_langgraph, test_manager, test_api）
+│   ├── tests/           # pytest 测试
 │   ├── requirements.txt
 │   └── .env             # LLM_API_KEY, LLM_MODEL, LLM_BASE_URL, TAVILY_API_KEY
 ├── src/                 # React 前端
 │   ├── components/      # UI 组件
-│   ├── hooks/           # useChat（状态管理）
+│   ├── hooks/           # useChat, useAnalytics, useDocuments 等
+│   ├── pages/           # Landing, Login, Dashboard, Search, Documents, Analytics, Benchmark, Admin
 │   ├── services/        # api.ts（后端通信）、storage.ts（LocalStorage）
+│   ├── i18n/            # 国际化（en/zh）
 │   └── types/           # Message 类型
-├── rag-ui/              # RAG 搜索独立前端（React + Vite + Tailwind）
+├── vitest.config.ts     # Vitest 测试配置
+└── rag-ui/              # RAG 搜索独立前端（React + Vite + Tailwind）
 ```
 
 （OpenSpec 规格文档统一在仓库根 `openspec/changes/`）
@@ -69,7 +72,10 @@ uvicorn app.main:app --reload --port 8000
 # 前端
 cd Aureon && npm install && npm run dev
 
-# 测试（需要先启动 venv）
+# 测试
+cd Aureon && npm test
+
+# 后端测试（需要先启动 venv）
 cd Aureon/backend && source .venv/bin/activate 2>/dev/null && python -m pytest tests/ -v
 ```
 
@@ -111,13 +117,30 @@ cd Aureon/backend && source .venv/bin/activate 2>/dev/null && python -m pytest t
 
 | 方法 | 路径 | 说明 |
 | POST | /api/chat/stream | Agent 对话 SSE 流式 |
+| POST | /api/chat/enhanced/stream | 增强对话（自动 RAG 集成） |
 | GET | /api/sessions | 活跃会话列表 |
 | DELETE | /api/sessions/{id} | 清除会话 |
 | POST | /api/rag/query | RAG 知识库查询 |
+| POST | /api/rag/query/stream | 流式 RAG 查询（SSE） |
 | POST | /api/rag/index | 重建索引 |
+| POST | /api/rag/upload | 上传文档并索引 |
+| GET | /api/rag/uploads | 列出已上传文件 |
+| DELETE | /api/rag/upload/{filename} | 删除上传文件 |
 | POST | /api/rag/evaluate | RAG 全量评估 |
 | POST | /api/rag/experiment | Prompt 策略对比实验 |
+| GET | /api/rag/stats | 系统统计 |
+| GET | /api/rag/queries/recent | 最近查询 |
+| GET | /api/rag/documents | 文档列表 |
+| GET | /api/rag/health | RAG 健康检查 |
+| GET | /api/rag/benchmark | 性能基准 |
+| GET | /api/rag/analytics/usage | 使用量分析 |
+| GET | /api/rag/analytics/latency | 延迟分析 |
+| GET | /api/rag/analytics/tokens | Token 使用分析 |
+| GET | /api/rag/analytics/cache | 缓存性能分析 |
 | POST | /api/langgraph/run | LangGraph 工作流 |
+| POST | /api/crew/generate | CrewAI 文章生成 |
+| POST | /api/crew/generate/stream | 流式文章生成 |
+| GET | /api/crew/health | CrewAI 健康检查 |
 | GET | /api/health | 健康检查 |
 
 ## 语言规则

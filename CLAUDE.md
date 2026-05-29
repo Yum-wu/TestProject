@@ -79,15 +79,23 @@ uvicorn app.main:app --reload --port 8000
 # 前端
 cd Aureon && npm install && npm run dev
 
+# 测试
+cd Aureon && npm test
+
 # 文章生成服务（CrewAI，端口 8001）
 cd Aureon/crew && pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8001
 ```
 
-**API 端点（2026-05-27 新增）：**
+**API 端点（2026-05-28 更新）：**
 - `POST /api/chat/enhanced/stream` — Chat + RAG 自动集成，LangGraph 流式工作流
 - `POST /api/chat/stream` — 基础 Chat Agent
 - `POST /api/rag/query` — RAG 查询
+- `POST /api/rag/query/stream` — 流式 RAG 查询（SSE）
+- `GET /api/rag/analytics/usage` — 使用量分析
+- `GET /api/rag/analytics/latency` — 延迟分析
+- `GET /api/rag/analytics/tokens` — Token 使用分析
+- `GET /api/rag/analytics/cache` — 缓存性能分析
 - `POST /api/rag/index` — 重新索引文章
 ```
 

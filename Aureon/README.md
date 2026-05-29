@@ -21,8 +21,13 @@
 - **Hybrid Retrieval** — BM25 keyword + Dense semantic dual-channel fusion
 - **Document Management** — Upload, auto-index, preview, source management
 - **System Dashboard** — Real-time metrics, health monitoring, usage analytics
+- **Analytics** — Latency, token usage, cache performance, query distribution
+- **Architecture & Performance** — Interactive architecture diagram, optimization metrics
+- **Enterprise Admin** — Workspace management, user roles, audit logs
+- **Login** — Enterprise SSO-ready login page
 - **Multilingual RAG** — Chinese + English bilingual knowledge base
 - **SSE Streaming** — Real-time token-level streaming
+- **Responsive Design** — Mobile, tablet, desktop optimized
 - **Docker + CI/CD** — Production-grade deployment pipeline
 
 ## Architecture
