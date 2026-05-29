@@ -14,6 +14,7 @@ import Login from "./pages/Login";
 import Analytics from "./pages/Analytics";
 import Benchmark from "./pages/Benchmark";
 import Admin from "./pages/Admin";
+import { Architecture } from "./pages/Architecture";
 
 /* ── StatusPill ── */
 function StatusPill({ color, label }: { color: string; label: string }) {
@@ -50,6 +51,7 @@ function AppLayout() {
     { path: "/analytics", key: "app.nav.analytics" },
     { path: "/benchmark", key: "app.nav.benchmark" },
     { path: "/admin", key: "app.nav.admin" },
+    { path: "/architecture", key: "app.nav.architecture" },
     { path: "/crew", key: "app.nav.crew" },
   ];
 
@@ -110,6 +112,7 @@ function AppLayout() {
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/benchmark" element={<Benchmark />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/architecture" element={<Architecture />} />
           <Route path="/crew" element={<CrewGenerator />} />
         </Routes>
       </div>
