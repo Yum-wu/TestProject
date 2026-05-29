@@ -57,7 +57,10 @@ export function RagQuery() {
     }
   }, []);
 
-  useEffect(() => { fetchUploadedFiles(); }, [fetchUploadedFiles]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchUploadedFiles();
+  }, [fetchUploadedFiles]);
 
   const handleDeleteFile = useCallback(async (filename: string) => {
     try {
