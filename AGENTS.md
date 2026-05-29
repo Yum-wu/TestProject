@@ -8,7 +8,8 @@
 
 ## 关键约定
 
-- **文章格式**: Markdown + YAML frontmatter（title, date, slug, tags, category, excerpt）
+- **文章格式**: Markdown + YAML frontmatter（title, date, slug, tags, category, excerpt, lang）
+- **语言字段**: frontmatter 中的 `lang` 字段（`zh` 或 `en`），用于区分中英文文章
 - **路由**: React Router，`/posts/:slug` 为文章详情
 - **样式**: Tailwind CSS v4 + CSS 变量
 - **代码分包**: vite.config.ts 中 manualChunks 配置了 vendor 分包
@@ -31,3 +32,7 @@
 - 修改 `vite.config.ts` 的 `base` 需同步更新 `__BASE_PATH__` define
 - git push / rebase / reset 须先问我
 - 不改 .env、密钥、CI/CD 配置
+
+## 语言规则
+- 所有回复必须使用中文
+
