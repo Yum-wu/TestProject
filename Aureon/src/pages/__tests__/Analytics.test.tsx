@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 // Mock useAnalytics before importing Analytics
 const mockUseAnalytics = vi.fn();
 vi.mock('../../hooks/useAnalytics', () => ({
-  useAnalytics: (...args: any[]) => mockUseAnalytics(...args),
+  useAnalytics: (...args: unknown[]) => mockUseAnalytics(...args),
 }));
 
 // Mock i18n

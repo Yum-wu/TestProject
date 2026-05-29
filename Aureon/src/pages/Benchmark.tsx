@@ -15,7 +15,7 @@ const Benchmark = () => {
 
       {/* Runtime Metrics Hero */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-        {benchmark?.metrics?.map((m: any, i: number) => {
+        {benchmark?.metrics?.map((m: { value: string | number; label: string }, i: number) => {
           const colors = ['from-blue-500 to-cyan-400', 'from-purple-500 to-pink-400', 'from-green-500 to-emerald-400', 'from-amber-500 to-orange-400', 'from-red-500 to-rose-400'];
           return (
             <div key={i} className={`bg-gradient-to-br ${colors[i % colors.length]} rounded-xl p-5 text-white shadow-lg`}>

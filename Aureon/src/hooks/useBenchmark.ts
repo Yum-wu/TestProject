@@ -10,6 +10,7 @@ export interface BenchmarkData {
   timestamp: string | null;
   metrics: BenchmarkMetric[];
   services: Record<string, string>;
+  runs?: BenchmarkData[];
 }
 
 const BASE_URL =
@@ -29,7 +30,7 @@ export function useBenchmark() {
       try {
         // 1st: GET /benchmark (reads benchmark_results.json)
         let res = await fetch(`${BASE_URL}/benchmark`);
-        let body: any = null;
+        let body: BenchmarkData | null = null;
 
         if (res.ok) {
           body = await res.json();
@@ -37,8 +38,8 @@ export function useBenchmark() {
           // 2nd fallback: GET /benchmark/history (take latest run)
           res = await fetch(`${BASE_URL}/benchmark/history?limit=1`);
           if (res.ok) {
-            body = await res.json();
-            const runs = body.runs ?? [];
+            const json = await res.json() as { runs?: BenchmarkData[] };
+            const runs = json.runs ?? [];
             body = runs.length > 0 ? runs[0] : null;
           } else {
             throw new Error(`HTTP ${res.status}`);

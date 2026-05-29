@@ -40,7 +40,7 @@ function AppLayout() {
   const { data: benchmark } = useBenchmark();
 
   const findMetric = (pat: string) =>
-    benchmark?.metrics?.find((m: any) => m.label.includes(pat))?.value ?? null;
+    benchmark?.metrics?.find((m: { label: string; value: string | number }) => m.label.includes(pat))?.value ?? null;
   const recallVal = findMetric("Recall@3 (Hybrid)");
   const latencyVal = findMetric("Retrieval Latency");
 
