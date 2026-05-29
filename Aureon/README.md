@@ -1,9 +1,9 @@
 # Aureon — Enterprise AI Knowledge Base Platform
 
-> Low-latency enterprise AI search and knowledge intelligence platform.
-> Built as a production-grade system, not a demo.
+> Production-grade enterprise AI search and knowledge intelligence platform.
 
-[//]: # (一旦有 CI badge 后加上: ![CI](...))
+[![CI](https://github.com/Yum-wu/Aureon/actions/workflows/ci.yml/badge.svg)](https://github.com/Yum-wu/Aureon/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ## Performance
 
@@ -13,7 +13,7 @@
 | TTFT (Streaming) | **~310ms** |
 | Full RAG Latency | **~400ms** |
 | Retrieval Latency | **~10ms** |
-| Cost per Query | **~$0.001** |
+| Cost per Query | **$0.001** |
 
 ## Features
 
@@ -23,12 +23,6 @@
 - **System Dashboard** — Real-time metrics, health monitoring, usage analytics
 - **Analytics** — Latency, token usage, cache performance, query distribution
 - **Architecture & Performance** — Interactive architecture diagram, optimization metrics
-- **Enterprise Admin** — Workspace management, user roles, audit logs
-- **Login** — Enterprise SSO-ready login page
-- **Multilingual RAG** — Chinese + English bilingual knowledge base
-- **SSE Streaming** — Real-time token-level streaming
-- **Responsive Design** — Mobile, tablet, desktop optimized
-- **Docker + CI/CD** — Production-grade deployment pipeline
 
 ## Architecture
 
@@ -50,21 +44,28 @@ cd Aureon && npm install && npm run dev
 # Backend
 cd Aureon/backend && pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
+
+# Docker (recommended)
+docker-compose up
 ```
 
-## Deployment
+## Screenshots
 
-| Tier | Scope | Timeline | Price |
-|------|-------|----------|-------|
-| Standard | Template + data import + basic UI | 24h | $500 |
-| Custom | + RBAC + multi-format + private deploy | 1-2 weeks | $1,500+ |
-| Enterprise | + IM integration + system integration | 2-4 weeks | $5,000+ |
-| Maintenance | Content updates + monitoring | Monthly | $200-500/mo |
+| Landing | Search | Dashboard |
+|---------|--------|-----------|
+| ![Landing](screenshots/landing.png) | ![Search](screenshots/search.png) | ![Dashboard](screenshots/dashboard.png) |
 
-## Benchmark
+## Documentation
 
-51 QA pairs, 96.08% Recall@3 hybrid, ~$0.001/query. Full benchmark: see `/benchmark`.
+- [Architecture](docs/architecture/)
+- [Benchmarks](docs/benchmarks/)
+- [Deployment](docs/deployment/)
+- [Product](docs/product/)
+
+## License
+
+MIT
 
 ---
 
-Built by [Enterprise AI Systems Studio](https://github.com/Yum-wu)
+Built by [Yum-wu](https://github.com/Yum-wu)
