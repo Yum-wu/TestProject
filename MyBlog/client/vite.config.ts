@@ -1,15 +1,15 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// GitHub Actions 部署到 /TestProject/ 子路径，Vercel 部署到根路径
+// GitHub Actions 部署到 /MyBlog/ 子路径，Vercel 部署到根路径
 const isGitHubPages = !!process.env.GITHUB_ACTIONS;
-const base = isGitHubPages ? "/TestProject/" : "/";
+const base = isGitHubPages ? "/MyBlog/" : "/";
 
 export default defineConfig({
   base,
   plugins: [react()],
   define: {
-    __BASE_PATH__: JSON.stringify(isGitHubPages ? "/TestProject" : ""),
+    __BASE_PATH__: JSON.stringify(isGitHubPages ? "/MyBlog" : ""),
   },
   build: {
     sourcemap: false,
